@@ -1,0 +1,64 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+import HeroBanner from "../components/ui/single/HeroBanner.astro";
+import Card from "../components/ui/single/Card.astro";
+
+// 1. Configuración de Seguridad
+const token = import.meta.env.VITE_API_TOKEN;
+
+// 2. Llamada a la API de TOURS
+const response = await fetch('https://api.tudestinomx.com/api/tour', {
+    headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    }
+});
+
+// 3. Transformación de datos
+const data = await response.json();
+// Manejamos la posibilidad de que venga directo o en un objeto .data
+const tours = Array.isArray(data) ? data : (data.data || []);
+---
+
+<Layout title="Tours e Incursiones | Tu Destino México">
+    <Header/>
+
+    <Content>
+        <HeroBanner
+                title="Nuestros Tours"
+                imageSrc="https://images.unsplash.com/photo-1544735745-b89b18555f60?q=80&w=2070&auto=format&fit=crop"
+                altText="Fondo sección de tours y aventuras"
+        />
+
+        <div class="max-w-7xl mx-auto px-6 py-12">
+
+            <div class="mb-12 text-center">
+                <p class="text-xl font-bold text-purple-800 mb-2">Aventuras Inolvidables</p>
+                <h2 class="text-3xl font-extrabold text-gray-800 uppercase">Descubre las mejores experiencias</h2>
+            </div>
+
+            {tours.length > 0 ? (
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {tours.map((tour: any) => (
+                                <Card
+                                        title={tour.name || tour.title}
+                                        slug={tour.slug}
+                                        type="tours"
+                                        destino={tour.destino}
+                                        photo={tour.images || tour.imagenes}
+                                />
+                        ))}
+                    </div>
+            ) : (
+                    <div class="text-center py-20">
+                        <p class="text-gray-500 italic">No se encontraron tours disponibles en este momento.</p>
+                    </div>
+            )}
+        </div>
+    </Content>
+
+    <Footer/>
+</Layout>

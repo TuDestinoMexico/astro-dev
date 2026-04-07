@@ -1,0 +1,101 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from "../../components/layout/Header.astro";
+import Footer from "../../components/layout/Footer.astro";
+import { Icon } from 'astro-icon/components';
+import Gallery from '../../components/ui/hotel/Gallery.astro';
+import BookingCalendar from '../../components/ui/BookingCalendar';
+
+const { slug } = Astro.params;
+
+if (!slug) {
+    return Astro.redirect('/404');
+}
+
+const token = import.meta.env.VITE_API_TOKEN;
+
+// 1. Cambiamos el endpoint a /tour/
+const response = await fetch(`https://api.tudestinomx.com/api/tour/slug/${slug}`, {
+    headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+    }
+});
+
+if (!response.ok) {
+    return Astro.redirect('/404');
+}
+
+const data = await response.json();
+const tour = data.data || data;
+
+// 2. Procesamos las imágenes de la misma forma
+const rawImages = tour.images || {};
+const allImages = [
+    ...(rawImages.principal || []),
+    ...(rawImages.secundaria || []),
+    ...(rawImages.adicional || [])
+];
+---
+
+<Layout title={tour.name || "Detalle de Tour"}>
+    <Header/>
+
+    <div class="container mx-auto my-5 space-y-5">
+
+        <div class="space-y-2.5 mx-5 xl:mx-0">
+            <h1 class="text-4xl font-bold text-slate-800" set:html={tour.name}></h1>
+
+            <div class="flex flex-row justify-between items-center">
+                <div class="flex flex-row gap-4 xl:text-md text-xs">
+                    <div class="flex items-center gap-1">
+                        <Icon class="text-yellow-400" size="20" name="fa7-solid:star"/>
+                        <span class="font-bold">{tour.reviews ?? '4.8'}</span>
+                    </div>
+                    <div class="flex flex-row items-center gap-1 font-semibold text-slate-600">
+                        <Icon class="text-red-500" size="20" name="fa7-solid:location-dot"/>
+                        {tour.address || tour.destino}
+                    </div>
+                </div>
+            </div>
+
+            <Gallery images={allImages} hotelName={tour.name} />
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 mx-5 xl:mx-0 gap-8">
+
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-800">Acerca de esta experiencia</h2>
+                    <div class="prose prose-slate max-w-none font-medium text-gray-600" set:html={tour.description}></div>
+                </div>
+
+                {tour.includes && (
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <h3 class="font-bold mb-3">¿Qué incluye?</h3>
+                            <div class="text-sm text-gray-600" set:html={tour.includes}></div>
+                        </div>
+                )}
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="sticky top-24 bg-white border border-gray-200 p-6 rounded-2xl shadow-lg space-y-6">
+                    <div class="booking-section">
+                        <h3 class="text-xl font-bold text-center mb-4 text-slate-800 tracking-tight">
+                            Reserva tu aventura
+                        </h3>
+                        <BookingCalendar client:visible />
+
+                        <div class="mt-6 pt-6 border-t border-gray-100">
+                            <p class="text-xs text-center text-gray-400">
+                                Al confirmar, te contactaremos por WhatsApp para finalizar tu reservación y brindarte los detalles de pick-up.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <Footer/>
+</Layout>

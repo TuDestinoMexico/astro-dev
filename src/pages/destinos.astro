@@ -1,0 +1,70 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+import HeroBanner from "../components/ui/single/HeroBanner.astro";
+
+// 1. Organizamos tus datos en un arreglo limpio
+const promos = [
+    { nombre: "Cancún", url: "https://link.tudestinomx.com/PromoCancun", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/cancun.png" },
+    { nombre: "Cozumel", url: "https://link.tudestinomx.com/PromoCozumel", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/cozumel.png" },
+    { nombre: "Huatulco", url: "https://link.tudestinomx.com/PromoHuatulco", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/huatulco.png" },
+    { nombre: "Riviera Maya", url: "https://link.tudestinomx.com/PromoRivieraMaya", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/riviera-maya.png" },
+    { nombre: "Puerto Vallarta", url: "https://link.tudestinomx.com/PromoPuertoVallarta", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/puerto-vallarta.png" },
+    { nombre: "Punta Cana", url: "https://link.tudestinomx.com/PromoPuntaCana", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/punta-cana.png" },
+    { nombre: "Colombia", url: "https://link.tudestinomx.com/PromoColombia", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/colombia.png" },
+    { nombre: "Los Cabos", url: "https://link.tudestinomx.com/PromoLosCabos", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/los-cabos.png" }
+];
+---
+
+<Layout title="Nuestros Destinos | Tu Destino México">
+    <Header/>
+
+    <Content>
+        <HeroBanner
+                title="Destinos"
+                imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
+                altText="Explora nuestros destinos"
+        />
+
+        <div class="max-w-7xl mx-auto px-4 py-12">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {promos.map((promo) => (
+                        <a
+                                href={promo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="group block overflow-hidden rounded-xl shadow-md hover:shadow-2xl transition-all duration-300"
+                        >
+                            <div class="relative overflow-hidden">
+                                <img
+                                        src={promo.img}
+                                        alt={`Promoción ${promo.nombre}`}
+                                        class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                                        loading="lazy"
+                                />
+                                <div class="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors"></div>
+                            </div>
+                        </a>
+                ))}
+            </div>
+
+            <div class="mt-16 text-center bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <h2 class="text-2xl font-bold text-purple-800 mb-2 italic">¿Necesitas ayuda con tu reservación?</h2>
+                <p class="text-gray-600 mb-6">Estamos listos para ayudarte a planear tu viaje ideal.</p>
+                <a
+                        href="https://wa.me/529989806611"
+                        target="_blank"
+                        class="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-3 rounded-full font-bold hover:bg-green-600 transition-colors"
+                >
+                    Hablar con un asesor
+                </a>
+            </div>
+
+        </div>
+    </Content>
+
+    <Footer/>
+</Layout>

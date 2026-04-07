@@ -1,0 +1,49 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+import HeroBanner from "../components/ui/single/HeroBanner.astro";
+import PaymentMethods from "../components/payments/PaymentMethods.jsx";
+---
+
+<Layout title="Métodos de Pago | Tu Destino México">
+    <Header/>
+
+    <Content>
+        <HeroBanner
+                title="Métodos de Pago"
+                imageSrc="https://images.unsplash.com/photo-1556742044-3c52d6e88c62?q=80&w=2070"
+                altText="Pagos seguros en Tu Destino México"
+        />
+
+        <div class="max-w-7xl mx-auto px-6 py-12">
+
+            <div class="mb-12 text-center">
+                <p class="text-xl font-bold text-purple-800 mb-2">Seguridad en cada transacción</p>
+                <h2 class="text-3xl font-extrabold text-gray-800 uppercase tracking-tight">Selecciona tu forma de pago preferida</h2>
+                <p class="mt-4 text-gray-500 max-w-2xl mx-auto">
+                    En Tu Destino México utilizamos pasarelas de pago certificadas (Openpay) para garantizar que tu información esté siempre protegida.
+                </p>
+            </div>
+
+            <PaymentMethods client:load />
+
+            <div class="mt-16 bg-gray-50 border border-gray-200 p-8 rounded-2xl flex flex-col md:flex-row items-center gap-8">
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">¿Tienes dudas con tu pago?</h3>
+                    <p class="text-gray-600 text-sm">Nuestro equipo de soporte está disponible de Lunes a Viernes de 12:00 hrs a 19:00 hrs para asistirte en cualquier proceso de pago o aclaración.</p>
+                </div>
+                <a
+                        href="https://wa.me/529989806611"
+                        target="_blank"
+                        class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md whitespace-nowrap"
+                >
+                    Contactar soporte
+                </a>
+            </div>
+        </div>
+    </Content>
+
+    <Footer/>
+</Layout>

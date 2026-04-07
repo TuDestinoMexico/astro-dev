@@ -1,0 +1,70 @@
+---
+import { Icon } from 'astro-icon/components';
+import IconSocial from "../ui/IconSocial.astro";
+---
+<footer id="footer" class="bg-orange-500 text-white font-sans">
+    <div class="container mx-auto px-6 py-8">
+
+        <div class="space-y-4 mb-6">
+            <h2 class="text-lg font-semibold tracking-wide">Sigue nuestras redes sociales</h2>
+            <div class="flex flex-row gap-4">
+                <IconSocial url="https://facebook.com/tudestinomexicoo" class="hover:scale-110 transition-transform">
+                    <Icon name="simple-icons:facebook" class="w-6 h-6" />
+                </IconSocial>
+                <IconSocial url="https://instagram.com/tudestinomexico" class="hover:scale-110 transition-transform">
+                    <Icon name="simple-icons:instagram" class="w-6 h-6" />
+                </IconSocial>
+                <IconSocial url="https://tiktok.com/@tudestinomexico" class="hover:scale-110 transition-transform">
+                    <Icon name="simple-icons:tiktok" class="w-6 h-6" />
+                </IconSocial>
+                <IconSocial url="https://youtube.com/@tudestinomexico" class="hover:scale-110 transition-transform">
+                    <Icon name="simple-icons:youtube" class="w-6 h-6" />
+                </IconSocial>
+            </div>
+        </div>
+
+        <div class="border-y border-white/50 py-8 flex flex-col md:flex-row justify-center items-center gap-10">
+            <a href="https://rnt-consulta.sectur.gob.mx/" target="_blank" class="flex flex-col items-center group">
+                <img
+                        src="https://storage.googleapis.com/tudestinomx_bucket/assets/img/sectur_logo.png"
+                        alt="Secretaría de Turismo"
+                        class="h-16 w-auto object-contain mb-3"
+                />
+                <div class="overflow-hidden rounded shadow-md w-48 text-[10px] sm:text-xs">
+                    <div class="bg-[#b90309] text-white text-center py-0.5 font-bold uppercase tracking-wider">
+                        SECTUR No.
+                    </div>
+                    <div class="bg-black text-white text-center py-1 font-mono">
+                        0423005c2dd75
+                    </div>
+                </div>
+            </a>
+
+            <div class="flex items-center">
+                <img
+                        src="https://storage.googleapis.com/tudestinomx_bucket/assets/img/sat_logo.png"
+                        alt="Hacienda y Crédito Público"
+                        class="h-16 w-auto object-contain"
+                />
+            </div>
+        </div>
+
+        <div class="mt-8 flex flex-col md:flex-row justify-between items-center md:items-end gap-6 text-xs sm:text-sm opacity-95">
+            <div class="text-center md:text-left leading-relaxed">
+                <p class="font-bold mb-1">© TU DESTINO MX ROLANDO X MEXICO S.A. de C.V.</p>
+                <p>Todos los derechos reservados</p>
+                <p>No nos hacemos responsables por fotografías no actualizadas por la cadena o proveedor distinguido.</p>
+                <p class="mt-2 flex items-center justify-center md:justify-start gap-1">
+                    <span class="font-bold">Teléfono:</span> (998) 980 6611
+                </p>
+            </div>
+
+            <a
+                    href="/terminos-condiciones"
+                    class="font-semibold underline-offset-4 hover:underline hover:text-white transition-all italic"
+            >
+                Nuestros términos y condiciones.
+            </a>
+        </div>
+    </div>
+</footer>

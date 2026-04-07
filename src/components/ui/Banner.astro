@@ -1,0 +1,15 @@
+---
+interface Props {
+    url?: string
+    src?: string
+    alt?: string
+    className?: string
+}
+const {url, src, alt, className } = Astro.props
+---
+<a href={url} class={className} target="_blank" rel="noopener noreferrer">
+    <img
+            src={src}
+            alt={alt}
+    />
+</a>

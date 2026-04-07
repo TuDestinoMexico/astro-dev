@@ -1,0 +1,51 @@
+---
+const {
+    title = "Explora el paraíso con nosotros",
+    subtitle = "Desde el Caribe hasta el Pacífico, descubre los rincones más espectaculares de México.",
+    buttonText = "Ver todos los destinos",
+    link = "/destinos"
+} = Astro.props;
+---
+
+<section class="relative my-10 lg:mx-auto container overflow-hidden rounded-2xl shadow-lg group">
+
+    <div class="absolute inset-0 z-0">
+        <img
+                src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop"
+                alt="Fondo destinos"
+                class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+        />
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-900/90 to-orange-600/40"></div>
+    </div>
+
+    <div class="relative z-10 px-8 py-20 md:px-16 md:py-24 text-center md:text-left">
+        <div class="max-w-2xl">
+            <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
+                {title}
+            </h2>
+            <p class="text-xl text-white/90 mb-10 leading-relaxed font-medium">
+                {subtitle}
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a
+                        href={link}
+                        class="inline-flex items-center justify-center px-8 py-4 bg-orange-500 text-white font-bold rounded-xl text-lg shadow-md hover:bg-orange-600 hover:shadow-orange-500/30 transition-all duration-300 transform hover:-translate-y-1"
+                >
+                    {buttonText}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
+
+                <a
+                        href="https://wa.me/529989806611"
+                        target="_blank"
+                        class="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold rounded-xl text-lg hover:bg-white/20 transition-all"
+                >
+                    Asesoría personalizada
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

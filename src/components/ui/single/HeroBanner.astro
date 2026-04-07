@@ -1,0 +1,24 @@
+---
+// Definimos la interfaz para que Astro sepa qué datos necesita recibir
+interface Props {
+    title: string;
+    imageSrc: string;
+    altText?: string; // El signo '?' indica que es opcional
+}
+
+const { title, imageSrc, altText = "Encabezado de página" } = Astro.props;
+---
+
+<div class="relative mx-4 my-5 flex h-55 items-center justify-center overflow-hidden rounded-lg xl:mx-0">
+    <div class="absolute z-20 h-full w-full bg-black/40"></div>
+
+    <img
+            class="absolute z-10 h-full w-full object-cover"
+            src={imageSrc}
+            alt={altText}
+    />
+
+    <h1 class="z-20 text-4xl md:text-5xl font-bold text-white text-center px-4">
+        {title}
+    </h1>
+</div>

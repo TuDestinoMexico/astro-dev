@@ -1,0 +1,77 @@
+---
+import MenuBar from "../ui/MenuBar.astro";
+import SubMenu from "../ui/SubMenu.astro";
+---
+<div class="space-y-5">
+    <div class="container mx-auto xl:grid grid-cols-2 items-center">
+        <!--Logo-->
+        <div class="h-full flex items-center xl:justify-start justify-center mt-5 xl:mt-0">
+            <a href="/">
+                <img
+                        class="w-70"
+                        src="https://storage.googleapis.com/tudestinomx_bucket/assets/test/tdmx-logo-purpel.png"
+                        alt="Tu Destino Mexico"
+                >
+            </a>
+        </div>
+        <!--MenuBar-->
+        <div class="xl:flex h-auto flex-row font-bold rounded-bl-xl overflow-hidden text-sm justify-end hidden">
+            <MenuBar
+                    title="Solo ventas"
+                    subtitle="(998) 980 6611"
+                    url="tel:529989806611"
+                    color="bg-green-400"
+                    icon="fa7-solid:phone"
+            />
+            <MenuBar
+                    title="WhatsApp"
+                    subtitle="(998) 714 1365"
+                    url="https://wa.me/529987141365"
+                    color="bg-green-600"
+                    icon="simple-icons:whatsapp"
+            />
+            <MenuBar
+                    title="Pagar en linea"
+                    subtitle="lo hacemos facil"
+                    url="/pagos"
+                    color="bg-lime-500"
+                    icon="fa7-solid:credit-card"
+            />
+            <MenuBar
+                    title="Quienes Somos"
+                    subtitle="La familia Xolo"
+                    url="/about"
+                    color="bg-orange-500"
+                    icon="fa7-solid:people-group"
+            />
+        </div>
+    </div>
+    <!--Submenu-->
+    <div class="container w-full overflow-x-scroll xl:overflow-x-auto mx-auto pt-5 px-5 xl:py-0 xl:pt-0 justify-between xl:justify-center flex flex-row gap-5 text-md xl:text-xl font-bold">
+        <SubMenu
+                title="Hoteles"
+                icon="balcony"
+                url="/hoteles"
+        />
+        <SubMenu
+                title="Tours"
+                icon="tour"
+                url="/tours"
+        />
+        <SubMenu
+                title="Destinos"
+                icon="public"
+                url="/destinos"
+        />
+        <SubMenu
+                title="Convenios"
+                icon="handshake"
+                url="/convenios"
+        />
+        <SubMenu
+                title="XoloRuta"
+                icon="place"
+                url="/xolo-ruta"
+        />
+    </div>
+</div>

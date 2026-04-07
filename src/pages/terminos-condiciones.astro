@@ -1,0 +1,120 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+import HeroBanner from "../components/ui/single/HeroBanner.astro";
+
+
+---
+<Layout title="Términos y Condiciones | Tu Destino México">
+    <Header/>
+
+    <Content>
+        <HeroBanner
+                title="Términos y Condiciones"
+                imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
+                altText="Fondo de documentos legales"
+        />
+
+        <div class="max-w-4xl mx-auto px-6 py-10 text-gray-700 leading-relaxed">
+
+            <section class="mb-10 text-center">
+                <p class="text-xl font-bold text-purple-800 mb-4">
+                    ¡Bienvenido a Tu Destino México!
+                </p>
+                <p>
+                    Nos alegra que estés interesado en explorar todo lo que nuestro hermoso país tiene para ofrecer.
+                    Antes de comenzar tu viaje, queremos asegurar que tengas toda la información clara y al alcance de tu mano.
+                </p>
+            </section>
+
+            <hr class="my-10 border-gray-200" />
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Introducción</h2>
+                <p>
+                    Al utilizar nuestros servicios y realizar pagos a través de nuestra plataforma, usted acepta los términos y condiciones descritos a continuación.
+                    <strong>Si no está de acuerdo con estos términos, por favor, no utilice nuestro servicio de pagos.</strong>
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Información General y Políticas de Reservación</h2>
+                <div class="space-y-4">
+                    <p>
+                        Las tarifas proporcionadas por nuestros representantes o en <a href="https://www.tudestinomx.com" class="text-indigo-600 hover:underline">www.tudestinomx.com</a> se mantendrán solo si el usuario genera una reservación y cumple con las políticas de pago.
+                    </p>
+                    <p>
+                        Una reservación se considera completa cuando el cliente proporciona toda la documentación requerida y recibe su <strong>clave de confirmación</strong>.
+                    </p>
+                    <p class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        Tu Destino México utiliza la pasarela de <strong>Openpay</strong> para procesar transacciones de manera segura mediante tarjetas, transferencias y pagos en tiendas de conveniencia.
+                    </p>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Métodos de Pago Aceptados</h2>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Tarjetas de crédito y débito (Visa, MasterCard, American Express).</li>
+                    <li>Transferencias bancarias.</li>
+                    <li>Pagos en tiendas de conveniencia.</li>
+                </ul>
+            </section>
+
+            <section class="mb-12 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Proceso de Pago</h2>
+                <ol class="list-decimal pl-6 space-y-3">
+                    <li><strong>Selección:</strong> El cliente elige el servicio en la web o Call Center.</li>
+                    <li><strong>Revisión:</strong> Verificación de detalles y costo total.</li>
+                    <li><strong>Pago:</strong> Ingreso de datos en la pasarela de Openpay.</li>
+                    <li><strong>Confirmación:</strong> Recepción de comprobante vía correo electrónico.</li>
+                </ol>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Política de Cancelaciones y Reembolsos</h2>
+                <div class="space-y-4">
+                    <p>
+                        El cliente cuenta con un plazo de <strong>48 horas posteriores</strong> al momento de compra para cancelar sin penalización, siempre que el servicio no se haya prestado.
+                    </p>
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                        <p class="text-sm text-red-800 font-bold uppercase mb-1 italic">Aviso Importante:</p>
+                        <p class="text-sm text-red-700">
+                            Si la reservación fue hecha con tarifa <strong>"NO REEMBOLSABLE"</strong>, el cliente acepta que no hay cambios ni devoluciones bajo ninguna circunstancia.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-12 border-t pt-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">6. Jurisdicción y Ley Aplicable</h2>
+                <p>
+                    Estos términos se rigen por las leyes del artículo 1803 del Código Civil Federal. En caso de disputa, las partes se someten a los tribunales de la <strong>Ciudad de Cancún, Quintana Roo</strong>.
+                </p>
+            </section>
+
+            <section class="bg-indigo-900 text-white p-8 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-4">Contacto y Soporte</h2>
+                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <p class="font-bold opacity-70 uppercase tracking-wide">Correos:</p>
+                        <p>info@tudestinomx.com</p>
+                        <p>gerencia@tudestinomx.com</p>
+                    </div>
+                    <div>
+                        <p class="font-bold opacity-70 uppercase tracking-wide">Teléfono:</p>
+                        <p>998 980 6611</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="font-bold opacity-70 uppercase tracking-wide">Dirección:</p>
+                        <p>Xel-ha 10, Supermanzana 28SM 28, Plaza portales, 77509 Cancún, Q.R</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </Content>
+
+    <Footer/>
+</Layout>

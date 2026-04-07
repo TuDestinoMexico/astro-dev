@@ -1,0 +1,59 @@
+---
+// src/components/ui/home/YouTubeCTA.astro
+---
+
+<section class="mx-4 my-16 lg:mx-auto container">
+    <div class="relative bg-zinc-950 rounded-[2.5rem] overflow-hidden p-8 md:p-12 shadow-2xl group border border-zinc-800">
+
+        <div class="absolute -right-10 -top-10 w-96 h-96 bg-red-600/20 rounded-full blur-[100px] transition-all group-hover:bg-red-600/30"></div>
+
+        <div class="absolute right-10 top-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+            <svg class="w-64 h-64 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+        </div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row items-center gap-8 md:gap-16">
+
+            <div class="shrink-0 animate-pulse-slow">
+                <div class="bg-red-600 p-6 rounded-4xl shadow-[0_0_50px_rgba(220,38,38,0.3)]">
+                    <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.377.505 9.377.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="text-center lg:text-left flex-1 space-y-4">
+                <h2 class="text-3xl md:text-5xl font-black text-white leading-tight">
+                    ¡Vive la experiencia <span class="text-red-600">en video</span>!
+                </h2>
+                <p class="text-zinc-400 text-lg md:text-xl max-w-xl">
+                    Suscríbete a nuestro canal para descubrir las mejores guías de viaje, tips exclusivos y tomas aéreas de tus próximos destinos.
+                </p>
+
+                <div class="pt-4">
+                    <a
+                            href="https://youtube.com/@TuDestinoMexico"
+                            target="_blank"
+                            class="inline-flex items-center gap-3 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-red-600/20"
+                    >
+                        <span>Suscribirme ahora</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    @keyframes pulse-slow {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .animate-pulse-slow {
+        animation: pulse-slow 4s infinite ease-in-out;
+    }
+</style>

@@ -1,0 +1,73 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from "../../components/layout/Header.astro";
+import Footer from "../../components/layout/Footer.astro";
+import { Icon } from 'astro-icon/components';
+import Gallery from '../../components/ui/hotel/Gallery.astro';
+import BookingCalendar from '../../components/ui/BookingCalendar';
+
+
+const { slug } = Astro.params;
+
+if (!slug) {
+    return Astro.redirect('/404');
+}
+
+
+const token = import.meta.env.VITE_API_TOKEN;
+
+const response = await fetch(`https://api.tudestinomx.com/api/hotel/slug/${slug}`, {
+    headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+    }
+});
+
+if (!response.ok) {
+    return Astro.redirect('/404');
+}
+
+const data = await response.json();
+
+const hotel = data.data || data;
+
+const rawImages = hotel.images || {};
+const allImages = [
+    ...(rawImages.principal || []),
+    ...(rawImages.secundaria || []),
+    ...(rawImages.adicional || [])
+];
+---
+
+<Layout title={hotel.name || "Detalle de Hotel"}>
+    <Header/>
+    <div class="container mx-auto my-5 space-y-5">
+        <!--Primer componente-->
+        <div class="space-y-2.5 mx-5 xl:mx-0">
+            <h2 class="text-4xl font-bold" set:html={hotel.name}></h2>
+            <div class="flex flex-row justify-between items-center">
+                <div class="flex flex-row gap-3 xl:text-md text-xs">
+                    <div class="flex items-center gap-1"><Icon class="text-yellow-300" size="20" name="fa7-solid:star"/>{hotel.reviews ?? 'N/A'}</div>
+                    <div class="flex flex-row items-center gap-1 font-semibold"><Icon class="text-red-500" size="20" name="fa7-solid:location-dot"/>{hotel.address}</div>
+                </div>
+            </div>
+            <Gallery images={allImages} hotelName={hotel.name} />
+        </div>
+        <!--Tercer componente-->
+        <div class="grid grid-cols-1 xl:grid-cols-2 mx-5 xl:mx-0 gap-5">
+            <div class="bg-gray-100/50 p-5 rounded-xl space-y-1.5">
+                <div class="text-xl font-bold" set:html={hotel.name}></div>
+                <p class="font-medium" set:html={hotel.description}></p>
+            </div>
+            <div class="bg-gray-100/50 p-5 rounded-xl space-y-1.5">
+                <div class="grid grid-cols-2">
+                    <div class="booking-section col-span-2">
+                        <h1>Reserva tu estadía</h1>
+                        <BookingCalendar client:visible />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <Footer/>
+</Layout>

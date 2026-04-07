@@ -1,0 +1,28 @@
+---
+import Button from "./Button.astro";
+interface Props {
+    grid : number,
+    title?: string
+    isActive?: boolean
+    url?: string
+}
+const{grid,title, isActive = false, url = '#'} = Astro.props
+---
+<div class="space-y-3 py-3">
+    <h2 class="text-4xl font-semibold">{title}</h2>
+    <div
+            class=`grid gap-5`
+            style={`grid-template-columns: repeat(${grid}, minmax(0, 1fr));`}
+    >
+        <slot/>
+    </div>
+    {isActive && (
+            <div class="flex justify-center">
+                <Button
+                        title="Ver más"
+                        className="bg-green-500 text-white hover:bg-green-600"
+                        url={url}
+                />
+            </div>
+    )}
+</div>

@@ -1,0 +1,13 @@
+---
+interface Props {
+    title?: string,
+    className?: string,
+    url: string,
+}
+const {title, className, url} = Astro.props;
+---
+<a href={url}>
+    <button class=`${className} px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform active:scale-95 hover:-translate-y-0.5`>
+        {title}
+    </button>
+</a>
