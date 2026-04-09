@@ -28,77 +28,92 @@ const hiddenImages = hasImages ? images.slice(5) : [];
         }}
 >
     {hasImages ? (
-                    <div class="grid grid-cols-1 xl:grid-cols-2 h-fit xl:gap-5 relative">
-                        <div class="rounded-xl overflow-hidden relative group cursor-pointer bg-purple-200 animate-pulse img-loader-container">
-                            <a
-                                    href={mainImage.url}
-                                    data-sub-html={`<h4>${hotelName}</h4><p>${mainImage.alt}</p>`}
-                                    class="block h-full w-full"
-                            >
-                                <img
-                                        src={mainImage.url}
-                                        alt={mainImage.alt || hotelName}
-                                        loading="lazy"
-                                class="w-full h-102 object-cover transition-all duration-500 opacity-0 group-hover:scale-105"
-                                onload="this.classList.remove('opacity-0'); this.parentElement.parentElement.classList.remove('animate-pulse', 'bg-purple-200');"
-                                />
+            <div class="grid grid-cols-1 xl:grid-cols-2 h-fit xl:gap-5 relative">
+                {/* Imagen Principal */}
+                <div class="rounded-xl overflow-hidden relative group cursor-pointer bg-purple-200 animate-pulse img-loader-container">
+                    <a
+                            href={mainImage.url}
+                            data-sub-html={`<h4>${hotelName}</h4><p>${mainImage.alt || ''}</p>`}
+                            class="block h-full w-full"
+                    >
+                        <img
+                                src={mainImage.url}
+                                alt={mainImage.alt || hotelName}
+                                loading="lazy"
+                                class="gallery-img w-full h-102 object-cover transition-all duration-500 opacity-0 group-hover:scale-105"
+                        />
 
-                                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span class="text-white bg-black/50 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm">Ver Galería</span>
-                                </div>
-                            </a>
+                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="text-white bg-black/50 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm">Ver Galería</span>
                         </div>
-        <div class="hidden xl:grid grid-cols-2 gap-2">
-            {gridImages.map((img, index) => (
-                    <div class="rounded-xl overflow-hidden relative group cursor-pointer bg-purple-200 animate-pulse img-loader-container">
-                        <a
-                                href={img.url}
-                                data-sub-html={`<h4>${hotelName}</h4><p>${img.alt}</p>`}
-                        >
-                            <img
-                                    src={img.url}
-                                    loading="lazy"
-                            class="rounded-xl w-full h-50 object-cover transition-all duration-500 opacity-0 group-hover:scale-110"
-                            alt={img.alt || "Galería"}
-                            onload="this.classList.remove('opacity-0'); this.parentElement.parentElement.classList.remove('animate-pulse', 'bg-purple-200');"
-                            />
-                        </a>
-                    </div>
-            ))}
-        </div>
+                    </a>
+                </div>
 
-    {/* IMÁGENES OCULTAS (No necesitan skeleton porque no se ven inicialmente) */}
-    <div class="hidden">
-        {hiddenImages.map((img, index) => (
-                <a
-                        href={img.url}
-                        data-sub-html={`<h4>${hotelName}</h4><p>${img.alt}</p>`}
-                >
-                    <img src={img.url} alt={img.alt || "Galería"} loading="lazy" />
-                </a>
-        ))}
-    </div>
+                {/* Grid de Imágenes Secundarias */}
+                <div class="hidden xl:grid grid-cols-2 gap-2">
+                    {gridImages.map((img) => (
+                            <div class="rounded-xl overflow-hidden relative group cursor-pointer bg-purple-200 animate-pulse img-loader-container">
+                                <a
+                                        href={img.url}
+                                        data-sub-html={`<h4>${hotelName}</h4><p>${img.alt || ''}</p>`}
+                                >
+                                    <img
+                                            src={img.url}
+                                            loading="lazy"
+                                            class="gallery-img rounded-xl w-full h-50 object-cover transition-all duration-500 opacity-0 group-hover:scale-110"
+                                            alt={img.alt || "Galería"}
+                                    />
+                                </a>
+                            </div>
+                    ))}
+                </div>
 
-    </div>
+                {/* IMÁGENES OCULTAS */}
+                <div class="hidden">
+                    {hiddenImages.map((img) => (
+                            <a
+                                    href={img.url}
+                                    data-sub-html={`<h4>${hotelName}</h4><p>${img.alt || ''}</p>`}
+                            >
+                                <img src={img.url} alt={img.alt || "Galería"} loading="lazy" />
+                            </a>
+                    ))}
+                </div>
+            </div>
     ) : (
-    <div class="w-full h-96 bg-purple-200 rounded-xl flex items-center justify-center">
-        <span class="text-gray-400">Sin imágenes disponibles</span>
-    </div>
+            <div class="w-full h-96 bg-purple-200 rounded-xl flex items-center justify-center">
+                <span class="text-gray-400">Sin imágenes disponibles</span>
+            </div>
     )}
 </LightGallery>
 
 <script>
-    document.addEventListener('astro:page-load', () => {
-        const images = document.querySelectorAll('.img-loader-container img');
+    // Función para quitar el skeleton
+    const removeLoader = (img) => {
+        img.classList.remove('opacity-0');
+        const container = img.closest('.img-loader-container');
+        if (container) {
+            container.classList.remove('animate-pulse', 'bg-purple-200');
+        }
+    };
 
-        images.forEach((img) => {
+    const setupGalleryLoaders = () => {
+        const galleryImages = document.querySelectorAll('.gallery-img');
+
+        galleryImages.forEach((img) => {
+            // Si la imagen ya cargó (por caché)
             if (img.complete) {
-                img.classList.remove('opacity-0');
-                const container = img.closest('.img-loader-container');
-                if (container) {
-                    container.classList.remove('animate-pulse', 'bg-purple-200');
-                }
+                removeLoader(img);
+            } else {
+                // Si aún está cargando
+                img.addEventListener('load', () => removeLoader(img));
             }
         });
-    });
+    };
+
+    // Ejecutar al cargar la página y al navegar (para View Transitions)
+    document.addEventListener('astro:page-load', setupGalleryLoaders);
+
+    // Fallback por si no usas View Transitions
+    setupGalleryLoaders();
 </script>

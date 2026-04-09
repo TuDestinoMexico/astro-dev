@@ -16,14 +16,12 @@ const {title} = Astro.props
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 		<meta name="generator" content={Astro.generator} />
 		<ClientRouter />
-		<Font cssVariable="--font-poppins" preload />
-		<style>
-			:root {
-				font-family: var(--font-poppins);
-			}
-		</style>
 		<title>{title || 'Tu Destino Mexico'}</title>
 	</head>
 	<body>
@@ -32,6 +30,14 @@ const {title} = Astro.props
 </html>
 
 <style>
+	:root {
+		--font-poppins: 'Poppins', sans-serif;
+		--font-icons: 'Material Icons Outlined';
+	}
+
+	body {
+		font-family: var(--font-poppins);
+	}
 	html,
 	body {
 		margin: 0;

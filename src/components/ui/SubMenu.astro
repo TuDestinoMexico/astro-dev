@@ -1,5 +1,4 @@
 ---
-import { Font } from "astro:assets";
 interface Props {
     title: string,
     icon: string,
@@ -8,14 +7,6 @@ interface Props {
 
 const {title, icon, url} = Astro.props;
 ---
-<Font cssVariable="--font-icons" preload />
-
-<style>
-    .icons {
-        font-family: var(--font-icons);
-        font-weight: normal;
-    }
-</style>
 <a href={url} class="flex flex-col items-center gap-1 hover:text-purple-800">
     <span class="material-icons-outlined icons text-3xl">{icon}</span>
     {title}

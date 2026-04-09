@@ -9,15 +9,16 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/netlify": "^7.0.6",
     "@astrojs/react": "^5.0.3",
-    "@astrojs/vue": "^5.1.4",
+    "@astrojs/vue": "^6.0.1",
     "@gsap/react": "^2.1.2",
     "@iconify-json/simple-icons": "^1.2.68",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@unpic/astro": "^1.0.2",
-    "astro": "^5.16.15",
+    "astro": "^6.1.4",
     "astro-icon": "^1.1.5",
     "astro-lightgallery": "^2.3.0",
     "date-fns": "^4.1.0",
