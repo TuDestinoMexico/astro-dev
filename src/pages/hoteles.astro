@@ -6,10 +6,8 @@ import Content from "../components/layout/Content.astro";
 import HeroBanner from "../components/ui/single/HeroBanner.astro";
 import Card from "../components/ui/single/Card.astro";
 
-// 1. Configuración de Seguridad (Usa variables de entorno en producción)
 const token = import.meta.env.VITE_API_TOKEN
 
-// 2. Llamada a la API
 const response = await fetch('https://api.tudestinomx.com/api/hotel', {
     headers: {
         'Accept': 'application/json',
@@ -17,9 +15,12 @@ const response = await fetch('https://api.tudestinomx.com/api/hotel', {
     }
 });
 
-// 3. Transformación de datos
 const data = await response.json();
-const hoteles = Array.isArray(data) ? data : (data.data || []);
+const rawData = Array.isArray(data) ? data : (data.data || []);
+const hoteles = rawData.filter((hotel: any) => Number(hotel.active) === 1);
+
+// Configuramos cuántos mostrar inicialmente
+const INITIAL_VISIBLE = 8;
 ---
 
 <Layout title="Hoteles Exclusivos | Tu Destino México">
@@ -32,7 +33,7 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
                 altText="Fondo sección de hoteles"
         />
 
-        <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="container mx-auto py-12 px-4">
 
             <div class="mb-12 text-center">
                 <p class="text-xl font-bold text-purple-800 mb-2">Selección Premium</p>
@@ -40,16 +41,29 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
             </div>
 
             {hoteles.length > 0 ? (
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {hoteles.map((hotel: any) => (
-                                <Card
-                                        title={hotel.name || hotel.title}
-                                        slug={hotel.slug}
-                                        type="hoteles"
-                                        destino={hotel.destino}
-                                        photo={hotel.images || hotel.imagenes}
-                                />
-                        ))}
+                    <div class="flex flex-col items-center">
+                        <div id="hotel-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
+                            {hoteles.map((hotel: any, index: number) => (
+                                    <div class={`hotel-card ${index >= INITIAL_VISIBLE ? 'hidden' : ''}`}>
+                                        <Card
+                                                title={hotel.name || hotel.title}
+                                                slug={hotel.slug}
+                                                type="hoteles"
+                                                destino={hotel.destino}
+                                                photo={hotel.images || hotel.imagenes}
+                                        />
+                                    </div>
+                            ))}
+                        </div>
+
+                        {hoteles.length > INITIAL_VISIBLE && (
+                                <button
+                                        id="load-more-btn"
+                                        class="mt-12 px-8 py-3 bg-purple-800 text-white font-bold rounded-full hover:bg-purple-900 transition-colors shadow-lg"
+                                >
+                                    Ver más hoteles
+                                </button>
+                        )}
                     </div>
             ) : (
                     <div class="text-center py-20">
@@ -61,3 +75,40 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
 
     <Footer/>
 </Layout>
+
+<script>
+    const btn = document.getElementById('load-more-btn');
+    const cards = document.querySelectorAll('.hotel-card.hidden');
+    let currentVisible = 8;
+    const increment = 8;
+
+    btn?.addEventListener('click', () => {
+        const hiddenCards = document.querySelectorAll('.hotel-card.hidden');
+
+        // Mostramos el siguiente bloque de 8
+        for (let i = 0; i < increment; i++) {
+            if (hiddenCards[i]) {
+                hiddenCards[i].classList.remove('hidden');
+                // Añadimos una pequeña animación de entrada opcional
+                hiddenCards[i].classList.add('animate-fade-in');
+            }
+        }
+
+        // Si ya no hay más cartas ocultas, quitamos el botón
+        if (document.querySelectorAll('.hotel-card.hidden').length === 0) {
+            btn.style.display = 'none';
+        }
+    });
+</script>
+
+<style>
+    /* Animación suave para cuando aparecen los nuevos hoteles */
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

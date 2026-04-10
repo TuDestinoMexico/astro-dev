@@ -29,6 +29,10 @@ if (!response.ok) {
 const data = await response.json();
 const hotel = data.data || data;
 
+if (Number(hotel.active) === 0) {
+    return Astro.redirect('/404');
+}
+
 const amenities = hotel.amenities_list || [];
 const coordinates = hotel.google_maps || [];
 
