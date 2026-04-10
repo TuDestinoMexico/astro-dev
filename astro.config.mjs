@@ -9,7 +9,7 @@ import react from "@astrojs/react";
 export default defineConfig({
   output: 'server',
   server: {
-      host: true
+      host: true //Permisos
   },
   vite: {
       plugins: [tailwindcss()],
