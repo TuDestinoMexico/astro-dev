@@ -5,14 +5,13 @@ import Footer from "../../components/layout/Footer.astro";
 import { Icon } from 'astro-icon/components';
 import Gallery from '../../components/ui/hotel/Gallery.astro';
 import BookingCalendar from '../../components/ui/BookingCalendar';
-
+import HotelTabs from '../../components/ui/hotel/HotelTabs';
 
 const { slug } = Astro.params;
 
 if (!slug) {
     return Astro.redirect('/404');
 }
-
 
 const token = import.meta.env.VITE_API_TOKEN;
 
@@ -28,8 +27,10 @@ if (!response.ok) {
 }
 
 const data = await response.json();
-
 const hotel = data.data || data;
+
+const amenities = hotel.amenities_list || [];
+const coordinates = hotel.google_maps || [];
 
 const rawImages = hotel.images || {};
 const allImages = [
@@ -41,33 +42,57 @@ const allImages = [
 
 <Layout title={hotel.name || "Detalle de Hotel"}>
     <Header/>
-    <div class="container mx-auto my-5 space-y-5">
-        <!--Primer componente-->
-        <div class="space-y-2.5 mx-5 xl:mx-0">
-            <h2 class="text-4xl font-bold" set:html={hotel.name}></h2>
-            <div class="flex flex-row justify-between items-center">
-                <div class="flex flex-row gap-3 xl:text-md text-xs">
-                    <div class="flex items-center gap-1"><Icon class="text-yellow-300" size="20" name="fa7-solid:star"/>{hotel.reviews ?? 'N/A'}</div>
-                    <div class="flex flex-row items-center gap-1 font-semibold"><Icon class="text-red-500" size="20" name="fa7-solid:location-dot"/>{hotel.address}</div>
+
+    <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
+
+        <div class="space-y-4">
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+                {hotel.name}
+            </h1>
+
+            <div class="flex flex-wrap items-center gap-y-3 gap-x-6 text-sm md:text-base">
+                <div class="flex items-center gap-1.5 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
+                    <Icon class="text-yellow-500" size="18" name="fa7-solid:star"/>
+                    <span class="font-bold text-yellow-700">{hotel.reviews ?? 'N/A'}</span>
+                </div>
+
+                <div class="flex items-start gap-2 flex-1 min-w-0 text-slate-600 font-medium">
+                    <Icon class="text-red-500 mt-0.5 flex-shrink-0" size="20" name="fa7-solid:location-dot"/>
+                    <p class="truncate md:whitespace-normal">{hotel.address}</p>
                 </div>
             </div>
+
             <Gallery images={allImages} hotelName={hotel.name} />
         </div>
-        <!--Tercer componente-->
-        <div class="grid grid-cols-1 xl:grid-cols-2 mx-5 xl:mx-0 gap-5">
-            <div class="bg-gray-100/50 p-5 rounded-xl space-y-1.5">
-                <div class="text-xl font-bold" set:html={hotel.name}></div>
-                <p class="font-medium" set:html={hotel.description}></p>
-            </div>
-            <div class="bg-gray-100/50 p-5 rounded-xl space-y-1.5">
-                <div class="grid grid-cols-2">
-                    <div class="booking-section col-span-2">
-                        <h1>Reserva tu estadía</h1>
-                        <BookingCalendar client:visible />
-                    </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+
+                    <HotelTabs
+                            client:load
+                            description={hotel.description}
+                            coordinates={coordinates}
+                            address={hotel.address}
+                            amenities={amenities}
+                    />
+
                 </div>
             </div>
+
+            <div class="lg:col-span-1">
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl sticky top-24">
+                    <div class="flex items-center gap-2 mb-4">
+                        <Icon name="fa7-solid:calendar-check" size="24" class="text-emerald-600"/>
+                        <h2 class="text-xl font-bold text-slate-800">Reserva tu estadía</h2>
+                    </div>
+                    <BookingCalendar client:visible hotelName={hotel.name} />
+                </div>
+            </div>
+
         </div>
-    </div>
+    </main>
+
     <Footer/>
 </Layout>
