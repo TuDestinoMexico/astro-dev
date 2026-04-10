@@ -1,4 +1,5 @@
 ---
+export const prerender = false
 import Layout from '../../layouts/Layout.astro';
 import Header from "../../components/layout/Header.astro";
 import Footer from "../../components/layout/Footer.astro";
@@ -61,7 +62,7 @@ const allImages = [
                 </div>
 
                 <div class="flex items-start gap-2 flex-1 min-w-0 text-slate-600 font-medium">
-                    <Icon class="text-red-500 mt-0.5 flex-shrink-0" size={20} name="fa7-solid:location-dot"/>
+                    <Icon class="text-red-500 mt-0.5 shrink-0" size={20} name="fa7-solid:location-dot"/>
                     <p class="truncate md:whitespace-normal">{address}</p>
                 </div>
             </div>
@@ -103,8 +104,8 @@ const allImages = [
                             isSingleDate={true}
                     />
 
-                    <div className="mt-6 pt-6 border-t border-slate-100">
-                        <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                    <div class="mt-6 pt-6 border-t border-slate-100">
+                        <p class="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
                             Al confirmar, te contactaremos por WhatsApp para finalizar tu reservación y coordinar detalles.
                         </p>
                     </div>
