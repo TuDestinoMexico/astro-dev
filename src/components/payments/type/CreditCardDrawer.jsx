@@ -85,19 +85,19 @@ export default function CreditCardDrawer() {
                 </div>
 
                 {/* Email */}
-                <div class="text-left">
+                <div className="text-left">
                     <label className={labelStyle}>Correo Electrónico</label>
                     <input id="email" type="email" placeholder="correo@ejemplo.com" className={inputStyle} onChange={handleChange} required />
                 </div>
 
                 {/* Teléfono */}
-                <div class="text-left">
+                <div className="text-left">
                     <label className={labelStyle}>Teléfono de contacto</label>
                     <input id="phone_number" type="tel" placeholder="10 dígitos" className={inputStyle} onChange={handleChange} required />
                 </div>
 
                 {/* Referencia y Cantidad */}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
                         <label className={labelStyle}>Referencia / Concepto</label>
                         <input id="description" type="text" placeholder="Nombre del hotel/tour" className={inputStyle} onChange={handleChange} required />
