@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function CreditCardDrawer() {
+export default function CreditCardDrawer({ baseUrl }) {
     const [form, setForm] = useState({
         method: 'card',
         amount: '',
@@ -12,7 +12,8 @@ export default function CreditCardDrawer() {
             email: ''
         },
         confirm: 'false',
-        send_email: 'true'
+        send_email: 'true',
+        redirect_url: `${baseUrl}/nosotros`,
     });
 
     const [loading, setLoading] = useState(false);
@@ -73,7 +74,7 @@ export default function CreditCardDrawer() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Nombres y Apellidos */}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
                         <label className={labelStyle}>Nombres</label>
                         <input id="name" type="text" placeholder="Ej. Juan" className={inputStyle} onChange={handleChange} required />

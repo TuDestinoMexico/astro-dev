@@ -2,9 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import CreditCardDrawer from "./type/CreditCardDrawer.jsx";
 import StorePaymentForm from "./type/StorePaymentForm.jsx";
-// 1. Importamos el componente del formulario de la tarjeta
-
-
 const paymentData = [
     { id: 1, title: "Tarjeta de débito o crédito", icon: "💳", info: "" }, // Info vacía porque cargaremos el componente
     { id: 2, title: "Tiendas de conveniencia", icon: "🛒", info: "Genera tu ficha y paga en 7-Eleven, Walmart, Farmacias del Ahorro y más." },
@@ -14,7 +11,7 @@ const paymentData = [
     { id: 6, title: "Depósitos (Oxxo)", icon: "🏪", info: "Paga en efectivo en cualquier OXXO indicando el número de tarjeta asignado." },
 ];
 
-export default function PaymentMethods() {
+export default function PaymentMethods({ baseUrl }) {
     const [selectedId, setSelectedId] = useState(null);
     const containerRef = useRef(null);
 
@@ -63,9 +60,7 @@ export default function PaymentMethods() {
                                 &times;
                             </button>
 
-                            {/* LÓGICA DE CARGA: Si el ID es 1, cargamos el componente de Tarjeta */}
-                            {/* LÓGICA DE CARGA DINÁMICA */}
-                            {selectedId === 1 && <CreditCardDrawer />}
+                            {selectedId === 1 && <CreditCardDrawer baseUrl={baseUrl} />}
                             {selectedId === 2 && <StorePaymentForm />}
 
                             {/* Información para otros métodos */}
