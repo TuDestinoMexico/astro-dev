@@ -2,8 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import CreditCardDrawer from "./type/CreditCardDrawer.jsx";
 import StorePaymentForm from "./type/StorePaymentForm.jsx";
+import BankTransferForm from "./type/BankTransferForm.jsx";
+import DirectTransferForm from "./type/DirectTransferForm.jsx";
+import CounterPaymentForm from "./type/CounterPaymentForm.jsx";
+import OxxoDepositForm from "./type/OxxoDepositForm.jsx";
 const paymentData = [
-    { id: 1, title: "Tarjeta de débito o crédito", icon: "💳", info: "" }, // Info vacía porque cargaremos el componente
+    { id: 1, title: "Tarjeta de débito o crédito", icon: "💳", info: "" },
     { id: 2, title: "Tiendas de conveniencia", icon: "🛒", info: "Genera tu ficha y paga en 7-Eleven, Walmart, Farmacias del Ahorro y más." },
     { id: 3, title: "Pagos de servicios (BBVA)", icon: "🏦", info: "Ingresa a tu app BBVA, ve a 'Pago de Servicios' y usa nuestro convenio." },
     { id: 4, title: "Transferencias Interbancarias", icon: "🏛️", info: "Realiza un SPEI a nuestra cuenta CLABE con tu número de reserva." },
@@ -62,9 +66,13 @@ export default function PaymentMethods({ baseUrl }) {
 
                             {selectedId === 1 && <CreditCardDrawer baseUrl={baseUrl} />}
                             {selectedId === 2 && <StorePaymentForm />}
+                            {selectedId === 3 && <BankTransferForm />}
+                            {selectedId === 4 && <DirectTransferForm/>}
+                            {selectedId === 5 && <CounterPaymentForm/>}
+                            {selectedId === 6 && <OxxoDepositForm/>}
 
                             {/* Información para otros métodos */}
-                            {![1, 2].includes(selectedId) && (
+                            {![1, 2, 3, 4, 5, 6].includes(selectedId) && (
                                 <div className="py-4">
                                     <span className="text-6xl block mb-4">{activeMethod.icon}</span>
                                     <h2 className="text-2xl font-bold text-gray-800 mb-4">{activeMethod.title}</h2>
