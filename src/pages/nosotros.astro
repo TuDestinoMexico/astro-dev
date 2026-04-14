@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+import HeroBanner from "../components/ui/single/HeroBanner.astro";
+---
+
+<Layout title="Nosotros | Tu Destino México">
+    <Header/>
+    <Content>
+        <HeroBanner
+                title="Nuestro Equipo"
+                videoSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/video/Team%20Video%20Noaudio.webm"
+                altText="Pagos seguros en Tu Destino México"
+        />
+    </Content>
+    <Footer/>
+</Layout>

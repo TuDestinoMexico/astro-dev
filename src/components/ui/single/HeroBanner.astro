@@ -1,24 +1,41 @@
 ---
-// Definimos la interfaz para que Astro sepa qué datos necesita recibir
 interface Props {
     title: string;
-    imageSrc: string;
-    altText?: string; // El signo '?' indica que es opcional
+    imageSrc?: string;
+    videoSrc?: string;
+    altText?: string;
 }
 
-const { title, imageSrc, altText = "Encabezado de página" } = Astro.props;
+const { title, imageSrc,videoSrc, altText = "Encabezado de página" } = Astro.props;
 ---
 
 <div class="relative mx-4 my-5 flex h-55 items-center justify-center overflow-hidden rounded-lg xl:mx-0">
-    <div class="absolute z-20 h-full w-full bg-black/40"></div>
+    <div
+            class="bg-black/50 absolute w-full h-full gap-3 z-20 text-white flex flex-col justify-center items-center"
+    >
+        <h1 class="text-4xl md:text-5xl font-bold text-white text-center px-4">
+            {title}
+        </h1>
+    </div>
+    {imageSrc && (
+        <>
+            <img
+                    class="absolute z-10 h-full w-full object-cover"
+                    src={imageSrc}
+                    alt={altText}
+            />
+        </>
+    )}
+    {videoSrc && (
+        <>
+            <video
+                    class="h-full object-cover w-full"
+                    src={videoSrc}
+                    autoplay loop muted playsinline
+            ></video>
+        </>
+    )}
 
-    <img
-            class="absolute z-10 h-full w-full object-cover"
-            src={imageSrc}
-            alt={altText}
-    />
 
-    <h1 class="z-20 text-4xl md:text-5xl font-bold text-white text-center px-4">
-        {title}
-    </h1>
+
 </div>
