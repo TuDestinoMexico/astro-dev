@@ -16,49 +16,49 @@ interface Milestone {
 
 const milestones: Milestone[] = [
     {
-        id: 0,
-        date: "Marzo 20, 2024",
-        shortTitle: "XOLO RUTA MONTERREY",
-        fullTitle: "Inicio de la Aventura",
-        description: "Recorrido por las rutas emblemáticas de Monterrey, la ciudad de las montañas.",
-        image: "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2024.png",
-        coords: { lat: 25.6866, lng: -100.3161 } // Monterrey Real
+        "id": 0,
+        "date": "Marzo 20, 2024",
+        "shortTitle": "XOLO RUTA MONTERREY",
+        "fullTitle": "Lanzamiento y Conexión en la Sultana",
+        "description": "Iniciamos nuestra presencia en las ferias turísticas más importantes del norte, compartiendo nuestra pasión por los viajes y conectando con la comunidad regia para llevar la magia de México a cada rincón.",
+        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2024.png",
+        "coords": { "lat": 25.6866, "lng": -100.3161 }
     },
     {
-        id: 1,
-        date: "Octubre 2, 2025",
-        shortTitle: "XOLO RUTA MERIDA",
-        fullTitle: "Cierre de Inscripciones",
-        description: "Explorando la blanca Mérida y sus alrededores mayas.",
-        image: "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-merida-2025.png",
-        coords: { lat: 20.9674, lng: -89.5926 } // Mérida Real
+        "id": 1,
+        "date": "Octubre 2, 2025",
+        "shortTitle": "XOLO RUTA MERIDA",
+        "fullTitle": "Mérida: El Corazón del Mundo Maya",
+        "description": "Nuestra agencia llega a la Blanca Mérida para participar en foros de turismo cultural, fortaleciendo alianzas con proveedores locales para ofrecerte experiencias exclusivas en el sureste mexicano.",
+        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-merida-2025.png",
+        "coords": { "lat": 20.9674, "lng": -89.5926 }
     },
     {
-        id: 2,
-        date: "Diciembre 15, 2025",
-        shortTitle: "XOLO RUTA MONTERREY",
-        fullTitle: "Ruta Final TDMX",
-        description: "Regreso a la capital regia para el evento de cierre.",
-        image: "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2025.png",
-        coords: { lat: 25.6714, lng: -100.3067 }
+        "id": 2,
+        "date": "Diciembre 15, 2025",
+        "shortTitle": "XOLO RUTA MONTERREY",
+        "fullTitle": "Cumbre de Viajes: Edición Invierno",
+        "description": "Cerramos el ciclo de exposiciones del año en Monterrey, presentando nuestros paquetes premium de temporada y asesorando a viajeros que buscan vivir experiencias inolvidables en sus próximas vacaciones.",
+        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2025.png",
+        "coords": { "lat": 25.6714, "lng": -100.3067 }
     },
     {
-        id: 3,
-        date: "Enero 15, 2026",
-        shortTitle: "XOLO RUTA MONTERREY",
-        fullTitle: "Especial de Invierno",
-        description: "Ruta de invierno por los parajes de Nuevo León.",
-        image: "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2026.png",
-        coords: { lat: 25.7000, lng: -100.3500 }
+        "id": 3,
+        "date": "Enero 15, 2026",
+        "shortTitle": "XOLO RUTA MONTERREY",
+        "fullTitle": "Kick-off 2026: Nuevos Horizontes",
+        "description": "Arrancamos el año en el centro de convenciones más importante de Nuevo León, lanzando oficialmente nuestro catálogo 2026 con destinos emergentes y rutas diseñadas para el viajero moderno.",
+        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2026.png",
+        "coords": { "lat": 25.7000, "lng": -100.3500 }
     },
     {
-        id: 4,
-        date: "MARZO 21, 2026",
-        shortTitle: "XOLO RUTA CHIHUAHUA",
-        fullTitle: "Desierto y Aventura",
-        description: "Atravesando las majestuosas tierras de Chihuahua.",
-        image: "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-chihuahua-2026.png",
-        coords: { lat: 28.6330, lng: -106.0691 } // Chihuahua Real
+        "id": 4,
+        "date": "MARZO 21, 2026",
+        "shortTitle": "XOLO RUTA CHIHUAHUA",
+        "fullTitle": "Chihuahua: Aventura y Negocios Turísticos",
+        "description": "Exploramos el estado más grande de México participando en foros de turismo de aventura, listos para posicionar la ruta de las Barrancas del Cobre como el destino imperdible de nuestra nueva temporada.",
+        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-chihuahua-2026.png",
+        "coords": { "lat": 28.6330, "lng": -106.0691 }
     }
 ];
 

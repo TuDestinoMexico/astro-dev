@@ -35,7 +35,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                     <div className="h-1 w-16 md:w-20 bg-indigo-500 rounded-full"></div>
                 </div>
                 <p className="text-gray-500 leading-relaxed text-base md:text-lg lg:text-xl font-medium">{description}</p>
-                <div className="pt-2">
+                <div className="pt-2 hidden">
                     <button onClick={onButtonClick} className="w-full sm:w-auto flex items-center justify-center gap-3 bg-indigo-600 text-white px-8 md:px-10 py-3 md:py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all shadow-lg shadow-indigo-200 active:scale-95 group">
                         {buttonText} <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </button>
