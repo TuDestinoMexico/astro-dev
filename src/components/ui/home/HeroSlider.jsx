@@ -64,7 +64,7 @@ export default function OrganicSlider() {
     const nextSlide = () => setIndex((prev) => (prev + 1) % slides.length);
 
     return (
-        <section ref={containerRef} className="mt-10 px-4 md:px-0">
+        <section ref={containerRef} className="">
             <div className={`relative w-full container mx-auto min-h-137.5 md:h-150 rounded-[2.5rem] overflow-hidden transition-colors duration-1000 ${activeSlide.bgColor}`}>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 h-full items-center p-8 md:p-16">
