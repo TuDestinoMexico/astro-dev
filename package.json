@@ -13,11 +13,11 @@
     "@astrojs/vercel": "^10.0.4",
     "@gsap/react": "^2.1.2",
     "@iconify-json/simple-icons": "^1.2.68",
+    "@react-google-maps/api": "^2.20.8",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "astro": "^6.1.4",
-    "astro-icon": "^1.1.5",
     "astro-lightgallery": "^2.3.0",
     "date-fns": "^4.1.0",
     "gsap": "^3.14.2",
@@ -28,6 +28,10 @@
     "vue": "^3.5.27"
   },
   "devDependencies": {
-    "@iconify-json/fa7-solid": "^1.2.3"
+    "@iconify-json/bxl": "^1.2.4",
+    "@iconify-json/fa7-solid": "^1.2.3",
+    "@iconify-json/lucide": "^1.2.102",
+    "@iconify-json/mdi": "^1.2.3",
+    "astro-icon": "^1.1.5"
   }
 }

@@ -22,7 +22,6 @@ import SubMenu from "../ui/SubMenu.astro";
     </div>
 
     <div id="sticky-header-container" class="relative">
-
         <nav id="main-nav" class="relative w-full z-100 transition-all duration-300">
             <div id="nav-bg" class="absolute inset-0 bg-transparent transition-all duration-300"></div>
 
@@ -43,12 +42,23 @@ import SubMenu from "../ui/SubMenu.astro";
                         />
                     </a>
 
-                    <div class="flex flex-row gap-6 text-md xl:text-lg font-bold overflow-x-auto no-scrollbar py-2 flex-shrink-0">
-                        <SubMenu title="Hoteles" icon="balcony" url="/hoteles" />
-                        <SubMenu title="Tours" icon="tour" url="/tours" />
-                        <SubMenu title="Destinos" icon="public" url="/destinos" />
-                        <SubMenu title="Convenios" icon="handshake" url="/convenios" />
-                        <SubMenu title="XoloRuta" icon="place" url="/xolo-ruta" />
+                    <div class="relative flex items-center flex-grow md:flex-grow-0 overflow-hidden">
+                        <button id="prev-btn" class="absolute left-0 z-10 bg-white/80 p-1 rounded-full shadow-md md:hidden opacity-0 transition-opacity">
+                            <span class="material-icons-outlined text-purple-800 pointer-events-none">chevron_left</span>
+                        </button>
+
+                        <div id="submenu-container" class="flex flex-row gap-6 text-md xl:text-lg font-bold overflow-x-auto no-scrollbar py-2 flex-grow md:justify-center scroll-smooth">
+                            <SubMenu title="Hoteles" icon="balcony" url="/hoteles" />
+                            <SubMenu title="Tours" icon="tour" url="/tours" />
+                            <SubMenu title="Destinos" icon="public" url="/destinos" />
+                            <SubMenu title="Convenios" icon="handshake" url="/convenios" />
+                            <SubMenu title="XoloRuta" icon="place" url="/xolo-ruta" />
+                            <div class="w-10 md:hidden flex-shrink-0"></div>
+                        </div>
+
+                        <button id="next-btn" class="absolute right-0 z-10 bg-white/80 p-1 rounded-full shadow-md md:hidden transition-opacity">
+                            <span class="material-icons-outlined text-purple-800 pointer-events-none">chevron_right</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -62,67 +72,55 @@ import SubMenu from "../ui/SubMenu.astro";
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Mejoras de rendimiento en animación */
     #nav-content, #nav-bg, #logo-scroll, #nav-spacer {
         will-change: transform, opacity, width, padding, height;
     }
 </style>
 
 <script>
-    // IDs sincronizados
     const nav = document.getElementById('main-nav');
     const navBg = document.getElementById('nav-bg');
     const navContent = document.getElementById('nav-content');
     const logoScroll = document.getElementById('logo-scroll');
     const spacer = document.getElementById('nav-spacer');
 
+    const container = document.getElementById('submenu-container');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    // --- MANTENEMOS TU LÓGICA STICKY ORIGINAL ---
     window.addEventListener('scroll', () => {
-        const isScrolled = window.scrollY > 150; // Punto de activación ajustable
+        const isScrolled = window.scrollY > 150;
 
         if (isScrolled) {
-            // --- MODO FOLLOW: Pegajoso ---
-
-            // 1. Activar 'fixed' y sombra
             nav?.classList.add('fixed', 'top-0', 'left-0', 'shadow-lg');
             nav?.classList.remove('relative');
-
-            // 2. SOLUCIÓN FONDO: Fondo blanco sólido e imperecedero
             navBg?.classList.replace('bg-transparent', 'bg-white');
-
-            // 3. SOLUCIÓN SALTO: El espaciador 'crece' para ocupar el hueco
-            // Haremos que la transición del espaciador coincida con la del menú (aprox 80px)
             spacer?.classList.add('h-[88px]');
-
-            // --- Resto de animaciones visuales ---
             navContent?.classList.replace('justify-center', 'justify-between');
-
             logoScroll?.classList.remove('w-0', 'opacity-0', 'pointer-events-none');
             logoScroll?.classList.add('w-48', 'opacity-100');
-
-            // Hacer el menú un poco más delgado al bajar
             navContent?.classList.replace('py-4', 'py-2');
-
         } else {
-            // --- MODO NORMAL: Arriba ---
-
-            // 1. Quitar 'fixed' y sombra
             nav?.classList.remove('fixed', 'top-0', 'left-0', 'shadow-lg');
             nav?.classList.add('relative');
-
-            // 2. SOLUCIÓN FONDO: Volver a transparente
             navBg?.classList.replace('bg-white', 'bg-transparent');
-
-            // 3. SOLUCIÓN SALTO: Ocultar el espaciador
             spacer?.classList.remove('h-[88px]');
-
-            // --- Restaurar animaciones visuales ---
             navContent?.classList.replace('justify-between', 'justify-center');
-
             logoScroll?.classList.add('w-0', 'opacity-0', 'pointer-events-none');
             logoScroll?.classList.remove('w-48', 'opacity-100');
-
-            // Restaurar grosor normal
             navContent?.classList.replace('py-2', 'py-4');
         }
+    });
+
+    // --- LÓGICA DE FLECHAS MÓVILES ---
+    nextBtn?.addEventListener('click', () => container?.scrollBy({ left: 150, behavior: 'smooth' }));
+    prevBtn?.addEventListener('click', () => container?.scrollBy({ left: -150, behavior: 'smooth' }));
+
+    container?.addEventListener('scroll', () => {
+        if (!container || !prevBtn || !nextBtn) return;
+        prevBtn.style.opacity = container.scrollLeft > 10 ? "1" : "0";
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        nextBtn.style.opacity = container.scrollLeft >= maxScroll - 10 ? "0" : "1";
     });
 </script>
