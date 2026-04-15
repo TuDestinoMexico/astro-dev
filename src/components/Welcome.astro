@@ -21,6 +21,27 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
     <YouTubeCTA />
 
 <div class="container mx-auto">
+
+    <Grid
+            grid={5}
+    >
+        {hoteles.slice(0, 5).map(
+            (
+                hotel: { name: string | undefined;
+                    slug: string | undefined;
+                    images: string | undefined;
+                    destino: string | undefined;
+                }) => (
+                    <Card
+                            title={hotel.name}
+                            slug={hotel.slug}
+                            photo={hotel.images}
+                            type="hoteles"
+                            destino={hotel.destino}
+                    />
+            ))}
+    </Grid>
+
     <Grid
         grid={2}
         title="Ofertas relampago"
@@ -43,23 +64,4 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
 
     <DestinosCTA />
 
-    <Grid
-        grid={5}
-    >
-        {hoteles.slice(0, 5).map(
-            (
-                hotel: { name: string | undefined;
-                slug: string | undefined;
-                images: string | undefined;
-                destino: string | undefined;
-            }) => (
-                <Card
-                        title={hotel.name}
-                        slug={hotel.slug}
-                        photo={hotel.images}
-                        type="hoteles"
-                        destino={hotel.destino}
-            />
-        ))}
-    </Grid>
 </div>

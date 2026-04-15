@@ -1,28 +1,51 @@
 ---
 import Button from "./Button.astro";
+
 interface Props {
-    grid : number,
-    title?: string
-    isActive?: boolean
-    url?: string
+    grid: number;
+    title?: string;
+    isActive?: boolean;
+    url?: string;
 }
-const{grid,title, isActive = false, url = '#'} = Astro.props
+
+const { grid, title, isActive = false, url = '#' } = Astro.props;
 ---
+
 <div class="space-y-3 py-3">
-    <h2 class="text-4xl font-semibold">{title}</h2>
-    <div
-            class=`grid gap-5`
-            style={`grid-template-columns: repeat(${grid}, minmax(0, 1fr));`}
-    >
-        <slot/>
+    {title && <h2 class="text-4xl font-semibold">{title}</h2>}
+
+    <div class="responsive-grid">
+        <slot />
     </div>
+
     {isActive && (
-            <div class="flex justify-center">
+            <div class="flex justify-center mt-8">
                 <Button
                         title="Ver más"
-                        className="bg-green-500 text-white hover:bg-green-600"
+                        className="bg-green-500 text-white hover:bg-green-600 px-8 py-3 rounded-xl font-bold transition-all active:scale-95"
                         url={url}
                 />
             </div>
     )}
 </div>
+
+<style define:vars={{ desktopCols: grid }}>
+    .responsive-grid {
+        display: grid;
+        gap: 1.25rem;
+
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    @media (min-width: 640px) {
+        .responsive-grid {
+            grid-template-columns: repeat(min(2, var(--desktopCols)), minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .responsive-grid {
+            grid-template-columns: repeat(var(--desktopCols), minmax(0, 1fr));
+        }
+    }
+</style>
