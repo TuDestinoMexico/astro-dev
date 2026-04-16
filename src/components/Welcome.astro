@@ -38,7 +38,7 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
                                 title={hotel.name}
                                 slug={hotel.slug}
                                 photo={hotel.images}
-                                type="hoteles"
+                                type="hotel"
                                 destino={hotel.destino}
                         />
                 ))}
@@ -65,7 +65,7 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
         <AppDownload />
 
         <DestinosCTA />
+    </div>
 </Content>
 
 
-</div>
