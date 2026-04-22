@@ -13,7 +13,7 @@ export default function CreditCardDrawer({ baseUrl }) {
         },
         confirm: 'false',
         send_email: 'true',
-        redirect_url: `${baseUrl}/nosotros`,
+        redirect_url: `${baseUrl}`,
     });
 
     const [loading, setLoading] = useState(false);

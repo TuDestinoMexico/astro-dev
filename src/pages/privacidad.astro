@@ -1,0 +1,122 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+import HeroBanner from "../components/ui/single/HeroBanner.astro";
+---
+
+<Layout title="Aviso de Privacidad | Tu Destino México">
+    <Header/>
+
+    <Content>
+        <HeroBanner
+                title="Aviso de Privacidad"
+                imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
+                altText="Fondo de protección de datos"
+        />
+
+        <div class="max-w-4xl mx-auto px-6 py-10 text-gray-700 leading-relaxed">
+
+            <section class="mb-10 text-center">
+                <p class="text-xl font-bold text-indigo-800 mb-4">
+                    Tu privacidad es nuestra prioridad
+                </p>
+                <p>
+                    En <strong>Tu Destino México</strong>, valoramos la confianza que depositas en nosotros al compartir tu información. Este aviso explica cómo protegemos tus datos personales.
+                </p>
+            </section>
+
+            <hr class="my-10 border-gray-200" />
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Identidad y Domicilio del Responsable</h2>
+                <p>
+                    Tu Destino México, con domicilio en <strong>Xel-ha 10, Supermanzana 28, Plaza portales, 77509 Cancún, Q.R.</strong>, es el responsable del uso y protección de sus datos personales, de conformidad con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Datos Personales que Recabamos</h2>
+                <div class="space-y-4">
+                    <p>Para llevar a cabo las finalidades descritas en este aviso, utilizaremos los siguientes datos:</p>
+                    <ul class="list-disc pl-6 space-y-2 bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+                        <li><strong>Identificación:</strong> Nombre completo.</li>
+                        <li><strong>Contacto:</strong> Correo electrónico y <strong>número telefónico</strong> (incluyendo código de área).</li>
+                        <li><strong>Facturación:</strong> RFC y domicilio fiscal (en caso de requerirse).</li>
+                        <li><strong>Pago:</strong> Información procesada de forma cifrada a través de la pasarela segura de Openpay.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Finalidades del Uso de Datos</h2>
+                <p>Sus datos personales serán utilizados para las siguientes actividades primarias:</p>
+                <div class="grid md:grid-cols-2 gap-4 mt-4">
+                    <div class="p-4 border rounded-lg border-gray-200">
+                        <p class="font-bold text-indigo-600">Gestión de Reservas</p>
+                        <p class="text-sm">Procesar confirmaciones de hoteles, tours y traslados.</p>
+                    </div>
+                    <div class="p-4 border rounded-lg border-gray-200">
+                        <p class="font-bold text-indigo-600">Verificación de Pago</p>
+                        <p class="text-sm">Validar transacciones de forma segura mediante Openpay.</p>
+                    </div>
+                    <div class="p-4 border rounded-lg border-gray-200">
+                        <p class="font-bold text-indigo-600">Atención al Cliente</p>
+                        <p class="text-sm">Contactarlo vía telefónica o correo para cualquier cambio en su itinerario.</p>
+                    </div>
+                    <div class="p-4 border rounded-lg border-gray-200">
+                        <p class="font-bold text-indigo-600">Seguridad</p>
+                        <p class="text-sm">Prevenir fraudes y conductas ilícitas en transacciones en línea.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Transferencia de Datos</h2>
+                <p>
+                    Le informamos que sus datos pueden ser compartidos con proveedores de servicios (Hoteles, Aerolíneas, Operadores de Tours) y con la institución bancaria a través de <strong>Openpay</strong> para completar el pago de su reservación.
+                    <strong>No vendemos ni alquilamos su información personal a terceros para fines publicitarios.</strong>
+                </p>
+            </section>
+
+            <section class="mb-12 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Derechos ARCO</h2>
+                <p class="mb-4">
+                    Usted tiene derecho a conocer qué datos tenemos de usted, para qué los utilizamos y las condiciones del uso que les damos (Acceso). Asimismo, es su derecho solicitar la corrección de su información (Rectificación), que la eliminemos de nuestros registros (Cancelación) o ponerse al uso de sus datos para fines específicos (Oposición).
+                </p>
+                <p>
+                    Para ejercer estos derechos, debe enviar una solicitud al correo: <a href="mailto:gerencia@tudestinomx.com" class="text-indigo-600 font-bold underline">gerencia@tudestinomx.com</a>.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">6. Seguridad de la Información</h2>
+                <p>
+                    Implementamos medidas de seguridad técnicas y administrativas, como certificados <strong>SSL</strong> y protocolos de cifrado de datos, para asegurar que su navegación y transacciones en <a href="https://www.tudestinomx.com" class="text-indigo-600">www.tudestinomx.com</a> sean totalmente privadas.
+                </p>
+            </section>
+
+            <section class="bg-teal-600 text-white p-8 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-4">Departamento de Privacidad</h2>
+                <p class="mb-6 opacity-90 text-sm">Si tiene alguna duda sobre el tratamiento de sus datos personales, puede contactarnos:</p>
+                <div class="grid md:grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <p class="font-bold opacity-70 uppercase tracking-wide">Correo Electrónico:</p>
+                        <p>info@tudestinomx.com</p>
+                    </div>
+                    <div>
+                        <p class="font-bold opacity-70 uppercase tracking-wide">Teléfono Directo:</p>
+                        <p>998 980 6611</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="font-bold opacity-70 uppercase tracking-wide">Horario de Atención:</p>
+                        <p>Lunes a Viernes de 9:00 AM a 6:00 PM (Hora Cancún)</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </Content>
+
+    <Footer/>
+</Layout>
