@@ -10,7 +10,7 @@ const bancos = [
     {
         key: 'banorte',
         clabe: '072691012738958697',
-        logo: 'https://tudestinomx-bucket.storage.googleapis.com/wp-content/uploads/2024/12/17194951/banorte.png',
+        logo: 'https://storage.googleapis.com/tudestinomx_bucket/logos/bancos/banorte.png',
         alt: 'Banorte',
     },
     {
