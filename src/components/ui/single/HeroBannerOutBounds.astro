@@ -1,0 +1,72 @@
+---
+// 1. Definimos las propiedades (Props)
+interface Props {
+    title: string;
+    imageSrc?: string;
+    videoSrc?: string;
+    characterSrc?: string; // ¡Nueva propiedad para tu personaje PNG!
+    altText?: string;
+}
+
+const {
+    title,
+    imageSrc,
+    videoSrc,
+    characterSrc,
+    altText = "Encabezado de página"
+} = Astro.props;
+---
+
+<!-- 2. Contenedor Principal: SIN overflow-hidden.
+     Agregamos mt-12 (margin-top) para darle espacio al personaje que sobresale hacia arriba -->
+<section class="relative mx-4 mt-16 mb-8 flex min-h-[16rem] md:min-h-[20rem] items-center xl:mx-0">
+
+    <!-- 3. Caja del Fondo (Esta SÍ recorta lo que sobra de la imagen/video de fondo) -->
+    <div class="absolute inset-0 overflow-hidden rounded-2xl shadow-xl">
+        <!-- Capa oscura para que el texto se lea bien -->
+        <div class="absolute inset-0 z-20 bg-black/50"></div>
+
+        <!-- Renderizado del fondo (Video o Imagen) -->
+        {videoSrc ? (
+                <video
+                        class="absolute inset-0 z-10 h-full w-full object-cover"
+                        src={videoSrc}
+                        poster={imageSrc}
+                        autoplay loop muted playsinline
+                ></video>
+        ) : (
+            imageSrc && (
+                    <img
+                            class="absolute inset-0 z-10 h-full w-full object-cover"
+                            src={imageSrc}
+                            alt={altText}
+                            fetchpriority="high"
+                    />
+            )
+        )}
+    </div>
+
+    <!-- 4. Contenedor del Título -->
+    <!-- Lo empujamos un poco a la izquierda para que no choque con el personaje -->
+    <div class="relative z-30 w-full pl-8 pr-32 md:pl-16 md:pr-1/2">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-md">
+            {title}
+        </h1>
+    </div>
+
+    <!-- 5. El Personaje "Out of Bounds" -->
+    {characterSrc && (
+            <img
+                    src={characterSrc}
+                    alt="Personaje destacado"
+        /*
+        Claves del efecto:
+        - absolute bottom-0 right-0: Lo ancla a la esquina inferior derecha.
+        - h-[120%] md:h-[130%]: Lo hace más alto que el contenedor padre, forzándolo a salir por arriba.
+        - z-40: Lo pone por encima de todo.
+        - drop-shadow-2xl: Le da una sombra que se proyecta fuera de la caja, aumentando el efecto 3D.
+        */
+        class="absolute bottom-0 right-0 md:right-10 z-40 h-[120%] md:h-[130%] w-auto object-contain drop-shadow-2xl pointer-events-none"
+        />
+        )}
+</section>

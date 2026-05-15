@@ -6,36 +6,38 @@ interface Props {
     altText?: string;
 }
 
-const { title, imageSrc,videoSrc, altText = "Encabezado de página" } = Astro.props;
+const { title, imageSrc, videoSrc, altText = "Encabezado de página" } = Astro.props;
 ---
 
-<div class="relative mx-4 my-5 flex h-55 items-center justify-center overflow-hidden rounded-lg xl:mx-0">
-    <div
-            class="bg-black/50 absolute w-full h-full gap-3 z-20 text-white flex flex-col justify-center items-center"
-    >
-        <h1 class="text-4xl md:text-5xl font-bold text-white text-center px-4">
+<header class="relative mx-4 my-5 flex min-h-[16rem] md:min-h-[20rem] items-center justify-center overflow-hidden rounded-lg xl:mx-0">
+
+    <!-- Capa oscura (Overlay) y Título -->
+    <!-- 'inset-0' es el equivalente a 'top-0 right-0 bottom-0 left-0 w-full h-full' -->
+    <div class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/50 text-white">
+        <h1 class="px-4 text-center text-4xl font-bold md:text-5xl">
             {title}
         </h1>
     </div>
-    {imageSrc && (
-        <>
-            <img
-                    class="absolute z-10 h-full w-full object-cover"
-                    src={imageSrc}
-                    alt={altText}
-            />
-        </>
-    )}
-    {videoSrc && (
-        <>
+
+    <!-- Renderizado Condicional: Video vs Imagen -->
+    {videoSrc ? (
             <video
-                    class="h-full object-cover w-full"
+                    class="absolute inset-0 z-10 h-full w-full object-cover"
                     src={videoSrc}
-                    autoplay loop muted playsinline
+                    poster={imageSrc}
+                    autoplay
+                    loop
+                    muted
+                    playsinline
             ></video>
-        </>
+    ) : (
+        imageSrc && (
+                <img
+                        class="absolute inset-0 z-10 h-full w-full object-cover"
+                        src={imageSrc}
+                        alt={altText}
+                        fetchpriority="high"
+                />
+        )
     )}
-
-
-
-</div>
+</header>

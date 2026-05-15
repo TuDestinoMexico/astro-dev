@@ -1,19 +1,19 @@
 ---
-
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/layout/Header.astro";
 import Content from "../components/layout/Content.astro";
 import Footer from "../components/layout/Footer.astro";
 import Timeline from "../components/ui/timeline/Timeline";
 import HeroBanner from "../components/ui/single/HeroBanner.astro";
+import HeroBannerOutBounds from "../components/ui/single/HeroBannerOutBounds.astro";
 ---
 <Layout title="Xolo Ruta | Tu Destino Mexico">
     <Header/>
         <Content>
-            <HeroBanner
-                    title="Nuestra Xolo Ruta"
-                    videoSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/video/Team%20Video%20Noaudio.webm"
-                    altText="Pagos seguros en Tu Destino México"
+            <HeroBannerOutBounds
+                    title="¡Conoce nuestra XoloRuta!"
+                    imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
+                    characterSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/xolo-transparente-bg.png"
             />
             <Timeline client:only="react" />
         </Content>
