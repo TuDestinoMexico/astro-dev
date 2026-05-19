@@ -1,0 +1,56 @@
+---
+import Header from "../components/layout/Header.astro";
+import Layout from "../layouts/Layout.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+import HeroBanner from "../components/ui/single/HeroBanner.astro";
+import Grid from "../components/ui/Grid.astro";
+import FacebookReel from "../components/ui/recomendacion/FacebookReel";
+---
+
+<Layout title="Nuestras recomendaciones | Tu Destino Mexico">
+    <Header/>
+        <Content>
+            <HeroBanner
+                title="Nuestras recomendaciones"
+                imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/img/recomendaciones-tdmx-v1.png"
+                altText="Reseñas Tu Destino Mexico"
+            />
+            <Grid
+                grid={4}
+                title="Que opinan los gerentes"
+            >
+                <FacebookReel
+                        client:only="react"
+                        reelId=802125325939306
+                        title="Sandos Playacar"
+                />
+                <FacebookReel
+                        client:only="react"
+                        reelId=837397402794507
+                        title="Royalton Splash"
+                />
+                <FacebookReel
+                        client:only="react"
+                        reelId=783423487849346
+                        title="Royalton Chic Cancun"
+                />
+                <FacebookReel
+                        client:only="react"
+                        reelId=1494562411235780
+                        title="Hotel Nickelodeon"
+                />
+            </Grid>
+            <Grid
+                grid={3}
+                title="Que opinan los famosos"
+            >
+                <FacebookReel
+                        client:only="react"
+                        reelId=738465115732171
+                        title="Chacho Gaytán - Productor Musical"
+                />
+            </Grid>
+        </Content>
+    <Footer />
+</Layout>

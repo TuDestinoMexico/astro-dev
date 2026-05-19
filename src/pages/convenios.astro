@@ -8,17 +8,17 @@ import HeroBanner from "../components/ui/single/HeroBanner.astro";
 const alianzasExclusivas = [
     {
         empresa: "Sams Club Afiliados",
-        descripcion: "Con tu Membresía física o digital PLUS o Benefits obtén un 15% descuento ó paquetes a costo preferencial de $13,990 (5 días y 4 noches)",
-        beneficios: []
-    },
-    {
-        empresa: "Cupón Click",
-        descripcion: "Con tu Membresía física o digital PLUS o Benefits obtén un 15% descuento ó paquetes a costo preferencial de $13,990 (5 días y 4 noches)",
-        beneficios: []
+        descripcion: "Con tu Membresía física o digital PLUS o Benefits obtén:",
+        beneficios: [
+            "15% de descuento",
+            "Paquetes a costo preferencia por $18,990"
+        ],
+        url: "https://www.samsbenefits.com/resultados/detalles/Tu-Destino-M%C3%A9xico/P7562"
     },
     {
         empresa: "Nissan",
         descripcion: "",
+        url: "https://conveniosnissan.com/c/Tu-Destino-Mexico_12668",
         beneficios: [
             "Paquetes en $13,990",
             "35% de descuento en hoteles",
@@ -66,7 +66,7 @@ const alianzasExclusivas = [
                         <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     <h3 class="font-bold text-xl mb-2">Pagos Flexibles</h3>
-                    <p class="text-gray-600 text-sm">Opciones de descuento por nómina o facilidades de pago diferido.</p>
+                    <p class="text-gray-600 text-sm">Opciones de descuento o facilidades de pago diferido.</p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 text-center hover:shadow-md transition-shadow">
@@ -135,7 +135,7 @@ const alianzasExclusivas = [
                                         <div class="flex items-center justify-between">
                                             <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Cupón disponible</span>
                                             <a
-                                                    href="https://wa.me/529989806611"
+                                                    href={aliado.url}
                                                     target="_blank"
                                                     class="inline-flex items-center justify-center px-6 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-purple-800 transition-colors shadow-sm"
                                             >
@@ -155,14 +155,14 @@ const alianzasExclusivas = [
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a
-                            href="https://wa.me/529989806611?text=Hola,%20busco%20información%20sobre%20convenios%20empresariales"
+                            href="https://wa.me/529987141365?text=Hola,%20busco%20información%20sobre%20convenios%20empresariales"
                             target="_blank"
                             class="bg-green-500 hover:bg-green-600 text-white px-10 py-4 rounded-xl font-bold transition-all shadow-lg"
                     >
                         Solicitar información vía WhatsApp
                     </a>
                     <a
-                            href="mailto:gerencia@tudestinomx.com"
+                            href="mailto:info@tudestinomx.com"
                             class="bg-white/10 hover:bg-white/20 border border-white/30 text-white px-10 py-4 rounded-xl font-bold transition-all"
                     >
                         Enviar correo formal
