@@ -3,17 +3,29 @@ import { Icon } from "astro-icon/components";
 import FooterBanner from "../ui/FooterBanner.astro";
 ---
 
-<footer class="bg-white py-10 px-4">
+<footer class="bg-white py-10 px-4 relative">
     <div class="container mx-auto flex flex-col gap-10">
 
         <FooterBanner />
 
-        <div class="bg-orange-500 text-white/90 rounded-[2.5rem] p-8 sm:p-10 flex flex-col gap-8 shadow-lg border border-white/20">
+        <div class="bg-orange-500 text-white/90 rounded-[2.5rem] p-8 sm:p-10 flex flex-col gap-8 shadow-lg border border-white/20 relative">
+
+            {/* AVISO FLOTANTE (Oculto por defecto, se activa con JS) */}
+            <div id="copy-toast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+                <Icon name="material-symbols:check-circle-outline" class="text-green-400" size={16} />
+                <span>Folio copiado. Redireccionando...</span>
+            </div>
 
             <div class="flex flex-col lg:flex-row justify-between items-center gap-10 border-b border-white/20 pb-8">
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
-                    <a href="https://rnt-consulta.sectur.gob.mx/" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center group hover:scale-105 transition-transform duration-300">
+
+                    {/* ENLACE SECTUR MODIFICADO CON ID Y SIN HREF POR DEFECTO */}
+                    <button
+                            id="sectur-link"
+                            class="flex flex-col items-center group hover:scale-105 transition-transform duration-300 cursor-pointer text-left"
+                            aria-label="Verificar Registro Nacional de Turismo"
+                    >
                         <img
                                 src="https://storage.googleapis.com/tudestinomx_bucket/assets/img/sectur_logo.png"
                                 alt="Secretaría de Turismo"
@@ -23,11 +35,11 @@ import FooterBanner from "../ui/FooterBanner.astro";
                             <div class="bg-[#b90309] text-white text-center py-1 font-bold uppercase tracking-wider">
                                 SECTUR No.
                             </div>
-                            <div class="bg-black text-white text-center py-1 font-mono">
+                            <div class="bg-black text-white text-center py-1 font-mono group-hover:bg-slate-900 transition-colors">
                                 0423005c2dd75
                             </div>
                         </div>
-                    </a>
+                    </button>
 
                     <div class="flex items-center hover:scale-105 transition-transform duration-300">
                         <img
@@ -89,5 +101,39 @@ import FooterBanner from "../ui/FooterBanner.astro";
     </div>
 </footer>
 
-<style>
-</style>
+<script>
+    // Lógica para copiar folio y redirigir
+    const secturBtn = document.getElementById('sectur-link');
+    const toastMessage = document.getElementById('copy-toast');
+
+    if (secturBtn && toastMessage) {
+        secturBtn.addEventListener('click', async () => {
+            const folio = '0423005c2dd75';
+            const url = 'https://rnt-consulta.sectur.gob.mx/';
+
+            try {
+                // 1. Intentamos copiar al portapapeles
+                await navigator.clipboard.writeText(folio);
+
+                // 2. Mostramos el mensaje (Cambiamos opacity-0 a opacity-100)
+                toastMessage.classList.remove('opacity-0');
+                toastMessage.classList.add('opacity-100');
+
+                // 3. Esperamos 1.5 segundos y abrimos la pestaña
+                setTimeout(() => {
+                    // Ocultamos el mensaje
+                    toastMessage.classList.remove('opacity-100');
+                    toastMessage.classList.add('opacity-0');
+
+                    // Abrimos la página de SECTUR en una pestaña nueva
+                    window.open(url, '_blank');
+                }, 1500);
+
+            } catch (err) {
+                // Fallback por si el navegador bloquea el portapapeles (Redirigimos de inmediato)
+                console.error('Fallo al copiar:', err);
+                window.open(url, '_blank');
+            }
+        });
+    }
+</script>

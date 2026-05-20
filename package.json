@@ -12,6 +12,7 @@
     "@astrojs/react": "^5.0.3",
     "@astrojs/vercel": "^10.0.4",
     "@gsap/react": "^2.1.2",
+    "@iconify-json/material-symbols": "^1.2.73",
     "@iconify-json/simple-icons": "^1.2.68",
     "@react-google-maps/api": "^2.20.8",
     "@tailwindcss/vite": "^4.1.18",
