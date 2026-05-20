@@ -42,6 +42,21 @@ const allImages = [
     ...(rawImages.secundaria || []),
     ...(rawImages.adicional || [])
 ];
+
+// FILTRAMOS LOS DATOS PARA GUARDAR SOLO LO NECESARIO
+// Extraemos estrictamente la propiedad .url del objeto JSON
+const principalImage = rawImages.principal && rawImages.principal.length > 0
+    ? rawImages.principal[0].url
+    : (allImages.length > 0 && allImages[0].url ? allImages[0].url : '');
+
+const recentlyViewedData = {
+    id: slug,
+    type: "hotel",
+    title: hotel.name,
+    location: hotel.address,
+    image: principalImage, // Ahora guarda únicamente el string de la URL
+    url: `/hotel/${slug}` // Ruta exacta según tu petición
+};
 ---
 
 <Layout title={hotel.name || "Detalle de Hotel"}>
@@ -73,7 +88,6 @@ const allImages = [
 
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
-
                     <HotelTabs
                             client:load
                             description={hotel.description}
@@ -81,7 +95,6 @@ const allImages = [
                             address={hotel.address}
                             amenities={amenities}
                     />
-
                 </div>
             </div>
 
@@ -100,3 +113,24 @@ const allImages = [
 
     <Footer/>
 </Layout>
+
+{/* SCRIPT PARA GUARDAR LA VISITA EN EL NAVEGADOR */}
+<script define:vars={{ recentlyViewedData }}>
+    if (typeof window !== 'undefined' && recentlyViewedData && recentlyViewedData.id) {
+        try {
+            const currentStorage = localStorage.getItem('tdmx_recently_viewed');
+            let items = currentStorage ? JSON.parse(currentStorage) : [];
+
+            // Filtramos el hotel actual por si ya estaba en la lista
+            items = items.filter(item => item.id !== recentlyViewedData.id);
+
+            // Lo ponemos al principio
+            items.unshift(recentlyViewedData);
+
+            // Mantenemos solo los últimos 4
+            localStorage.setItem('tdmx_recently_viewed', JSON.stringify(items.slice(0, 4)));
+        } catch (error) {
+            console.error("Error guardando historial:", error);
+        }
+    }
+</script>
