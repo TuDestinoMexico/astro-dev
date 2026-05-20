@@ -78,10 +78,10 @@ export default function AgencyHeroBanner() {
     };
 
     return (
-        <section ref={containerRef} className="w-full py-8 font-sans">
-            <div className="container mx-auto px-4 md:px-6">
+        <section ref={containerRef} className="w-full py-3 font-sans">
+            <div className="px-4 md:px-0">
 
-                <div className="relative w-full h-[700px] md:h-[750px] rounded-[2.5rem] overflow-hidden shadow-2xl bg-slate-900 group">
+                <div className="relative w-full h-[700px] md:h-[750px] overflow-hidden shadow-2xl bg-slate-900 group">
 
                     {/* IMAGEN DE FONDO */}
                     <div className="absolute inset-0 z-0">
