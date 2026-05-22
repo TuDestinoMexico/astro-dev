@@ -33,7 +33,7 @@ import SubMenu from "../ui/SubMenu.astro";
                     <a
                             href="/"
                             id="logo-scroll"
-                            class="w-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out flex-shrink-0 pointer-events-none"
+                            class="w-0 opacity-0 overflow-hidden transition-all duration-300 ease-in-out shrink-0 pointer-events-none"
                     >
                         <img
                                 class="w-40 md:w-48"
@@ -42,7 +42,7 @@ import SubMenu from "../ui/SubMenu.astro";
                         />
                     </a>
 
-                    <div class="relative flex items-center flex-grow md:flex-grow-0 overflow-hidden">
+                    <div class="relative flex items-center grow md:grow-0 overflow-hidden">
                         <button id="prev-btn" class="absolute left-0 z-10 bg-white/80 p-1 rounded-full shadow-md md:hidden opacity-0 transition-opacity">
                             <span class="material-icons-outlined text-purple-800 pointer-events-none">chevron_left</span>
                         </button>
@@ -52,7 +52,7 @@ import SubMenu from "../ui/SubMenu.astro";
                             <SubMenu title="Tours" icon="tour" url="/tours" />
                             <SubMenu title="Destinos" icon="public" url="/destinos" />
                             <SubMenu title="Convenios" icon="handshake" url="/convenios" />
-                            <SubMenu title="Nosotros" icon="people" url="/nosotros" mobileOnly={true} />
+                            <SubMenu title="Quienes somos" icon="people" url="/nosotros" mobileOnly={true} />
                             <SubMenu title="XoloRuta" icon="place" url="/xolo-ruta" />
                             <SubMenu title="Recomendaciones" icon="star" url="/recomendaciones" />
                             <div class="w-10 md:hidden shrink-0"></div>
@@ -90,7 +90,6 @@ import SubMenu from "../ui/SubMenu.astro";
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
 
-    // --- MANTENEMOS TU LÓGICA STICKY ORIGINAL ---
     window.addEventListener('scroll', () => {
         const isScrolled = window.scrollY > 150;
 
@@ -115,7 +114,6 @@ import SubMenu from "../ui/SubMenu.astro";
         }
     });
 
-    // --- LÓGICA DE FLECHAS MÓVILES ---
     nextBtn?.addEventListener('click', () => container?.scrollBy({ left: 150, behavior: 'smooth' }));
     prevBtn?.addEventListener('click', () => container?.scrollBy({ left: -150, behavior: 'smooth' }));
 
