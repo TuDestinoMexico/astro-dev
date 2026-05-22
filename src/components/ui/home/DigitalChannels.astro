@@ -1,0 +1,46 @@
+---
+import MenuBar from "../MenuBar.astro";
+---
+
+<section class="w-full py-5 border-slate-200">
+    <div class="container mx-auto px-4 ">
+
+        <div class="mb-8 md:mb-10">
+            <span class="block text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-2">
+                Asistencia y Contacto
+            </span>
+            <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                Canales Digitales
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 md:hidden">
+
+            <MenuBar
+                    title="Solo Ventas"
+                    subtitle="(998) 980 6611"
+                    url="tel:529989806611"
+                    color="bg-emerald-500"
+                    icon="fa7-solid:phone"
+            />
+
+            <MenuBar
+                    title="WhatsApp"
+                    subtitle="(998) 714 1365"
+                    url="https://wa.me/529987141365"
+                    color="bg-[#25D366]"
+                    icon="simple-icons:whatsapp"
+            />
+
+            <MenuBar
+                    title="Pagar en línea"
+                    subtitle="Lo hacemos fácil"
+                    url="/pagos"
+                    color="bg-indigo-500"
+                    icon="fa7-solid:credit-card"
+            />
+
+        </div>
+
+    </div>
+</section>
