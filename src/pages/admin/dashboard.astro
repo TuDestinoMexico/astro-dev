@@ -1,0 +1,9 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DashboardLayout from '../../components/ui/admin/DashboardLayout.jsx';
+---
+
+<Layout title="Panel de Control | Tu Destino MX">
+    {/* Pasamos client:only="react" para que la autenticación solo ocurra en el navegador */}
+    <DashboardLayout client:only="react" />
+</Layout>
