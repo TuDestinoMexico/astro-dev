@@ -3,12 +3,16 @@ import Layout from "../layouts/Layout.astro";
 import Content from "../components/layout/Content.astro";
 import Grid from "../components/ui/Grid.astro";
 
-// 1. Importa tu configuración de Firebase y el Icono
+// Importamos el nuevo componente
+
+
+// 1. Importa tu configuración de Firebase
 import { db } from "../lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
-import { Icon } from "astro-icon/components";
+import MemberCard from "../components/ui/team/MemberCard.astro";
+import MemberSkeleton from "../components/ui/team/MemberSkeleton.astro";
 
 // 2. Realiza la consulta a la colección 'equipo' ordenada por el campo 'posicion'
 const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
@@ -44,46 +48,16 @@ const team = querySnapshot.docs.map(doc => ({
             </div>
 
             <Grid grid={4}>
-                {team.map((member) => (
-                        <article class="group flex flex-col items-center bg-white rounded-xl overflow-hidden shadow-xl border-2 border-white/80 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02] p-0 ring-4 ring-black/10">
-
-                            <div class="relative w-full bg-slate-100 overflow-hidden">
-                                <img
-                                        src={member.foto || "https://placehold.co/400x533?text=Perfil"}
-                                        alt={member.nombre}
-                                        class="w-full h-full object-cover"
-                                />
-                                <div class="absolute inset-0 border border-black/10 pointer-events-none"></div>
-                                <div class="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
-                            </div>
-
-                            <div class="w-full flex flex-col">
-
-                                <div class="bg-green-700 text-white text-center py-2.5 px-2 border-b-2 border-white">
-                                    <h3 class="text-sm md:text-base font-black leading-tight uppercase tracking-widest drop-shadow-sm truncate">
-                                        {member.nombre}
-                                    </h3>
-                                </div>
-
-                                {/* ZONA DEL PUESTO CON MARCA DE AGUA DEL BALÓN GIGANTE */}
-                                <div class="bg-white text-center py-5 px-3 relative overflow-hidden flex items-center justify-center">
-
-                                    {/* Icono de fondo: Grande, verde transparente y anclado a la izquierda */}
-                                    <Icon
-                                            name="fa7-solid:futbol"
-                                            class="absolute text-green-700/15 w-28 h-28 -left-8 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-700 group-hover:rotate-[30deg]"
-                                    />
-
-                                    <p class="relative z-10 text-[9px] sm:text-[10px] font-black text-slate-900 uppercase tracking-widest leading-snug text-balance mx-auto drop-shadow-sm">
-                                        {member.puesto}
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        </article>
-                ))}
+                {team.length > 0 ? (
+                    team.map((member) => <MemberCard member={member} />)
+                ) : (
+        <>
+                            <MemberSkeleton />
+                            <MemberSkeleton />
+                            <MemberSkeleton />
+                            <MemberSkeleton />
+                        </>
+                )}
             </Grid>
         </div>
     </Content>
