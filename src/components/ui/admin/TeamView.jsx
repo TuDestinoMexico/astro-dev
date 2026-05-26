@@ -1,23 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db, storage } from '../../../lib/firebase';
 import { collection, getDocs, query, orderBy, addDoc, updateDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Plus, X, Save, Edit2, ArrowUp, Loader2, User, Trash2, Move, Eye, EyeOff } from 'lucide-react';
+import { Plus, X, Save, Edit2, ArrowUp, Loader2, User, Trash2, Move, Eye, EyeOff, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function TeamView() {
     const [team, setTeam] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    // NUEVO: Agregamos 'activo' con valor inicial true al formData
     const [formData, setFormData] = useState({ nombre: '', puesto: '', foto: '', posicion: 1, activo: true });
 
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [draggedIndex, setDraggedIndex] = useState(null);
 
+    // NUEVOS ESTADOS: Control de Búsqueda y Paginación
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
     useEffect(() => {
         fetchTeam();
     }, []);
+
+    // Reiniciar a la página 1 cuando el usuario escribe en el buscador
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery]);
 
     const fetchTeam = async () => {
         try {
@@ -26,7 +35,6 @@ export default function TeamView() {
             const items = [];
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                // Si el campo activo no existe en documentos viejos, lo tratamos como true por defecto
                 items.push({
                     id: doc.id,
                     ...data,
@@ -38,6 +46,29 @@ export default function TeamView() {
             console.error("Error leyendo equipo: ", error);
         }
     };
+
+    // ==========================================
+    // LÓGICA DE FILTRADO Y PAGINACIÓN (MEMOIZADA)
+    // ==========================================
+    const filteredTeam = useMemo(() => {
+        return team.filter(member =>
+            member.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            member.puesto.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [team, searchQuery]);
+
+    const totalPages = Math.ceil(filteredTeam.length / itemsPerPage);
+
+    const { currentItems, indexOfFirstItem, indexOfLastItem } = useMemo(() => {
+        const lastItem = currentPage * itemsPerPage;
+        const firstItem = lastItem - itemsPerPage;
+        return {
+            currentItems: filteredTeam.slice(firstItem, lastItem),
+            indexOfFirstItem: firstItem,
+            indexOfLastItem: lastItem
+        };
+    }, [filteredTeam, currentPage]);
+
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -77,7 +108,7 @@ export default function TeamView() {
                 puesto: formData.puesto,
                 foto: formData.foto || "https://placehold.co/400x400?text=Perfil",
                 posicion: posicionFinal,
-                activo: formData.activo // NUEVO: Guardamos el estado de visibilidad
+                activo: formData.activo
             };
 
             if (editingId) {
@@ -96,20 +127,18 @@ export default function TeamView() {
         }
     };
 
-    // NUEVA FUNCIÓN: Alternar el estado activo/inactivo rápidamente desde la tabla
     const handleToggleStatus = async (member) => {
         try {
             const memberRef = doc(db, "equipo", member.id);
             await updateDoc(memberRef, { activo: !member.activo });
-            await fetchTeam(); // Sincronizar datos
+            await fetchTeam();
         } catch (error) {
             console.error("Error al cambiar estado de visibilidad:", error);
-            alert("No se pudo cambiar el estado del miembro.");
         }
     };
 
     const handleDeleteMember = async (id, nombre, fotoUrl) => {
-        const confirmDelete = window.confirm(`¿Estás seguro de que deseas ELIMINAR DEFINITIVAMENTE a ${nombre} del equipo y borrar su foto de la nube?`);
+        const confirmDelete = window.confirm(`¿Estás seguro de que deseas ELIMINAR DEFINITIVAMENTE a ${nombre}?`);
         if (!confirmDelete) return;
 
         try {
@@ -128,7 +157,6 @@ export default function TeamView() {
             alert(`${nombre} ha sido eliminado permanentemente.`);
         } catch (error) {
             console.error("Error al eliminar miembro:", error);
-            alert("No se pudo eliminar al miembro.");
         }
     };
 
@@ -139,26 +167,34 @@ export default function TeamView() {
             puesto: member.puesto,
             foto: member.foto,
             posicion: member.posicion,
-            activo: member.activo !== false // NUEVO: Cargamos el estado al editar
+            activo: member.activo !== false
         });
         setIsEditing(true);
     };
 
-    const handleDragStart = (index) => {
-        setDraggedIndex(index);
+    // ==========================================
+    // AJUSTE DE DRAG AND DROP CON PAGINACIÓN
+    // ==========================================
+    const handleDragStart = (localIndex) => {
+        if (searchQuery) return; // Desactivar ordenamiento si hay una búsqueda activa
+        setDraggedIndex(localIndex);
     };
 
-    const handleDragOver = (e, index) => {
+    const handleDragOver = (e, localIndex) => {
         e.preventDefault();
-        if (draggedIndex === null || draggedIndex === index) return;
+        if (draggedIndex === null || draggedIndex === localIndex || searchQuery) return;
+
+        // Mapeamos el índice de la página actual al índice global del array completo
+        const globalDraggedIdx = indexOfFirstItem + draggedIndex;
+        const globalTargetIdx = indexOfFirstItem + localIndex;
 
         const newTeam = [...team];
-        const draggedItem = newTeam[draggedIndex];
+        const draggedItem = newTeam[globalDraggedIdx];
 
-        newTeam.splice(draggedIndex, 1);
-        newTeam.splice(index, 0, draggedItem);
+        newTeam.splice(globalDraggedIdx, 1);
+        newTeam.splice(globalTargetIdx, 0, draggedItem);
 
-        setDraggedIndex(index);
+        setDraggedIndex(localIndex);
         setTeam(newTeam);
     };
 
@@ -183,6 +219,7 @@ export default function TeamView() {
 
     return (
         <div className="space-y-6 animate-fade-in w-full">
+            {/* ENCABEZADO */}
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Nuestro Equipo</h1>
@@ -198,6 +235,7 @@ export default function TeamView() {
                 )}
             </div>
 
+            {/* FORMULARIO */}
             {isEditing && (
                 <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl p-6 md:p-8 border-t-4 border-t-indigo-600">
                     <div className="flex justify-between items-center mb-6">
@@ -244,7 +282,6 @@ export default function TeamView() {
                             <input type="text" required value={formData.puesto} onChange={(e) => setFormData({...formData, puesto: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" />
                         </div>
 
-                        {/* NUEVO: Switch de Visibilidad en el Formulario */}
                         <div className="md:col-span-2 flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
                             <input
                                 type="checkbox"
@@ -275,11 +312,31 @@ export default function TeamView() {
                 </div>
             )}
 
-            {/* TABLA GENERAL */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-10">
-                <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Estructura del Equipo</h2>
-                {team.length === 0 ? (
-                    <p className="text-slate-400 text-sm py-4 text-center">No hay miembros registrados todavía.</p>
+            {/* TABLA PRINCIPAL Y CONTROLES */}
+            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-10 space-y-4">
+
+                {/* BARRA DE BÚSQUEDA INTERACTIVA */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+                    <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">Estructura del Equipo</h2>
+                    <div className="relative w-full sm:w-72">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Buscar miembro por nombre o rol..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-400 text-slate-700"
+                        />
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold bg-slate-200/60 px-1.5 py-0.5 rounded-md">Limpiar</button>
+                        )}
+                    </div>
+                </div>
+
+                {filteredTeam.length === 0 ? (
+                    <p className="text-slate-400 text-sm py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                        {team.length === 0 ? "No hay miembros registrados todavía." : "No se encontraron miembros que coincidan con la búsqueda."}
+                    </p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse min-w-[600px]">
@@ -295,17 +352,17 @@ export default function TeamView() {
                             </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                            {team.map((member, index) => (
+                            {currentItems.map((member, index) => (
                                 <tr
                                     key={member.id}
-                                    draggable
+                                    draggable={!searchQuery} // Deshabilitar arrastre si hay un filtro activo para evitar inconsistencias
                                     onDragStart={() => handleDragStart(index)}
                                     onDragOver={(e) => handleDragOver(e, index)}
                                     onDragEnd={handleDragEnd}
-                                    /* NUEVO: Si está inactivo, bajamos la opacidad de la fila entera */
                                     className={`group text-sm text-slate-700 transition-all duration-150 ${draggedIndex === index ? 'opacity-40 bg-slate-100 scale-[0.98]' : 'hover:bg-slate-50/80'} ${!member.activo ? 'opacity-50 bg-slate-50/50' : ''}`}
                                 >
-                                    <td className="py-4 text-center cursor-grab active:cursor-grabbing text-slate-300 group-hover:text-slate-400 transition-colors">
+                                    {/* Tirador para arrastrar */}
+                                    <td className={`py-4 text-center text-slate-300 transition-colors ${!searchQuery ? 'cursor-grab active:cursor-grabbing group-hover:text-slate-400' : 'opacity-20 cursor-not-allowed'}`} title={searchQuery ? "Deshabilita la búsqueda para reordenar perfiles" : "Arrastra para cambiar posición"}>
                                         <div className="flex justify-center"><Move size={16} /></div>
                                     </td>
 
@@ -316,7 +373,6 @@ export default function TeamView() {
                                     <td className="py-4 font-bold text-slate-900">{member.nombre}</td>
                                     <td className="py-4 font-medium text-slate-500">{member.puesto}</td>
 
-                                    {/* NUEVO: Columna de Estado con Badge dinámico */}
                                     <td className="py-4 text-center">
                                         <span className={`inline-block text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md ${member.activo ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}`}>
                                             {member.activo ? "Visible" : "Oculto"}
@@ -331,7 +387,6 @@ export default function TeamView() {
 
                                     <td className="py-4 text-right pr-4">
                                         <div className="flex items-center justify-end gap-2">
-                                            {/* NUEVO: Botón de Ojo para activar/desactivar rápido con un click */}
                                             <button
                                                 onClick={() => handleToggleStatus(member)}
                                                 className={`p-2 bg-white border rounded-xl transition-all shadow-sm ${member.activo ? 'border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100' : 'border-slate-200 text-amber-600 bg-amber-50'}`}
@@ -360,6 +415,45 @@ export default function TeamView() {
                             ))}
                             </tbody>
                         </table>
+
+                        {/* CONTROLES DE PAGINACIÓN DINÁMICOS */}
+                        {totalPages > 1 && (
+                            <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-100 pt-6 mt-4 gap-4">
+                                <p className="text-xs text-slate-400 font-medium">
+                                    Mostrando <span className="font-bold text-slate-700">{indexOfFirstItem + 1}</span> al <span className="font-bold text-slate-700">{Math.min(indexOfLastItem, filteredTeam.length)}</span> de <span className="font-bold text-slate-700">{filteredTeam.length}</span> miembros
+                                </p>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent text-slate-600 transition-colors"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                        <button
+                                            key={page}
+                                            type="button"
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-9 h-9 text-xs font-black rounded-xl transition-all ${currentPage === page ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'border border-slate-200 hover:bg-slate-50 text-slate-600'}`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                        className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent text-slate-600 transition-colors"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
