@@ -1,0 +1,83 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Content from "../components/layout/Content.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import { Icon } from "astro-icon/components";
+---
+
+<Layout title="404 - Ruta Desconocida | Tu Destino México">
+    <Content>
+        <Header />
+
+        <div class="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-12 relative overflow-hidden">
+
+            {/* Elemento decorativo de fondo: Un mapamundi o avión difuminado */}
+            <div class="absolute -right-10 -bottom-10 w-96 h-96 text-slate-100 pointer-events-none -z-10 opacity-30">
+                <Icon name="fa7-solid:earth-americas" class="w-full h-full" />
+            </div>
+
+            {/* BADGE DE ESTADO */}
+            <span class="inline-block py-1.5 px-4 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">
+                Desvío en el Camino
+            </span>
+
+            {/* NÚMERO 404 CON BRÚJULA ANIMADA */}
+            <div class="relative mb-2">
+                <h1 class="text-[9rem] md:text-[13rem] font-black text-slate-900 leading-none tracking-tighter select-none drop-shadow-sm">
+                    4<span class="text-indigo-600">0</span>4
+                </h1>
+                {/* Brújula que gira simulando buscar señal */}
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-24 md:h-24 text-orange-500 animate-[spin_8s_linear_infinite]">
+                    <Icon name="fa7-solid:compass" class="w-full h-full" />
+                </div>
+            </div>
+
+            {/* MENSAJES EDITADOS A TEMÁTICA DE VIAJES */}
+            <h2 class="text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight max-w-2xl leading-none">
+                ¡Te has salido del mapa!
+            </h2>
+
+            <p class="text-slate-500 font-medium mt-4 text-sm md:text-base max-w-md mx-auto text-balance leading-relaxed">
+                La ruta que intentas seguir no está disponible o ha cambiado de coordenadas. No te preocupes, incluso a los mejores exploradores les pasa. Reajustemos el equipaje y volvamos a la ruta principal.
+            </p>
+
+            {/* BOTONES DE ACCIÓN */}
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 w-full max-w-sm sm:max-w-none">
+
+                {/* BOTÓN OBLIGATORIO: Regresar al inicio */}
+                <a
+                        href="/"
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-black text-xs uppercase tracking-widest px-8 py-4 rounded-2xl hover:bg-slate-900 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-600/10"
+                >
+                    <Icon name="fa7-solid:house" class="w-4 h-4" />
+                    Volver al Inicio
+                </a>
+
+                {/* Botón de soporte o exploración de paquetes */}
+                <a
+                        href="/destinos"
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-slate-800 border-2 border-slate-200 font-black text-xs uppercase tracking-widest px-8 py-4 rounded-2xl hover:bg-slate-50 hover:border-slate-300 hover:scale-105 active:scale-95 transition-all shadow-sm"
+                >
+                    <Icon name="fa7-solid:plane" class="w-4 h-4 text-indigo-600" />
+                    Explorar Destinos
+                </a>
+
+            </div>
+
+        </div>
+
+    </Content>
+    <Footer />
+</Layout>
+
+<style>
+    /* Transición de carga suave para la UI */
+    div {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
