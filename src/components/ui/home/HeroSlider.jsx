@@ -3,19 +3,19 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Heart, Star, MessageCircle, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// DATOS DE LOS SLIDERS
+// DATOS DE LOS SLIDERS COREGIDOS PARA CAMPAÑA ACTIVA
 const SLIDES = [
     {
         id: "01",
-        badge: "¡PREPÁRATE!",
+        badge: "¡YA INICIÓ!",
         title: "HOT SALE 2026",
-        description: "El evento de descuentos online más grande del año está por comenzar. Ahorra en hoteles de lujo, tours exclusivos y paquetes vacacionales en todo México.",
+        description: "El evento de descuentos online más grande del año ya está aquí. Aprovecha ahorros inmediatos en hoteles de lujo, tours exclusivos y paquetes vacacionales en todo México.",
         image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&q=80&w=1600",
         accentColor: "text-red-500",
         btnColor: "bg-red-600 hover:bg-red-700",
-        whatsappMsg: "Hola, me interesa recibir las promociones exclusivas del Hot Sale.",
-        targetDate: "2026-05-25T00:00:00",
-        hasCountdown: true,
+        whatsappMsg: "Hola, quiero aprovechar las promociones exclusivas del Hot Sale que ya iniciaron.",
+        targetDate: null,
+        hasCountdown: false, // Se cambió a false para quitar el reloj
         logos: [],
         stat1Label: "Descuentos",
         stat1Text: "Hasta 50% OFF",
@@ -56,7 +56,6 @@ export default function AgencyHeroSlider() {
 
     const activeSlide = SLIDES[currentIndex];
 
-    // FUNCIONES DE NAVEGACIÓN (Envueltas en useCallback para optimización)
     const nextSlide = useCallback(() => {
         setCurrentIndex((prev) => (prev + 1) % SLIDES.length);
     }, []);
@@ -65,18 +64,13 @@ export default function AgencyHeroSlider() {
         setCurrentIndex((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
     }, []);
 
-    // 1. LÓGICA DE REPRODUCCIÓN AUTOMÁTICA (AUTOPLAY)
     useEffect(() => {
-        // Configuramos el temporizador para que ejecute nextSlide cada 8000ms (8 segundos)
         const slideTimer = setInterval(() => {
             nextSlide();
         }, 8000);
-
-        // Limpiamos el intervalo si el componente se desmonta o si el currentIndex cambia manualmente
         return () => clearInterval(slideTimer);
-    }, [currentIndex, nextSlide]); // Al depender de currentIndex, el reloj de 8 seg se reinicia si haces clic manual
+    }, [currentIndex, nextSlide]);
 
-    // 2. LÓGICA DEL CONTADOR DEL HOT SALE
     useEffect(() => {
         if (!activeSlide.hasCountdown || !activeSlide.targetDate) return;
 
@@ -99,7 +93,6 @@ export default function AgencyHeroSlider() {
         return () => clearInterval(timer);
     }, [currentIndex]);
 
-    // 3. ANIMACIONES GSAP
     useGSAP(() => {
         const tl = gsap.timeline();
 
@@ -243,7 +236,7 @@ export default function AgencyHeroSlider() {
                                     className={`flex items-center gap-3 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl ${activeSlide.btnColor}`}
                                 >
                                     <MessageCircle size={22} className="fill-current" />
-                                    {activeSlide.id === "01" ? "Recibir Alertas" : "Planear Mi Viaje"}
+                                    {activeSlide.id === "01" ? "Aprovechar Ofertas 🔥" : "Planear Mi Viaje"}
                                 </button>
                             </div>
                         </div>
@@ -260,7 +253,7 @@ export default function AgencyHeroSlider() {
                         </button>
                     </div>
 
-                    {/* INDICADOR NUMÉRICO (Línea de tiempo) */}
+                    {/* INDICADOR NUMÉRICO */}
                     <div className="absolute top-10 right-10 z-30 text-right hidden md:block">
                         <span className="text-4xl font-black text-white/30">{activeSlide.id}</span>
                         <div className="w-16 h-1 bg-white/20 mt-2 ml-auto rounded-full overflow-hidden">
