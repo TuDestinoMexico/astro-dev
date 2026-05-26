@@ -2,19 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { db, storage } from '../../../lib/firebase';
 import { collection, getDocs, query, orderBy, addDoc, updateDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Plus, X, Save, Edit2, ArrowUp, Loader2, User, Trash2, Move } from 'lucide-react';
+import { Plus, X, Save, Edit2, ArrowUp, Loader2, User, Trash2, Move, Eye, EyeOff } from 'lucide-react';
 
 export default function TeamView() {
     const [team, setTeam] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [formData, setFormData] = useState({ nombre: '', puesto: '', foto: '', posicion: 1 });
+    // NUEVO: Agregamos 'activo' con valor inicial true al formData
+    const [formData, setFormData] = useState({ nombre: '', puesto: '', foto: '', posicion: 1, activo: true });
 
-    // Estados para la carga de la imagen
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
-
-    // Estado para controlar qué fila se está arrastrando
     const [draggedIndex, setDraggedIndex] = useState(null);
 
     useEffect(() => {
@@ -26,7 +24,15 @@ export default function TeamView() {
             const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
             const querySnapshot = await getDocs(q);
             const items = [];
-            querySnapshot.forEach((doc) => items.push({ id: doc.id, ...doc.data() }));
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                // Si el campo activo no existe en documentos viejos, lo tratamos como true por defecto
+                items.push({
+                    id: doc.id,
+                    ...data,
+                    activo: data.activo !== false
+                });
+            });
             setTeam(items);
         } catch (error) {
             console.error("Error leyendo equipo: ", error);
@@ -64,14 +70,14 @@ export default function TeamView() {
     const handleSaveTeamMember = async (e) => {
         e.preventDefault();
         try {
-            // Si es un miembro nuevo, por defecto lo ponemos al final de la lista
             const posicionFinal = editingId ? Number(formData.posicion) : team.length + 1;
 
             const memberData = {
                 nombre: formData.nombre,
                 puesto: formData.puesto,
                 foto: formData.foto || "https://placehold.co/400x400?text=Perfil",
-                posicion: posicionFinal
+                posicion: posicionFinal,
+                activo: formData.activo // NUEVO: Guardamos el estado de visibilidad
             };
 
             if (editingId) {
@@ -82,7 +88,7 @@ export default function TeamView() {
 
             setIsEditing(false);
             setEditingId(null);
-            setFormData({ nombre: '', puesto: '', foto: '', posicion: 1 });
+            setFormData({ nombre: '', puesto: '', foto: '', posicion: 1, activo: true });
             await fetchTeam();
         } catch (error) {
             console.error("Error al guardar miembro: ", error);
@@ -90,37 +96,39 @@ export default function TeamView() {
         }
     };
 
+    // NUEVA FUNCIÓN: Alternar el estado activo/inactivo rápidamente desde la tabla
+    const handleToggleStatus = async (member) => {
+        try {
+            const memberRef = doc(db, "equipo", member.id);
+            await updateDoc(memberRef, { activo: !member.activo });
+            await fetchTeam(); // Sincronizar datos
+        } catch (error) {
+            console.error("Error al cambiar estado de visibilidad:", error);
+            alert("No se pudo cambiar el estado del miembro.");
+        }
+    };
+
     const handleDeleteMember = async (id, nombre, fotoUrl) => {
-        const confirmDelete = window.confirm(`¿Estás seguro de que deseas eliminar a ${nombre} del equipo y borrar su fotografía permanentemente?`);
+        const confirmDelete = window.confirm(`¿Estás seguro de que deseas ELIMINAR DEFINITIVAMENTE a ${nombre} del equipo y borrar su foto de la nube?`);
         if (!confirmDelete) return;
 
         try {
-            // --- NUEVA LÓGICA: ELIMINAR FOTO DE STORAGE SI NO ES LA POR DEFECTO ---
-            // Verificamos que el usuario tenga una foto real y no el placeholder por defecto
             if (fotoUrl && !fotoUrl.includes('placehold.co')) {
                 try {
-                    // Creamos la referencia en Storage directamente usando la URL pública del archivo
                     const imageRef = ref(storage, fotoUrl);
                     await deleteObject(imageRef);
-                    console.log("Fotografía eliminada con éxito de Firebase Storage.");
                 } catch (storageError) {
-                    // Si la foto no existe en Storage por alguna razón, capturamos el error
-                    // pero permitimos que el flujo continúe para borrar el registro de Firestore
-                    console.error("Error al intentar borrar la foto de Storage (puede que no exista):", storageError);
+                    console.error("Error al intentar borrar la foto de Storage:", storageError);
                 }
             }
 
-            // --- ELIMINAR REGISTRO DE FIRESTORE ---
             await deleteDoc(doc(db, "equipo", id));
-
-            // Recargamos y re-ordenamos las posiciones de los que quedan
             const updatedTeam = team.filter(member => member.id !== id);
             await saveNewOrder(updatedTeam);
-
-            alert(`${nombre} ha sido eliminado correctamente.`);
+            alert(`${nombre} ha sido eliminado permanentemente.`);
         } catch (error) {
-            console.error("Error al eliminar miembro de la base de datos:", error);
-            alert("No se pudo eliminar al miembro del equipo de Firestore.");
+            console.error("Error al eliminar miembro:", error);
+            alert("No se pudo eliminar al miembro.");
         }
     };
 
@@ -130,29 +138,25 @@ export default function TeamView() {
             nombre: member.nombre,
             puesto: member.puesto,
             foto: member.foto,
-            posicion: member.posicion
+            posicion: member.posicion,
+            activo: member.activo !== false // NUEVO: Cargamos el estado al editar
         });
         setIsEditing(true);
     };
-
-    // ==========================================
-    // LÓGICA DE DRAG AND DROP (ARRASTRAR Y SOLTAR)
-    // ==========================================
 
     const handleDragStart = (index) => {
         setDraggedIndex(index);
     };
 
     const handleDragOver = (e, index) => {
-        e.preventDefault(); // Necesario para permitir soltar el elemento
+        e.preventDefault();
         if (draggedIndex === null || draggedIndex === index) return;
 
-        // Reordenamos el estado visual local instantáneamente para que el usuario vea el movimiento
         const newTeam = [...team];
         const draggedItem = newTeam[draggedIndex];
 
-        newTeam.splice(draggedIndex, 1); // Quitamos de la posición vieja
-        newTeam.splice(index, 0, draggedItem); // Insertamos en la posición nueva
+        newTeam.splice(draggedIndex, 1);
+        newTeam.splice(index, 0, draggedItem);
 
         setDraggedIndex(index);
         setTeam(newTeam);
@@ -160,23 +164,18 @@ export default function TeamView() {
 
     const handleDragEnd = async () => {
         setDraggedIndex(null);
-        // Cuando el usuario suelta la fila, guardamos el nuevo orden permanentemente en Firebase
         await saveNewOrder(team);
     };
 
-    // Función auxiliar para actualizar masivamente el campo 'posicion' en Firestore
     const saveNewOrder = async (currentTeamList) => {
         try {
             const batch = writeBatch(db);
-
-            // Asignamos nuevas posiciones correlativas (1, 2, 3...) según el orden actual del array
             currentTeamList.forEach((member, index) => {
                 const memberRef = doc(db, "equipo", member.id);
                 batch.update(memberRef, { posicion: index + 1 });
             });
-
             await batch.commit();
-            await fetchTeam(); // Refrescamos desde la BD para asegurar sincronía
+            await fetchTeam();
         } catch (error) {
             console.error("Error al guardar el nuevo orden de posiciones:", error);
         }
@@ -187,7 +186,7 @@ export default function TeamView() {
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Nuestro Equipo</h1>
-                    <p className="text-sm text-slate-400 font-medium mt-1">Administra y reordena los miembros arrastrando las filas de la tabla.</p>
+                    <p className="text-sm text-slate-400 font-medium mt-1">Administra, desactiva o reordena los miembros arrastrando las filas.</p>
                 </div>
                 {!isEditing && (
                     <button
@@ -205,7 +204,7 @@ export default function TeamView() {
                         <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">
                             {editingId ? "Actualizar Miembro" : "Nuevo Miembro"}
                         </h2>
-                        <button onClick={() => { setIsEditing(false); setEditingId(null); setFormData({ nombre: '', puesto: '', foto: '', posicion: 1 }); }} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100">
+                        <button onClick={() => { setIsEditing(false); setEditingId(null); setFormData({ nombre: '', puesto: '', foto: '', posicion: 1, activo: true }); }} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100">
                             <X size={18} />
                         </button>
                     </div>
@@ -245,6 +244,20 @@ export default function TeamView() {
                             <input type="text" required value={formData.puesto} onChange={(e) => setFormData({...formData, puesto: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" />
                         </div>
 
+                        {/* NUEVO: Switch de Visibilidad en el Formulario */}
+                        <div className="md:col-span-2 flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <input
+                                type="checkbox"
+                                id="activo"
+                                checked={formData.activo}
+                                onChange={(e) => setFormData({...formData, activo: e.target.checked})}
+                                className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
+                            />
+                            <label htmlFor="activo" className="text-xs font-bold text-slate-700 uppercase tracking-wider cursor-pointer selects-none">
+                                Mostrar miembro en el sitio web público
+                            </label>
+                        </div>
+
                         {editingId && (
                             <div className="md:col-span-2">
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Posición Manual (Orden)</label>
@@ -253,7 +266,7 @@ export default function TeamView() {
                         )}
 
                         <div className="md:col-span-2 pt-4 flex flex-col sm:flex-row justify-end gap-3">
-                            <button type="button" onClick={() => { setIsEditing(false); setEditingId(null); setFormData({ nombre: '', puesto: '', foto: '', posicion: 1 }); }} className="px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-500 border border-slate-200 hover:bg-slate-50 text-center">Cancelar</button>
+                            <button type="button" onClick={() => { setIsEditing(false); setEditingId(null); setFormData({ nombre: '', puesto: '', foto: '', posicion: 1, activo: true }); }} className="px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-500 border border-slate-200 hover:bg-slate-50 text-center">Cancelar</button>
                             <button type="submit" disabled={isUploading} className="flex items-center justify-center gap-2 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest px-6 py-3.5 rounded-xl hover:bg-emerald-700 shadow-lg disabled:opacity-50">
                                 <Save size={14} /> Guardar
                             </button>
@@ -262,7 +275,7 @@ export default function TeamView() {
                 </div>
             )}
 
-            {/* TABLA GENERAL CON DRAG AND DROP */}
+            {/* TABLA GENERAL */}
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-10">
                 <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Estructura del Equipo</h2>
                 {team.length === 0 ? (
@@ -276,6 +289,7 @@ export default function TeamView() {
                                 <th className="pb-4">Foto</th>
                                 <th className="pb-4">Nombre</th>
                                 <th className="pb-4">Puesto</th>
+                                <th className="pb-4 text-center">Estado</th>
                                 <th className="pb-4 text-center">Posición</th>
                                 <th className="pb-4 text-right pr-4">Acciones</th>
                             </tr>
@@ -288,9 +302,9 @@ export default function TeamView() {
                                     onDragStart={() => handleDragStart(index)}
                                     onDragOver={(e) => handleDragOver(e, index)}
                                     onDragEnd={handleDragEnd}
-                                    className={`group text-sm text-slate-700 transition-all duration-150 ${draggedIndex === index ? 'opacity-40 bg-slate-100 scale-[0.98]' : 'hover:bg-slate-50/80'}`}
+                                    /* NUEVO: Si está inactivo, bajamos la opacidad de la fila entera */
+                                    className={`group text-sm text-slate-700 transition-all duration-150 ${draggedIndex === index ? 'opacity-40 bg-slate-100 scale-[0.98]' : 'hover:bg-slate-50/80'} ${!member.activo ? 'opacity-50 bg-slate-50/50' : ''}`}
                                 >
-                                    {/* Tirador para arrastrar */}
                                     <td className="py-4 text-center cursor-grab active:cursor-grabbing text-slate-300 group-hover:text-slate-400 transition-colors">
                                         <div className="flex justify-center"><Move size={16} /></div>
                                     </td>
@@ -302,15 +316,30 @@ export default function TeamView() {
                                     <td className="py-4 font-bold text-slate-900">{member.nombre}</td>
                                     <td className="py-4 font-medium text-slate-500">{member.puesto}</td>
 
+                                    {/* NUEVO: Columna de Estado con Badge dinámico */}
+                                    <td className="py-4 text-center">
+                                        <span className={`inline-block text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md ${member.activo ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}`}>
+                                            {member.activo ? "Visible" : "Oculto"}
+                                        </span>
+                                    </td>
+
                                     <td className="py-4 text-center">
                                             <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-xs font-mono font-bold px-2.5 py-0.5 rounded-md">
                                                 <ArrowUp size={10} className="text-slate-400" /> #{member.posicion}
                                             </span>
                                     </td>
 
-                                    {/* BOTONES DE ACCIÓN (Editar y Eliminar) */}
                                     <td className="py-4 text-right pr-4">
                                         <div className="flex items-center justify-end gap-2">
+                                            {/* NUEVO: Botón de Ojo para activar/desactivar rápido con un click */}
+                                            <button
+                                                onClick={() => handleToggleStatus(member)}
+                                                className={`p-2 bg-white border rounded-xl transition-all shadow-sm ${member.activo ? 'border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-100' : 'border-slate-200 text-amber-600 bg-amber-50'}`}
+                                                title={member.activo ? "Ocultar en web" : "Mostrar en web"}
+                                            >
+                                                {member.activo ? <Eye size={14} /> : <EyeOff size={14} />}
+                                            </button>
+
                                             <button
                                                 onClick={() => handleEditClick(member)}
                                                 className="p-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm"
@@ -321,7 +350,7 @@ export default function TeamView() {
                                             <button
                                                 onClick={() => handleDeleteMember(member.id, member.nombre, member.foto)}
                                                 className="p-2 bg-white border border-slate-200 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all shadow-sm"
-                                                title="Eliminar miembro"
+                                                title="Eliminar permanentemente"
                                             >
                                                 <Trash2 size={14} />
                                             </button>

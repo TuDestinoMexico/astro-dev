@@ -19,10 +19,10 @@ const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
 const querySnapshot = await getDocs(q);
 
 // 3. Mapea los documentos a un array de objetos
-const team = querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-}));
+const team = querySnapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter(member => member.activo !== false);
+;
 ---
 
 <Layout title="Nosotros | Tu Destino México">
