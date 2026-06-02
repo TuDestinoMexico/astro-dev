@@ -6,7 +6,6 @@ import { Icon } from 'astro-icon/components';
 import Gallery from '../../components/ui/hotel/Gallery.astro';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
-import SEO from '../../components/SEO.astro';
 
 const { slug } = Astro.params;
 
@@ -59,12 +58,6 @@ const recentlyViewedData = {
 ---
 
 <Layout title={hotel.name || "Detalle de Hotel"}>
-    <SEO
-            title={hotel.name}
-            description={hotel.description}
-            image={principalImage}
-            canonical={`https://tudestinomx.com/hotel/${slug}`}
-    />
     <Header/>
 
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
