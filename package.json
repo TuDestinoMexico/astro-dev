@@ -22,6 +22,7 @@
     "@vercel/analytics": "^2.0.1",
     "astro": "^6.4.2",
     "astro-lightgallery": "^2.3.0",
+    "astro-seo": "^1.1.0",
     "date-fns": "^4.1.0",
     "firebase": "^12.13.0",
     "gsap": "^3.14.2",
