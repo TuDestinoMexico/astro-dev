@@ -16,7 +16,6 @@ interface Props {
     type: string;
     photo?: HotelImages;
     destino?: string;
-    isHotSale?: boolean;
 }
 
 const {
@@ -24,25 +23,18 @@ const {
     slug = '#',
     photo,
     type = 'Hoteles',
-    destino,
-    isHotSale = true
+    destino
 } = Astro.props;
 
-// Extracción segura de URLs
+// Extracción segura de URLs de imágenes
 const mainPhoto = photo?.principal?.[0]?.url || "https://placehold.co/600x450?text=Tu+Destino";
 const secondaryPhoto = photo?.secundaria?.[0]?.url || mainPhoto;
 
-// Lógica para determinar el ícono según el tipo
+// Lógica para determinar el tipo de servicio
 const isHotel = type.toLowerCase().includes('hotel');
-
-// Usamos el slug (o generamos un ID aleatorio si no hay) para identificar cada tarjeta de forma única en el DOM
-const cardId = slug ? `hotsale-${slug}` : `hotsale-${Math.random().toString(36).substring(7)}`;
 ---
 
-<article class:list={[
-    "group relative flex flex-col h-full rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden",
-    { "hover:border-orange-400 hover:shadow-orange-100/50": isHotSale, "hover:shadow-indigo-100/50": !isHotSale }
-]}>
+<article class="group relative flex flex-col h-full rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden hover:shadow-indigo-100/50">
 
     {/* ZONA DE IMAGEN */}
     <div class="relative w-full aspect-[4/3] overflow-hidden bg-slate-100">
@@ -75,18 +67,6 @@ const cardId = slug ? `hotsale-${slug}` : `hotsale-${Math.random().toString(36).
             </span>
         </div>
 
-        {/* INSIGNIA HOT SALE (Flota a la derecha) */}
-        {isHotSale && (
-                <div class="absolute top-4 right-4 z-20 flex items-center gap-1 bg-gradient-to-r from-orange-600 to-red-600 px-3 py-1.5 rounded-full shadow-md animate-pulse">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-yellow-300 fill-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
-                    </svg>
-                    <span class="text-[9px] font-black uppercase tracking-wider text-white">
-                        Hot Sale
-                    </span>
-                </div>
-        )}
-
         <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent z-10 pointer-events-none"></div>
     </div>
 
@@ -94,7 +74,7 @@ const cardId = slug ? `hotsale-${slug}` : `hotsale-${Math.random().toString(36).
     <div class="flex flex-col flex-1 p-6 z-20 bg-white">
 
         <div class="space-y-3 mb-6">
-            <h2 class="text-[1.35rem] md:text-2xl font-black text-slate-900 leading-tight line-clamp-2 group-hover:text-orange-600 transition-colors">
+            <h2 class="text-[1.35rem] md:text-2xl font-black text-slate-900 leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors">
                 {title}
             </h2>
 
@@ -106,30 +86,13 @@ const cardId = slug ? `hotsale-${slug}` : `hotsale-${Math.random().toString(36).
                     Destino a <span class="font-black text-slate-800">{destino}</span>
                 </p>
             </div>
-
-            {/* CONTENEDOR DINÁMICO DEL AVISO HOT SALE */}
-            {isHotSale && (
-                    <div id={cardId} class="text-xs font-bold text-red-600 flex items-center gap-1.5 bg-red-50 border border-red-100 px-2.5 py-1.5 rounded-lg w-fit h-7">
-                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-600 animate-ping shrink-0"></span>
-                        {/* El texto será inyectado por JavaScript dependiendo de la fecha */}
-                        <span class="promo-text whitespace-nowrap overflow-hidden">
-                        Verificando oferta...
-                    </span>
-                    </div>
-            )}
         </div>
 
         {/* ZONA DE ACCIÓN */}
         <div class="mt-auto">
             <a
                     href={`/${type.toLowerCase()}/${slug}`}
-                    class:list={[
-                        "relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-white transition-all duration-300 active:scale-95 after:absolute after:inset-0 after:z-10 after:content-['']",
-                        {
-                            "bg-gradient-to-r from-orange-500 to-red-600 shadow-md shadow-orange-500/20 hover:from-orange-600 hover:to-red-700 hover:shadow-lg hover:shadow-orange-500/30": isHotSale,
-                            "bg-[#00c853] shadow-md shadow-green-500/20 hover:bg-[#00b34a] hover:shadow-lg hover:shadow-green-500/30": !isHotSale
-                        }
-                    ]}
+                    class="relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-white bg-00c853 bg-[#00c853] shadow-md shadow-green-500/20 hover:bg-[#00b34a] hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 active:scale-95 after:absolute after:inset-0 after:z-10 after:content-['']"
                     aria-label={`Cotizar ${title}`}
             >
                 <svg class="h-[22px] w-[22px] fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -141,49 +104,3 @@ const cardId = slug ? `hotsale-${slug}` : `hotsale-${Math.random().toString(36).
 
     </div>
 </article>
-
-{/* SCRIPT DEL CLIENTE PARA MANEJAR EL RELOJ */}
-{isHotSale && (
-<script define:vars={{ cardId }}>
-    // Encapsulamos en una función autoejecutable para aislar las variables de cada tarjeta
-    (function() {
-        const targetDate = new Date("2026-05-25T00:00:00").getTime();
-        const container = document.getElementById(cardId);
-
-        if (!container) return;
-
-        const textSpan = container.querySelector('.promo-text');
-        if (!textSpan) return;
-
-        const updateCountdown = () => {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-
-            if (distance <= 0) {
-                // El Hot Sale ya comenzó
-                textSpan.textContent = "Tarifa especial disponible hoy";
-            } else {
-                // Aún no empieza, calculamos el tiempo restante
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Formateamos para que siempre tengan dos dígitos (ej. 05m)
-                const d = String(days).padStart(2, '0');
-                const h = String(hours).padStart(2, '0');
-                const m = String(minutes).padStart(2, '0');
-                const s = String(seconds).padStart(2, '0');
-
-                textSpan.textContent = `Faltan ${d}d ${h}h ${m}m ${s}s`;
-
-                // Volvemos a llamar a la función en 1 segundo
-                requestAnimationFrame(() => setTimeout(updateCountdown, 1000));
-            }
-        };
-
-        // Iniciar el reloj
-        updateCountdown();
-    })();
-</script>
-    )}
