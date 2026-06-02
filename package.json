@@ -9,9 +9,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^5.0.3",
+    "@astrojs/react": "^5.0.6",
     "@astrojs/sitemap": "^3.7.3",
-    "@astrojs/vercel": "^10.0.4",
+    "@astrojs/vercel": "^10.0.8",
     "@gsap/react": "^2.1.2",
     "@iconify-json/material-symbols": "^1.2.73",
     "@iconify-json/simple-icons": "^1.2.68",
@@ -19,7 +19,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "astro": "^6.1.4",
+    "astro": "^6.4.2",
     "astro-lightgallery": "^2.3.0",
     "date-fns": "^4.1.0",
     "firebase": "^12.13.0",
