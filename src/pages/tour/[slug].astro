@@ -6,7 +6,6 @@ import { Icon } from 'astro-icon/components';
 import Gallery from '../../components/ui/hotel/Gallery.astro';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
-import HotSalePromoRibbon from "../../components/ui/home/HotSalePromoRibbon";
 import SEO from "../../components/SEO.astro";
 
 const { slug } = Astro.params;
@@ -32,12 +31,10 @@ if (!response.ok) {
 const data = await response.json();
 const tour = data.data || data;
 
-// Procesamiento de amenidades y mapa para Tours
 const amenities = tour.amenities_list || [];
 const coordinates = tour.google_maps || [];
 const address = tour.address || tour.destino || "Ubicación no disponible";
 
-// Procesamiento de imágenes para la galería
 const rawImages = tour.images || {};
 const allImages = [
     ...(rawImages.principal || []),
@@ -45,19 +42,17 @@ const allImages = [
     ...(rawImages.adicional || [])
 ];
 
-// FILTRAMOS LOS DATOS PARA GUARDAR SOLO LO NECESARIO EN "VISTOS RECIENTEMENTE"
-// Extraemos estrictamente la propiedad .url del objeto JSON
 const principalImage = rawImages.principal && rawImages.principal.length > 0
     ? rawImages.principal[0].url
     : (allImages.length > 0 && allImages[0].url ? allImages[0].url : '');
 
 const recentlyViewedData = {
-    id: `tour-${slug}`, // Le agregamos 'tour-' al id para diferenciarlo si hay un hotel con el mismo slug
-    type: "tour",       // Etiqueta como 'tour' para el icono en la tarjeta
+    id: `tour-${slug}`,
+    type: "tour",
     title: tour.name,
     location: address,
     image: principalImage,
-    url: `/tour/${slug}` // Asegúrate de que esta sea la ruta correcta en tu proyecto
+    url: `/tour/${slug}`
 };
 ---
 
@@ -68,7 +63,6 @@ const recentlyViewedData = {
             image={principalImage}
             canonical={`https://tudestinomx.com/tour/${slug}`}
     />
-    <HotSalePromoRibbon client:load />
     <Header/>
 
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
@@ -141,20 +135,16 @@ const recentlyViewedData = {
     <Footer/>
 </Layout>
 
-{/* SCRIPT PARA GUARDAR LA VISITA EN EL NAVEGADOR */}
 <script define:vars={{ recentlyViewedData }}>
     if (typeof window !== 'undefined' && recentlyViewedData && recentlyViewedData.id) {
         try {
             const currentStorage = localStorage.getItem('tdmx_recently_viewed');
             let items = currentStorage ? JSON.parse(currentStorage) : [];
 
-            // Filtramos el tour actual por si ya estaba en la lista (para no tener duplicados)
             items = items.filter(item => item.id !== recentlyViewedData.id);
 
-            // Añadimos la visita actual al principio de la lista
             items.unshift(recentlyViewedData);
 
-            // Mantenemos solo los últimos 4 elementos guardados
             localStorage.setItem('tdmx_recently_viewed', JSON.stringify(items.slice(0, 4)));
         } catch (error) {
             console.error("Error guardando historial de tours:", error);

@@ -6,7 +6,6 @@ import { Icon } from 'astro-icon/components';
 import Gallery from '../../components/ui/hotel/Gallery.astro';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
-import HotSalePromoRibbon from "../../components/ui/home/HotSalePromoRibbon";
 import SEO from '../../components/SEO.astro';
 
 const { slug } = Astro.params;
@@ -45,8 +44,6 @@ const allImages = [
     ...(rawImages.adicional || [])
 ];
 
-// FILTRAMOS LOS DATOS PARA GUARDAR SOLO LO NECESARIO
-// Extraemos estrictamente la propiedad .url del objeto JSON
 const principalImage = rawImages.principal && rawImages.principal.length > 0
     ? rawImages.principal[0].url
     : (allImages.length > 0 && allImages[0].url ? allImages[0].url : '');
@@ -56,8 +53,8 @@ const recentlyViewedData = {
     type: "hotel",
     title: hotel.name,
     location: hotel.address,
-    image: principalImage, // Ahora guarda únicamente el string de la URL
-    url: `/hotel/${slug}` // Ruta exacta según tu petición
+    image: principalImage,
+    url: `/hotel/${slug}`
 };
 ---
 
@@ -68,7 +65,6 @@ const recentlyViewedData = {
             image={principalImage}
             canonical={`https://tudestinomx.com/hotel/${slug}`}
     />
-    <HotSalePromoRibbon client:load />
     <Header/>
 
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
@@ -123,20 +119,16 @@ const recentlyViewedData = {
     <Footer/>
 </Layout>
 
-{/* SCRIPT PARA GUARDAR LA VISITA EN EL NAVEGADOR */}
 <script define:vars={{ recentlyViewedData }}>
     if (typeof window !== 'undefined' && recentlyViewedData && recentlyViewedData.id) {
         try {
             const currentStorage = localStorage.getItem('tdmx_recently_viewed');
             let items = currentStorage ? JSON.parse(currentStorage) : [];
 
-            // Filtramos el hotel actual por si ya estaba en la lista
             items = items.filter(item => item.id !== recentlyViewedData.id);
 
-            // Lo ponemos al principio
             items.unshift(recentlyViewedData);
 
-            // Mantenemos solo los últimos 4
             localStorage.setItem('tdmx_recently_viewed', JSON.stringify(items.slice(0, 4)));
         } catch (error) {
             console.error("Error guardando historial:", error);
