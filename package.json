@@ -19,6 +19,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vercel/analytics": "^2.0.1",
     "astro": "^6.4.2",
     "astro-lightgallery": "^2.3.0",
     "date-fns": "^4.1.0",
