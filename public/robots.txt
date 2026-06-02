@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://tudestinomx.com/sitemap-index.xml

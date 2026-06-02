@@ -11,6 +11,7 @@ import sitemap from "@astrojs/sitemap";
 
 
 export default defineConfig({
+  site: 'https://tudestinomx.com',
   compressHTML: true,
   output: 'server',
   vite: {
