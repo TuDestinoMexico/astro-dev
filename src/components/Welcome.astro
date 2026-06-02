@@ -2,7 +2,6 @@
 import Banner from "./ui/Banner.astro";
 import Grid from "./ui/Grid.astro";
 import AppDownload from "./ui/home/AppDownload.astro";
-import HeroSlider from "./ui/home/HeroSlider";
 import YouTubeCTA from "./ui/home/YouTubeCTA.astro";
 import Card from "./ui/single/Card.astro";
 import Content from "./layout/Content.astro";
@@ -10,6 +9,7 @@ import WelcomeModal from "./modal/WelcomeModal";
 import RecentlyViewed from "./ui/RecentlyViewed";
 import PromoLocker from "./ui/PromoLocker";
 import DigitalChannels from "./ui/home/DigitalChannels.astro";
+import EventsHeroSlider from "./ui/home/EventsHeroSlider";
 
 const token = import.meta.env.VITE_API_TOKEN
 const response = await fetch('https://api.tudestinomx.com/api/hotel', {
@@ -21,8 +21,8 @@ const response = await fetch('https://api.tudestinomx.com/api/hotel', {
 const data = await response.json();
 const hoteles = Array.isArray(data) ? data : (data.data || []);
 ---
-<HeroSlider client:only="react" />
 
+<EventsHeroSlider client:load />
 <Content>
     <WelcomeModal client:only="react" />
 
