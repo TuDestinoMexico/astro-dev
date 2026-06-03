@@ -4,8 +4,8 @@ export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
 
-        const privateKey = import.meta.env.OPENPAY_PRIVATE_KEY;
         const merchantId = import.meta.env.OPENPAY_MERCHANT_ID;
+        const privateKey = import.meta.env.OPENPAY_PRIVATE_KEY;
         // const privateKey = import.meta.env.VITE_SX_OPENPAY_PRIVATE_KEY;
 
         // Producción o Sandbox (ajusta la URL según necesites)
