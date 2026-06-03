@@ -1,20 +1,54 @@
 ---
-
+// Tu frontmatter se mantiene limpio
 ---
-<div class="relative bg-green-800 rounded-[3rem] h-87.5 md:h-112.5 flex items-end [clip-path:inset(-200%_-200%_0_-200%)]">
 
-    <div class="relative flex w-full h-full">
+<div
+        id="xolo-banner"
+        class="relative mt-14 md:mt-20 bg-green-800 rounded-[2.5rem] h-72 md:h-112.5 flex items-end [clip-path:inset(-200%_-200%_0_-200%)] w-[92%] container mx-auto"
+>
+
+    {/* ZONA DEL PERSONAJE (XOLO):
+      Quitamos 'overflow-hidden' para dejar que la silueta rompa el margen superior.
+      Usamos h-[125%] en móvil y tu medida fija h-140 en escritorio para que sobresalga con estilo.
+    */}
+    <div class="absolute inset-0 flex w-full h-full pointer-events-none select-none">
         <img
                 src="https://storage.googleapis.com/tudestinomx_bucket/assets/test/xolo-seleccion-banner.png"
                 alt="Xolo Tu Destino Mexico"
-                class="absolute bottom-0 md:-bottom-3 left-0 w-full md:h-140 object-contain"
+                class="absolute bottom-0 md:-bottom-3 left-0 w-full h-[125%] md:h-140 object-contain object-bottom z-0"
         />
     </div>
 
-    <div class="absolute z-10 w-full flex justify-center bottom-4 md:-bottom-2">
-        <h2 class="text-white text-[2.9rem] md:text-[11.5rem] font-black tracking-tighter leading-none select-none">
+    {/* CONTENEDOR DEL TEXTO */}
+    <div class="absolute z-10 w-full flex justify-center bottom-4 md:-bottom-6 left-0 right-0 px-4 pointer-events-none">
+        <h2 class="text-white text-[8.4vw] md:text-7xl lg:text-[150px] font-black tracking-tighter leading-none select-none text-center uppercase whitespace-nowrap drop-shadow-md">
             TuDestinoMéxico
         </h2>
     </div>
 
 </div>
+
+<script>
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const banner = document.getElementById('xolo-banner');
+
+    if (banner) {
+        gsap.to(banner, {
+            width: "100%",
+            maxWidth: "100%",
+            borderRadius: "0px",
+
+            scrollTrigger: {
+                trigger: banner,
+                start: "top 95%",
+                end: "bottom bottom",
+                scrub: 1,
+                invalidateOnRefresh: true
+            }
+        });
+    }
+</script>
