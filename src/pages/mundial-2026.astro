@@ -1,0 +1,245 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import Content from "../components/layout/Content.astro";
+
+// Estructura de datos 100% oficial de los 12 Grupos del Mundial 2026 (Extraída de FIFA)
+const GROUPS = [
+    {
+        name: "Grupo A",
+        highlight: true, // Destacamos el grupo del anfitrión México
+        teams: [
+            { name: "México", flag: "mx" },
+            { name: "Sudáfrica", flag: "za" },
+            { name: "República de Corea", flag: "kr" },
+            { name: "República Checa", flag: "cz" }
+        ]
+    },
+    {
+        name: "Grupo B",
+        teams: [
+            { name: "Canadá", flag: "ca" },
+            { name: "Bosnia y Herzegovina", flag: "ba" },
+            { name: "Catar", flag: "qa" },
+            { name: "Suiza", flag: "ch" }
+        ]
+    },
+    {
+        name: "Grupo C",
+        teams: [
+            { name: "Brasil", flag: "br" },
+            { name: "Marruecos", flag: "ma" },
+            { name: "Haití", flag: "ht" },
+            { name: "Escocia", flag: "gb-sct" }
+        ]
+    },
+    {
+        name: "Grupo D",
+        teams: [
+            { name: "Estados Unidos", flag: "us" },
+            { name: "Paraguay", flag: "py" },
+            { name: "Australia", flag: "au" },
+            { name: "Turquía", flag: "tr" }
+        ]
+    },
+    {
+        name: "Grupo E",
+        teams: [
+            { name: "Alemania", flag: "de" },
+            { name: "Curazao", flag: "cw" },
+            { name: "Costa de Marfil", flag: "ci" },
+            { name: "Ecuador", flag: "ec" }
+        ]
+    },
+    {
+        name: "Grupo F",
+        teams: [
+            { name: "Países Bajos", flag: "nl" },
+            { name: "Japón", flag: "jp" },
+            { name: "Suecia", flag: "se" },
+            { name: "Túnez", flag: "tn" }
+        ]
+    },
+    {
+        name: "Grupo G",
+        teams: [
+            { name: "Bélgica", flag: "be" },
+            { name: "Egipto", flag: "eg" },
+            { name: "RI de Irán", flag: "ir" },
+            { name: "Nueva Zelanda", flag: "nz" }
+        ]
+    },
+    {
+        name: "Grupo H",
+        teams: [
+            { name: "España", flag: "es" },
+            { name: "Cabo Verde", flag: "cv" },
+            { name: "Arabia Saudí", flag: "sa" },
+            { name: "Uruguay", flag: "uy" }
+        ]
+    },
+    {
+        name: "Grupo I",
+        teams: [
+            { name: "Francia", flag: "fr" },
+            { name: "Senegal", flag: "sn" },
+            { name: "Irak", flag: "iq" },
+            { name: "Noruega", flag: "no" }
+        ]
+    },
+    {
+        name: "Grupo J",
+        teams: [
+            { name: "Argentina", flag: "ar" },
+            { name: "Argelia", flag: "dz" },
+            { name: "Austria", flag: "at" },
+            { name: "Jordania", flag: "jo" }
+        ]
+    },
+    {
+        name: "Grupo K",
+        teams: [
+            { name: "Portugal", flag: "pt" },
+            { name: "RD de Congo", flag: "cd" },
+            { name: "Uzbekistán", flag: "uz" },
+            { name: "Colombia", flag: "co" }
+        ]
+    },
+    {
+        name: "Grupo L",
+        teams: [
+            { name: "Inglaterra", flag: "gb-eng" },
+            { name: "Croacia", flag: "hr" },
+            { name: "Ghana", flag: "gh" },
+            { name: "Panamá", flag: "pa" }
+        ]
+    }
+];
+---
+
+<Layout
+        title="Calendario y Grupos Mundial 2026 | Tu Destino Mexico"
+        description="Sigue la Fase de Grupos del Mundial 2026 y el partido inaugural en el Estadio Azteca. Asegura tu viaje con las ofertas mundialistas de Tu Destino MX."
+>
+    <Header />
+
+    <section class="bg-slate-950 text-white pt-24 pb-12">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] px-4 py-2 rounded-full border border-emerald-500/20 mb-4">
+                🏆 FORMATO OFICIAL DE 48 EQUIPOS
+            </span>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-4">
+                Fase de Grupos <span class="text-emerald-500">Mundial 2026</span>
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base font-medium max-w-xl mx-auto leading-relaxed">
+                Sigue de cerca la distribución de las selecciones y prepárate para vivir la máxima fiesta del fútbol global.
+            </p>
+        </div>
+    </section>
+
+    <div class="bg-slate-950 pb-6">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
+            <div class="bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-emerald-950/20 flex flex-col md:flex-row items-center justify-between gap-6">
+
+                {/* Info del Estadio y Torneo */}
+                <div class="flex flex-col text-center md:text-left">
+                    <span class="text-orange-500 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center justify-center md:justify-start gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span> PARTIDO INAUGURAL
+                    </span>
+                    <h3 class="text-white text-xl font-black tracking-tight uppercase">Estadio Ciudad de México</h3>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mt-0.5">Ciudad de México, México</p>
+                </div>
+
+                {/* Marcador Estilizado Versus */}
+                <div class="flex items-center gap-4 md:gap-8 my-2 md:my-0">
+                    {/* México */}
+                    <div class="flex items-center gap-3">
+                        <span class="text-white font-black text-base md:text-xl uppercase tracking-tighter hidden sm:inline">México</span>
+                        <img src="https://flagcdn.com/w80/mx.png" alt="México" class="w-12 h-8 md:w-14 md:h-10 object-cover rounded-lg shadow-md border border-white/10" />
+                    </div>
+
+                    {/* VS */}
+                    <div class="bg-white/10 px-4 py-2 rounded-xl border border-white/10">
+                        <span class="text-emerald-400 font-mono text-lg font-black italic tracking-widest">VS</span>
+                    </div>
+
+                    {/* Sudáfrica */}
+                    <div class="flex items-center gap-3">
+                        <img src="https://flagcdn.com/w80/za.png" alt="Sudáfrica" class="w-12 h-8 md:w-14 md:h-10 object-cover rounded-lg shadow-md border border-white/10" />
+                        <span class="text-white font-black text-base md:text-xl uppercase tracking-tighter hidden sm:inline">Sudáfrica</span>
+                    </div>
+                </div>
+
+                {/* Fecha y Hora Oficial */}
+                <div class="flex flex-col text-center md:text-right">
+                    <span class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">HORARIO DE TRANSMISIÓN</span>
+                    <h3 class="text-emerald-400 text-xl font-black tracking-tight uppercase">Jueves 11 de Junio</h3>
+                    <p class="text-white text-xs font-bold uppercase tracking-wider mt-0.5">13:00 <span class="text-slate-400">HRS (CDMX)</span></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <Content>
+        <div class="py-12">
+
+            {/* Grid Responsivo de Grupos (1 columna en móvil, 2 en tablets, 3 en pantallas grandes) */}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {GROUPS.map((group) => (
+                        <div
+                                class:list={[
+                                    "bg-white rounded-[2rem] border p-6 transition-all duration-300 shadow-sm",
+                                    {
+                                        "border-emerald-500 shadow-xl shadow-emerald-100/50 scale-[1.02] ring-2 ring-emerald-500/10": group.highlight,
+                                        "border-slate-100 hover:border-slate-300 hover:shadow-xl": !group.highlight
+                                    }
+                                ]}
+                        >
+                            {/* Cabecera del Grupo Card */}
+                            <div class="flex items-center justify-between mb-5 border-b border-slate-100 pb-3">
+                                <h2 class="text-xl font-black uppercase tracking-tight text-slate-900">
+                                    {group.name}
+                                </h2>
+                                {group.highlight && (
+                                        <span class="text-[9px] font-black bg-emerald-600 text-white px-3 py-1 rounded-full uppercase tracking-wider">
+                                            Grupo de México 🇲🇽
+                                        </span>
+                                )}
+                            </div>
+
+                            {/* Listado de los 4 Equipos con Banderas Actualizadas */}
+                            <ul class="space-y-3.5">
+                                {group.teams.map((team, index) => (
+                                        <li class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+                                            <div class="flex items-center gap-3">
+                                                {/* Posición en la tabla */}
+                                                <span class="text-xs font-black text-slate-400 w-4 text-center">
+                                                    {index + 1}
+                                                </span>
+                                                {/* Bandera */}
+                                                <img
+                                                        src={`https://flagcdn.com/w40/${team.flag}.png`}
+                                                        alt={`Bandera de ${team.name}`}
+                                                        class="w-7 h-5 object-cover rounded shadow-sm border border-slate-100"
+                                                />
+                                                <span class="text-sm font-bold text-slate-800 tracking-tight">
+                                                    {team.name}
+                                                </span>
+                                            </div>
+
+                                            {/* Indicador de tabla */}
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+                                        </li>
+                                ))}
+                            </ul>
+                        </div>
+                ))}
+            </div>
+
+        </div>
+    </Content>
+
+    <Footer />
+</Layout>
