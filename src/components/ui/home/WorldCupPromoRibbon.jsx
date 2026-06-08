@@ -6,7 +6,7 @@ export default function WorldCupPromoRibbon() {
     const [isMounted, setIsMounted] = useState(false);
 
     // Fecha oficial del partido inaugural del Mundial 2026: México vs Sudáfrica
-    const TARGET_DATE = "2026-06-11T13:00:00";
+    const TARGET_DATE = "2026-06-11T18:00:00-05:00";
 
     useEffect(() => {
         setIsMounted(true);
