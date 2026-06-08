@@ -1,0 +1,51 @@
+---
+import Analytics from '@vercel/analytics/astro'
+import { SEO } from "astro-seo"
+import "../assets/styles/global.css"
+import WorldCupPromoRibbon from '../components/ui/home/WorldCupPromoRibbon';
+interface Props {
+    title? : string,
+    description? : string,
+}
+
+const {title, description} = Astro.props
+---
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="https://storage.googleapis.com/tudestinomx_bucket/assets/favicon/32h/tdmxicon.png" />
+    <link rel="icon" href="https://storage.googleapis.com/tudestinomx_bucket/assets/favicon/32h/tdmxicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <meta name="generator" content={Astro.generator} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <SEO
+            title={title}
+            description={description}
+    />
+</head>
+<body>
+<slot />
+</body>
+<Analytics/>
+</html>
+
+<style>
+    :root {
+        --font-poppins: 'Poppins', sans-serif;
+    }
+
+    body {
+        font-family: var(--font-poppins);
+    }
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
