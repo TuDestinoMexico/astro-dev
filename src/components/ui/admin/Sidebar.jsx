@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, LogOut, X, User } from 'lucide-react'; // Agregamos User a la importación
+import { LayoutDashboard, Users, LogOut, X, User, Globe } from 'lucide-react';
 
 export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, isOpen, setIsOpen }) {
 
@@ -20,7 +20,6 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, i
             <aside className={`w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-6 fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-2xl lg:shadow-none`}>
 
                 <div className="space-y-8">
-                    {/* Logo y Botón de Cerrar */}
                     <div className="pt-2 flex items-center justify-between">
                         <div>
                             <span className="text-xl font-black tracking-tighter text-white uppercase block">
@@ -36,7 +35,6 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, i
                         </button>
                     </div>
 
-                    {/* NUEVO: Ficha de Usuario Logueado */}
                     {user && (
                         <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 flex items-center gap-3">
                             <div className="p-1.5 bg-indigo-600 rounded-lg text-white">
@@ -49,14 +47,21 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, i
                         </div>
                     )}
 
-                    {/* Navegación */}
                     <nav className="space-y-2">
+                        <a
+                            href="/"
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all border border-dashed border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-orange-400 hover:border-orange-500/30 mb-4"
+                        >
+                            <Globe size={16} className="text-orange-500" /> Ver Sitio Web
+                        </a>
+
                         <button
                             onClick={() => handleNavClick('inicio')}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'inicio' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
                         >
                             <LayoutDashboard size={16} /> Inicio
                         </button>
+
                         <button
                             onClick={() => handleNavClick('equipo')}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'equipo' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
