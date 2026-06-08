@@ -16,6 +16,7 @@ interface Props {
     type: string;
     photo?: HotelImages;
     destino?: string;
+    isWorldCup?: boolean; // Propiedad para activar el modo mundialista
 }
 
 const {
@@ -23,18 +24,25 @@ const {
     slug = '#',
     photo,
     type = 'Hoteles',
-    destino
+    destino,
+    isWorldCup = true
 } = Astro.props;
 
 // Extracción segura de URLs de imágenes
 const mainPhoto = photo?.principal?.[0]?.url || "https://placehold.co/600x450?text=Tu+Destino";
 const secondaryPhoto = photo?.secundaria?.[0]?.url || mainPhoto;
 
-// Lógica para determinar el tipo de servicio
+// Lógica para determinar el ícono según el tipo (Hotel o Tour)
 const isHotel = type.toLowerCase().includes('hotel');
+
+// Identificador único para el script del reloj en el DOM
+const cardId = slug ? `worldcup-${slug}` : `worldcup-${Math.random().toString(36).substring(7)}`;
 ---
 
-<article class="group relative flex flex-col h-full rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden hover:shadow-indigo-100/50">
+<article class:list={[
+    "group relative flex flex-col h-full rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden",
+    { "hover:border-emerald-500 hover:shadow-emerald-100/50": isWorldCup, "hover:shadow-indigo-100/50": !isWorldCup }
+]}>
 
     {/* ZONA DE IMAGEN */}
     <div class="relative w-full aspect-[4/3] overflow-hidden bg-slate-100">
@@ -67,6 +75,18 @@ const isHotel = type.toLowerCase().includes('hotel');
             </span>
         </div>
 
+        {/* NUEVO: INSIGNIA EXCLUSIVA MUNDIAL 2026 (Flota a la derecha) */}
+        {isWorldCup && (
+                <div class="absolute top-4 right-4 z-20 flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-indigo-900 px-3 py-1.5 rounded-full shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    <span class="text-[9px] font-black uppercase tracking-wider text-white">
+                        Mundial 2026
+                    </span>
+                </div>
+        )}
+
         <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent z-10 pointer-events-none"></div>
     </div>
 
@@ -74,7 +94,7 @@ const isHotel = type.toLowerCase().includes('hotel');
     <div class="flex flex-col flex-1 p-6 z-20 bg-white">
 
         <div class="space-y-3 mb-6">
-            <h2 class="text-[1.35rem] md:text-2xl font-black text-slate-900 leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors">
+            <h2 class="text-[1.35rem] md:text-2xl font-black text-slate-900 leading-tight line-clamp-2 group-hover:text-emerald-600 transition-colors">
                 {title}
             </h2>
 
@@ -86,13 +106,29 @@ const isHotel = type.toLowerCase().includes('hotel');
                     Destino a <span class="font-black text-slate-800">{destino}</span>
                 </p>
             </div>
+
+            {/* NUEVO: CONTENEDOR DINÁMICO DEL CRONÓMETRO MUNDIALISTA */}
+            {isWorldCup && (
+                    <div id={cardId} class="text-xs font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 px-2.5 py-1.5 rounded-lg w-fit h-7">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping shrink-0"></span>
+                        <span class="promo-text whitespace-nowrap overflow-hidden">
+                            Calculando silbatazo...
+                        </span>
+                    </div>
+            )}
         </div>
 
-        {/* ZONA DE ACCIÓN */}
+        {/* ZONA DE ACCIÓN (BOTÓN WHATSAPP) */}
         <div class="mt-auto">
             <a
                     href={`/${type.toLowerCase()}/${slug}`}
-                    class="relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-white bg-00c853 bg-[#00c853] shadow-md shadow-green-500/20 hover:bg-[#00b34a] hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 active:scale-95 after:absolute after:inset-0 after:z-10 after:content-['']"
+                    class:list={[
+                        "relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-white transition-all duration-300 active:scale-95 after:absolute after:inset-0 after:z-10 after:content-['']",
+                        {
+                            "bg-gradient-to-r from-emerald-600 to-green-700 shadow-md shadow-emerald-600/20 hover:from-emerald-700 hover:to-green-800 hover:shadow-lg hover:shadow-emerald-500/30": isWorldCup,
+                            "bg-[#00c853] shadow-md shadow-green-500/20 hover:bg-[#00b34a] hover:shadow-lg hover:shadow-green-500/30": !isWorldCup
+                        }
+                    ]}
                     aria-label={`Cotizar ${title}`}
             >
                 <svg class="h-[22px] w-[22px] fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -104,3 +140,45 @@ const isHotel = type.toLowerCase().includes('hotel');
 
     </div>
 </article>
+
+{/* SCRIPT DEL CLIENTE PARA EL CONTADOR AL PARTIDO INAUGURAL */}
+{isWorldCup && (
+<script define:vars={{ cardId }}>
+    (function() {
+        // Apuntamos al Jueves 11 de Junio de 2026
+        const targetDate = new Date("2026-06-11T18:00:00-05:00").getTime();
+        const container = document.getElementById(cardId);
+
+        if (!container) return;
+
+        const textSpan = container.querySelector('.promo-text');
+        if (!textSpan) return;
+
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance <= 0) {
+                // Si ya inició el partido/fecha mundialista
+                textSpan.textContent = "Tarifa Mundialista Activa ⚽";
+            } else {
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const d = String(days).padStart(2, '0');
+                const h = String(hours).padStart(2, '0');
+                const m = String(minutes).padStart(2, '0');
+                const s = String(seconds).padStart(2, '0');
+
+                textSpan.textContent = `Promo en: ${d}d ${h}h ${m}m ${s}s`;
+
+                requestAnimationFrame(() => setTimeout(updateCountdown, 1000));
+            }
+        };
+
+        updateCountdown();
+    })();
+</script>
+    )}

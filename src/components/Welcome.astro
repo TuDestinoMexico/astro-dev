@@ -52,6 +52,7 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
                 ))}
     </Grid>
 
+    <PromoLocker client:only="react">
         <Grid
                 grid={2}
                 title="Ofertas relampago"
@@ -69,6 +70,9 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
                     className="rounded-2xl overflow-hidden"
             />
         </Grid>
+    </PromoLocker>
+
+
 
         <!--<AppDownload />-->
 

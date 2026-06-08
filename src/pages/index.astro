@@ -5,8 +5,10 @@ import Header from "../components/layout/Header.astro";
 
 import Footer from "../components/layout/Footer.astro";
 import Welcome from "../components/Welcome.astro";
+import WorldCupCelebration from '../components/ui/home/WorldCupCelebration';
 ---
 <Layout title="Tu Destino México | Rolando por México" description="Bienvenidos a Tu Destino Mexico">
+	<!--<WorldCupCelebration client:only="react" ballCount={50} />-->
 	<Header/>
 	<Welcome/>
 	<Footer/>
