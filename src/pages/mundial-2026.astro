@@ -4,10 +4,11 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import Content from "../components/layout/Content.astro";
 
+// Estructura de datos con la propiedad isChampion añadida en Argentina (Grupo J)
 const GROUPS = [
     {
         name: "Grupo A",
-        highlight: true, // Destacamos el grupo del anfitrión México
+        highlight: true,
         teams: [
             { name: "México", flag: "mx" },
             { name: "Sudáfrica", flag: "za" },
@@ -90,7 +91,7 @@ const GROUPS = [
     {
         name: "Grupo J",
         teams: [
-            { name: "Argentina", flag: "ar" },
+            { name: "Argentina", flag: "ar", isChampion: true }, // <-- Propiedad agregada aquí
             { name: "Argelia", flag: "dz" },
             { name: "Austria", flag: "at" },
             { name: "Jordania", flag: "jo" }
@@ -137,40 +138,35 @@ const GROUPS = [
         </div>
     </section>
 
+    <!-- BANNER DEL PARTIDO INAUGURAL -->
     <div class="bg-slate-950 pb-6">
         <div class="max-w-7xl mx-auto px-4 md:px-6">
             <div class="bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-emerald-950/20 flex flex-col md:flex-row items-center justify-between gap-6">
 
-                {/* Info del Estadio y Torneo (Actualizado a la Jornada 2) */}
                 <div class="flex flex-col text-center md:text-left">
-                <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center justify-center md:justify-start gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> FASE DE GRUPOS • JORNADA 2
-                </span>
+                    <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center justify-center md:justify-start gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> FASE DE GRUPOS • JORNADA 2
+                    </span>
                     <h3 class="text-white text-xl font-black tracking-tight uppercase">Estadio Guadalajara</h3>
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mt-0.5">Guadalajara, México</p>
                 </div>
 
-                {/* Marcador Estilizado Versus (Actualizado con Corea del Sur) */}
                 <div class="flex items-center gap-4 md:gap-8 my-2 md:my-0">
-                    {/* México */}
                     <div class="flex items-center gap-3">
                         <span class="text-white font-black text-base md:text-xl uppercase tracking-tighter hidden sm:inline">México</span>
                         <img src="https://flagcdn.com/w80/mx.png" alt="México" class="w-12 h-8 md:w-14 md:h-10 object-cover shadow-md border border-white/10" />
                     </div>
 
-                    {/* VS */}
                     <div class="bg-white/10 px-4 py-2 rounded-xl border border-white/10">
                         <span class="text-emerald-400 font-mono text-lg font-black italic tracking-widest">VS</span>
                     </div>
 
-                    {/* Corea del Sur */}
                     <div class="flex items-center gap-3">
                         <img src="https://flagcdn.com/w80/kr.png" alt="Corea del Sur" class="w-12 h-8 md:w-14 md:h-10 object-cover rounded-lg shadow-md border border-white/10" />
                         <span class="text-white font-black text-base md:text-xl uppercase tracking-tighter hidden sm:inline">Corea del Sur</span>
                     </div>
                 </div>
 
-                {/* Fecha y Hora Oficial (Actualizado al Jueves 18 de Junio) */}
                 <div class="flex flex-col text-center md:text-right">
                     <span class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">HORARIO DE TRANSMISIÓN</span>
                     <h3 class="text-emerald-400 text-xl font-black tracking-tight uppercase">Jueves 18 de Junio</h3>
@@ -181,10 +177,10 @@ const GROUPS = [
         </div>
     </div>
 
+    <!-- ZONA DE GRUPOS -->
     <Content>
         <div class="py-12">
 
-            {/* Grid Responsivo de Grupos (1 columna en móvil, 2 en tablets, 3 en pantallas grandes) */}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {GROUPS.map((group) => (
                         <div
@@ -196,7 +192,6 @@ const GROUPS = [
                                     }
                                 ]}
                         >
-                            {/* Cabecera del Grupo Card */}
                             <div class="flex items-center justify-between mb-5 border-b border-slate-100 pb-3">
                                 <h2 class="text-xl font-black uppercase tracking-tight text-slate-900">
                                     {group.name}
@@ -208,16 +203,13 @@ const GROUPS = [
                                 )}
                             </div>
 
-                            {/* Listado de los 4 Equipos con Banderas Actualizadas */}
                             <ul class="space-y-3.5">
                                 {group.teams.map((team, index) => (
                                         <li class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                {/* Posición en la tabla */}
                                                 <span class="text-xs font-black text-slate-400 w-4 text-center">
                                                     {index + 1}
                                                 </span>
-                                                {/* Bandera */}
                                                 <img
                                                         src={`https://flagcdn.com/w40/${team.flag}.png`}
                                                         alt={`Bandera de ${team.name}`}
@@ -226,9 +218,15 @@ const GROUPS = [
                                                 <span class="text-sm font-bold text-slate-800 tracking-tight">
                                                     {team.name}
                                                 </span>
+
+                                                {/* NUEVO: Condicional de renderizado para el campeón defensor */}
+                                                {team.isChampion && (
+                                                        <span class="text-[9px] font-black bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm select-none">
+                                                        🏆 Campeón mundial 2022
+                                                    </span>
+                                                )}
                                             </div>
 
-                                            {/* Indicador de tabla */}
                                             <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
                                         </li>
                                 ))}
