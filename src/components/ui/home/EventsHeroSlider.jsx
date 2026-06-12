@@ -6,22 +6,23 @@ import { Trophy, Zap, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-re
 const SLIDES = [
     {
         id: "01",
-        badge: "¡PREVENTA MUNDIALISTA ACTIVA! 🏆",
-        title: "MÉXICO VS SUDÁFRICA",
-        description: "El pitazo inicial está cerca. Las ofertas mundialistas arrancan oficialmente con el partido inaugural este Jueves 11 de Junio. Asegura tus vuelos, hoteles de lujo y traslados VIP con tarifas de campeonato.",
+        badge: "¡SEGUNDA JORNADA EN PREVENTA! 🏆",
+        title: "MÉXICO VS COREA DEL SUR",
+        description: "La fiesta de la fase de grupos continúa. Las promociones mundialistas se renuevan para el segundo partido de la selección este Jueves 18 de Junio. Asegura tus vuelos, hospedajes de lujo y traslados VIP con tarifas exclusivas de campeonato.",
+        // Imagen optimizada de ambiente de estadio nocturno
         image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&q=80&w=1600",
         accentColor: "text-emerald-400",
         btnColor: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30",
-        whatsappMsg: "Hola! Quiero aprovechar las promociones mundialistas para el partido inaugural México vs Sudáfrica.",
+        whatsappMsg: "Hola! Quiero aprovechar las promociones mundialistas para el segundo partido México vs Corea del Sur.",
         logos: [
             { src: "https://flagcdn.com/w160/mx.png", alt: "México" },
-            { src: "https://flagcdn.com/w160/za.png", alt: "Sudáfrica" }
+            { src: "https://flagcdn.com/w160/kr.png", alt: "Corea del Sur" }
         ],
         stat1Label: "Fecha del Partido",
-        stat1Text: "Jueves 11 de Junio",
+        stat1Text: "Jueves 18 de Junio",
         stat1Icon: Trophy,
         stat2Label: "Beneficio Exclusivo",
-        stat2Text: "Tarifas de Inauguración",
+        stat2Text: "Tarifas de Segunda Ronda",
         stat2Icon: Zap
     }
 ];
