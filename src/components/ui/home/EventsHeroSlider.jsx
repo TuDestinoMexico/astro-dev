@@ -6,23 +6,23 @@ import { Trophy, Zap, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-re
 const SLIDES = [
     {
         id: "01",
-        badge: "¡SEGUNDA JORNADA EN PREVENTA! 🏆",
-        title: "MÉXICO VS COREA DEL SUR",
-        description: "La fiesta de la fase de grupos continúa. Las promociones mundialistas se renuevan para el segundo partido de la selección este Jueves 18 de Junio. Asegura tus vuelos, hospedajes de lujo y traslados VIP con tarifas exclusivas de campeonato.",
-        // Imagen optimizada de ambiente de estadio nocturno
+        badge: "¡VICTORIA TRICOLOR! 🇲🇽 🏆",
+        title: "MÉXICO VS REPÚBLICA CHECA", // Invertido: México primero
+        description: "¡El Tri ganó y está asegurando su lugar en la siguiente ronda! Así como la selección asegura su pase, asegura tú las mejores ofertas para el próximo gran partido de cierre este Miércoles 24 de Junio. Vuelos, hoteles de lujo y traslados VIP con tarifas de líder de grupo.",
         image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&q=80&w=1600",
         accentColor: "text-emerald-400",
         btnColor: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30",
-        whatsappMsg: "Hola! Quiero aprovechar las promociones mundialistas para el segundo partido México vs Corea del Sur.",
+        whatsappMsg: "Hola! Vi que México ganó y quiero asegurar mis ofertas mundialistas para el partido contra República Checa.",
         logos: [
+            // Invertido: Bandera de México primero
             { src: "https://flagcdn.com/w160/mx.png", alt: "México" },
-            { src: "https://flagcdn.com/w160/kr.png", alt: "Corea del Sur" }
+            { src: "https://flagcdn.com/w160/cz.png", alt: "República Checa" }
         ],
-        stat1Label: "Fecha del Partido",
-        stat1Text: "Jueves 18 de Junio",
+        stat1Label: "Cierre de Grupos",
+        stat1Text: "Miércoles 24 de Junio",
         stat1Icon: Trophy,
-        stat2Label: "Beneficio Exclusivo",
-        stat2Text: "Tarifas de Segunda Ronda",
+        stat2Label: "Beneficio de Victoria",
+        stat2Text: "Tarifas de Líder de Grupo",
         stat2Icon: Zap
     }
 ];
