@@ -11,7 +11,21 @@ interface Props {
 const {title, subtitle, url, color, icon} = Astro.props;
 ---
 
-<a href={url} class={`${color} text-white p-3 space-y-1 w-full`}>
-    <Icon size="20" name=`${icon}`/>
-    <p class="flex flex-col">{title} <span>{subtitle}</span></p>
+<a
+        href={url}
+        class:list={[
+            color,
+            "text-white p-3.5 flex flex-col space-y-1.5 flex-1 min-w-35 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105"
+        ]}
+>
+    {icon && <Icon size="18" name={icon} class="shrink-0 text-white/90" />}
+
+    <p class="flex flex-col leading-tight tracking-tight mt-1">
+        <span class="text-xs xl:text-sm font-black uppercase tracking-wide whitespace-nowrap">
+            {title}
+        </span>
+        <span class="text-[11px] xl:text-xs font-medium text-white/90 whitespace-nowrap mt-0.5">
+            {subtitle}
+        </span>
+    </p>
 </a>

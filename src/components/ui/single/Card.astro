@@ -16,7 +16,7 @@ interface Props {
     type: string;
     photo?: HotelImages;
     destino?: string;
-    isWorldCup?: boolean; // Propiedad para activar el modo mundialista
+    isWorldCup?: boolean;
 }
 
 const {
@@ -28,19 +28,15 @@ const {
     isWorldCup = true
 } = Astro.props;
 
-// Extracción segura de URLs de imágenes
 const mainPhoto = photo?.principal?.[0]?.url || "https://placehold.co/600x450?text=Tu+Destino";
 const secondaryPhoto = photo?.secundaria?.[0]?.url || mainPhoto;
 
-// Lógica para determinar el ícono según el tipo (Hotel o Tour)
 const isHotel = type.toLowerCase().includes('hotel');
-
-// Identificador único para el script del reloj en el DOM
 const cardId = slug ? `worldcup-${slug}` : `worldcup-${Math.random().toString(36).substring(7)}`;
 ---
 
 <article class:list={[
-    "group relative flex flex-col h-full rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden",
+    "group relative flex flex-col h-full rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden w-full",
     { "hover:border-emerald-500 hover:shadow-emerald-100/50": isWorldCup, "hover:shadow-indigo-100/50": !isWorldCup }
 ]}>
 
@@ -59,29 +55,29 @@ const cardId = slug ? `worldcup-${slug}` : `worldcup-${Math.random().toString(36
                 loading="lazy"
         />
 
-        {/* INSIGNIA DINÁMICA DE TIPO (HOTEL / TOUR) */}
-        <div class="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm">
+        {/* INSIGNIA DE TIPO */}
+        <div class="absolute top-3 left-3 z-20 flex items-center gap-1 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full shadow-sm">
             {isHotel ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>
                     </svg>
             ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/>
                     </svg>
             )}
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-800">
+            <span class="text-[9px] font-black uppercase tracking-widest text-slate-800">
                 {type}
             </span>
         </div>
 
-        {/* NUEVO: INSIGNIA EXCLUSIVA MUNDIAL 2026 (Flota a la derecha) */}
+        {/* INSIGNIA MUNDIAL 2026 */}
         {isWorldCup && (
-                <div class="absolute top-4 right-4 z-20 flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-indigo-900 px-3 py-1.5 rounded-full shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class="absolute top-3 right-3 z-20 flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-indigo-900 px-2.5 py-1 rounded-full shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
-                    <span class="text-[9px] font-black uppercase tracking-wider text-white">
+                    <span class="text-[8px] font-black uppercase tracking-wider text-white">
                         Mundial 2026
                     </span>
                 </div>
@@ -90,40 +86,42 @@ const cardId = slug ? `worldcup-${slug}` : `worldcup-${Math.random().toString(36
         <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent z-10 pointer-events-none"></div>
     </div>
 
-    {/* ZONA DE CONTENIDO */}
-    <div class="flex flex-col flex-1 p-6 z-20 bg-white">
+    {/* ZONA DE CONTENIDO (Se reduce padding de p-6 a p-5) */}
+    <div class="flex flex-col flex-1 p-5 z-20 bg-white">
 
-        <div class="space-y-3 mb-6">
-            <h2 class="text-[1.35rem] md:text-2xl font-black text-slate-900 leading-tight line-clamp-2 group-hover:text-emerald-600 transition-colors">
+        <div class="space-y-2 mb-4">
+            {/* Título optimizado para anchos estrechos */}
+            <h2 class="text-base lg:text-lg xl:text-xl font-black text-slate-900 leading-snug line-clamp-2 h-12 group-hover:text-emerald-600 transition-colors tracking-tight">
                 {title}
             </h2>
 
-            <div class="flex items-start gap-1.5 text-slate-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mt-0.5 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            {/* Ubicación */}
+            <div class="flex items-center gap-1 text-slate-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
                 </svg>
-                <p class="text-sm font-medium leading-snug">
-                    Destino a <span class="font-black text-slate-800">{destino}</span>
+                <p class="text-xs font-medium truncate">
+                    Destino a <span class="font-bold text-slate-800">{destino}</span>
                 </p>
             </div>
 
-            {/* NUEVO: CONTENEDOR DINÁMICO DEL CRONÓMETRO MUNDIALISTA */}
+            {/* CRONÓMETRO O BADGE ACTIVO */}
             {isWorldCup && (
-                    <div id={cardId} class="text-xs font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 px-2.5 py-1.5 rounded-lg w-fit h-7">
+                    <div id={cardId} class="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg w-fit max-w-full">
                         <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping shrink-0"></span>
-                        <span class="promo-text whitespace-nowrap overflow-hidden">
+                        <span class="promo-text truncate">
                             Calculando silbatazo...
                         </span>
                     </div>
             )}
         </div>
 
-        {/* ZONA DE ACCIÓN (BOTÓN WHATSAPP) */}
-        <div class="mt-auto">
+        {/* BOTÓN DE ACCIÓN */}
+        <div class="mt-auto pt-2">
             <a
                     href={`/${type.toLowerCase()}/${slug}`}
                     class:list={[
-                        "relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-white transition-all duration-300 active:scale-95 after:absolute after:inset-0 after:z-10 after:content-['']",
+                        "relative flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-white transition-all duration-300 active:scale-95 after:absolute after:inset-0 after:z-10 after:content-['']",
                         {
                             "bg-gradient-to-r from-emerald-600 to-green-700 shadow-md shadow-emerald-600/20 hover:from-emerald-700 hover:to-green-800 hover:shadow-lg hover:shadow-emerald-500/30": isWorldCup,
                             "bg-[#00c853] shadow-md shadow-green-500/20 hover:bg-[#00b34a] hover:shadow-lg hover:shadow-green-500/30": !isWorldCup
@@ -131,53 +129,40 @@ const cardId = slug ? `worldcup-${slug}` : `worldcup-${Math.random().toString(36
                     ]}
                     aria-label={`Cotizar ${title}`}
             >
-                <svg class="h-[22px] w-[22px] fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="h-4 w-4 md:h-5 md:w-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                <span class="font-bold uppercase tracking-widest text-[13px]">Cotiza ahora</span>
+                <span class="font-bold uppercase tracking-widest text-xs">Cotiza ahora</span>
             </a>
         </div>
 
     </div>
 </article>
 
-{/* SCRIPT DEL CLIENTE PARA EL CONTADOR AL PARTIDO INAUGURAL */}
+{/* SCRIPT SIN CAMBIOS */}
 {isWorldCup && (
 <script define:vars={{ cardId }}>
     (function() {
-        // Apuntamos al Jueves 11 de Junio de 2026
         const targetDate = new Date("2026-06-11T18:00:00-05:00").getTime();
         const container = document.getElementById(cardId);
-
         if (!container) return;
-
         const textSpan = container.querySelector('.promo-text');
         if (!textSpan) return;
 
         const updateCountdown = () => {
             const now = new Date().getTime();
             const distance = targetDate - now;
-
             if (distance <= 0) {
-                // Si ya inició el partido/fecha mundialista
                 textSpan.textContent = "Tarifa Mundialista Activa ⚽";
             } else {
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                const d = String(days).padStart(2, '0');
-                const h = String(hours).padStart(2, '0');
-                const m = String(minutes).padStart(2, '0');
-                const s = String(seconds).padStart(2, '0');
-
-                textSpan.textContent = `Promo en: ${d}d ${h}h ${m}m ${s}s`;
-
+                textSpan.textContent = `Promo en: ${days}d ${hours}h ${minutes}m ${seconds}s`;
                 requestAnimationFrame(() => setTimeout(updateCountdown, 1000));
             }
         };
-
         updateCountdown();
     })();
 </script>
