@@ -60,7 +60,7 @@ export default function RecentlyViewed() {
     }
 
     return (
-        <section ref={containerRef} className="w-full py-12 bg-slate-50 font-sans border-t border-slate-200">
+        <section ref={containerRef} className="w-full py-12 font-sans border-t border-slate-200">
             <div className="container mx-auto px-4 md:px-6">
 
                 {/* ENCABEZADO COMPACTO */}
