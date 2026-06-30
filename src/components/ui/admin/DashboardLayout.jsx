@@ -3,10 +3,11 @@ import { auth } from '../../../lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Loader2, Menu } from 'lucide-react';
 
-// Importamos nuestros sub-componentes
+// Importamos nuestros sub-componentes (Incluyendo el nuevo MediaManager)
 import Sidebar from './Sidebar';
 import LeadsView from './LeadsView';
 import TeamView from './TeamView';
+import MediaManager from './MediaManager';
 
 export default function DashboardLayout() {
     const [user, setUser] = useState(null);
@@ -69,9 +70,11 @@ export default function DashboardLayout() {
                     </button>
                 </header>
 
+                {/* Inyección dinámica de las pantallas según la pestaña activa */}
                 <div className="p-6 md:p-8 lg:p-12 max-w-6xl mx-auto w-full">
                     {activeTab === 'inicio' && <LeadsView />}
                     {activeTab === 'equipo' && <TeamView />}
+                    {activeTab === 'medios' && <MediaManager />}
                 </div>
             </main>
 

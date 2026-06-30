@@ -1,5 +1,6 @@
 import React from 'react';
-import { LayoutDashboard, Users, LogOut, X, User, Globe } from 'lucide-react';
+// Añadimos el ícono Image para la Biblioteca de Medios
+import { LayoutDashboard, Users, LogOut, X, User, Globe, Image } from 'lucide-react';
 
 export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, isOpen, setIsOpen }) {
 
@@ -55,6 +56,7 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, i
                             <Globe size={16} className="text-orange-500" /> Ver Sitio Web
                         </a>
 
+                        {/* PESTAÑA: INICIO */}
                         <button
                             onClick={() => handleNavClick('inicio')}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'inicio' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
@@ -62,11 +64,20 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, i
                             <LayoutDashboard size={16} /> Inicio
                         </button>
 
+                        {/* PESTAÑA: MI EQUIPO */}
                         <button
                             onClick={() => handleNavClick('equipo')}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'equipo' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
                         >
                             <Users size={16} /> Mi Equipo
+                        </button>
+
+                        {/* NUEVO - PESTAÑA: BIBLIOTECA DE MEDIOS */}
+                        <button
+                            onClick={() => handleNavClick('medios')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'medios' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+                        >
+                            <Image size={16} /> Multimedia
                         </button>
                     </nav>
                 </div>
