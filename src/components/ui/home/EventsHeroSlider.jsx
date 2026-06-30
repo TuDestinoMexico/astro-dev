@@ -6,23 +6,23 @@ import { Trophy, Zap, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-re
 const SLIDES = [
     {
         id: "01",
-        badge: "¡VICTORIA TRICOLOR! 🇲🇽 🏆",
-        title: "MÉXICO VS REPÚBLICA CHECA", // Invertido: México primero
-        description: "¡El Tri ganó y está asegurando su lugar en la siguiente ronda! Así como la selección asegura su pase, asegura tú las mejores ofertas para el próximo gran partido de cierre este Miércoles 24 de Junio. Vuelos, hoteles de lujo y traslados VIP con tarifas de líder de grupo.",
-        image: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&q=80&w=1600",
+        badge: "¡RUMBO A DIECISEISAVOS! 🇲🇽 🏆",
+        title: "MÉXICO VS ECUADOR", // String parametrizado con el nuevo rival
+        description: "¡El Tri clasificó como líder y se juega la vida en la fase de eliminación directa! Así como la selección asegura su lugar, asegura tú las mejores ofertas para este crucial partido de Dieciseisavos de Final que se disputa hoy mismo. Vuelos, hoteles de lujo y traslados VIP con tarifas exclusivas.",
+        image: "https://images.unsplash.com/photo-1521216774850-01bc1c5fe0da?auto=format&fit=crop&q=80&w=1600",
         accentColor: "text-emerald-400",
         btnColor: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30",
-        whatsappMsg: "Hola! Vi que México ganó y quiero asegurar mis ofertas mundialistas para el partido contra República Checa.",
+        // Mensaje de texto plano estructurado para la API de WhatsApp
+        whatsappMsg: "Hola! Vi que México juega hoy contra Ecuador en Dieciseisavos de Final y quiero asegurar mis ofertas mundialistas.",
         logos: [
-            // Invertido: Bandera de México primero
             { src: "https://flagcdn.com/w160/mx.png", alt: "México" },
-            { src: "https://flagcdn.com/w160/cz.png", alt: "República Checa" }
+            { src: "https://flagcdn.com/w160/ec.png", alt: "Ecuador" } // Código ISO de bandera actualizado a "ec"
         ],
-        stat1Label: "Cierre de Grupos",
-        stat1Text: "Miércoles 24 de Junio",
+        stat1Label: "Dieciseisavos de Final",
+        stat1Text: "Martes 30 de Junio • 20:00 HRS (Cancún)", // Ajuste del string de tiempo de transmisión
         stat1Icon: Trophy,
-        stat2Label: "Beneficio de Victoria",
-        stat2Text: "Tarifas de Líder de Grupo",
+        stat2Label: "Beneficio de Fase",
+        stat2Text: "Tarifas de Ronda 16avos",
         stat2Icon: Zap
     }
 ];
