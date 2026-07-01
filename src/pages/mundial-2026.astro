@@ -4,175 +4,131 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import Content from "../components/layout/Content.astro";
 
-// Estructura de datos con la propiedad isChampion añadida en Argentina (Grupo J)
-const GROUPS = [
+const octavosFixture = [
     {
-        name: "Grupo A",
-        highlight: true,
-        teams: [
-            { name: "México", flag: "mx" },
-            { name: "Sudáfrica", flag: "za" },
-            { name: "República de Corea", flag: "kr" },
-            { name: "República Checa", flag: "cz" }
-        ]
+        id: "M1",
+        fecha: "Sábado 4 de Julio, 2026",
+        hora: "12:00 PM",
+        estadio: "Estadio Houston",
+        ciudad: "Houston, EUA",
+        team1: { name: "Canadá", flag: "ca" },
+        team2: { name: "Marruecos", flag: "ma" }
     },
     {
-        name: "Grupo B",
-        teams: [
-            { name: "Canadá", flag: "ca" },
-            { name: "Bosnia y Herzegovina", flag: "ba" },
-            { name: "Catar", flag: "qa" },
-            { name: "Suiza", flag: "ch" }
-        ]
+        id: "M2",
+        fecha: "Sábado 4 de Julio, 2026",
+        hora: "4:00 PM", // Reubicado oficialmente como el 2° juego del fixture
+        estadio: "Estadio Filadelfia",
+        ciudad: "Filadelfia, EUA",
+        team1: { name: "Paraguay", flag: "py" },
+        team2: { name: "Francia", flag: "fr" }
     },
     {
-        name: "Grupo C",
-        teams: [
-            { name: "Brasil", flag: "br" },
-            { name: "Marruecos", flag: "ma" },
-            { name: "Haití", flag: "ht" },
-            { name: "Escocia", flag: "gb-sct" }
-        ]
+        id: "M3",
+        fecha: "Por determinar",
+        hora: "Por confirmar",
+        estadio: "Estadio por confirmar",
+        ciudad: "Sede por confirmar",
+        team1: { name: "Por Confirmar", flag: "un" },
+        team2: { name: "Por Confirmar", flag: "un" }
     },
     {
-        name: "Grupo D",
-        teams: [
-            { name: "Estados Unidos", flag: "us" },
-            { name: "Paraguay", flag: "py" },
-            { name: "Australia", flag: "au" },
-            { name: "Turquía", flag: "tr" }
-        ]
+        id: "M4",
+        fecha: "Por determinar",
+        hora: "Por confirmar",
+        estadio: "Estadio por confirmar",
+        ciudad: "Sede por confirmar",
+        team1: { name: "Por Confirmar", flag: "un" },
+        team2: { name: "Por Confirmar", flag: "un" }
     },
     {
-        name: "Grupo E",
-        teams: [
-            { name: "Alemania", flag: "de" },
-            { name: "Curazao", flag: "cw" },
-            { name: "Costa de Marfil", flag: "ci" },
-            { name: "Ecuador", flag: "ec" }
-        ]
+        id: "M5",
+        fecha: "Por determinar",
+        hora: "Por confirmar", // 5° juego del fixture asignado a Brasil vs Noruega
+        estadio: "Estadio por confirmar",
+        ciudad: "Sede por confirmar",
+        team1: { name: "Brasil", flag: "br" },
+        team2: { name: "Noruega", flag: "no" }
     },
     {
-        name: "Grupo F",
-        teams: [
-            { name: "Países Bajos", flag: "nl" },
-            { name: "Japón", flag: "jp" },
-            { name: "Suecia", flag: "se" },
-            { name: "Túnez", flag: "tn" }
-        ]
+        id: "M6",
+        fecha: "Domingo 5 de Julio, 2026",
+        hora: "20:00 HRS (CANCÚN)", // México e Inglaterra estables en la 6° posición
+        estadio: "Estadio Ciudad de México",
+        ciudad: "CDMX, México",
+        team1: { name: "México", flag: "mx" },
+        team2: { name: "Inglaterra", flag: "gb-eng" },
+        destacado: true
     },
     {
-        name: "Grupo G",
-        teams: [
-            { name: "Bélgica", flag: "be" },
-            { name: "Egipto", flag: "eg" },
-            { name: "RI de Irán", flag: "ir" },
-            { name: "Nueva Zelanda", flag: "nz" }
-        ]
+        id: "M7",
+        fecha: "Por determinar",
+        hora: "Por confirmar",
+        estadio: "Estadio por confirmar",
+        ciudad: "Sede por confirmar",
+        team1: { name: "Por Confirmar", flag: "un" },
+        team2: { name: "Por Confirmar", flag: "un" }
     },
     {
-        name: "Grupo H",
-        teams: [
-            { name: "España", flag: "es" },
-            { name: "Cabo Verde", flag: "cv" },
-            { name: "Arabia Saudí", flag: "sa" },
-            { name: "Uruguay", flag: "uy" }
-        ]
-    },
-    {
-        name: "Grupo I",
-        teams: [
-            { name: "Francia", flag: "fr" },
-            { name: "Senegal", flag: "sn" },
-            { name: "Irak", flag: "iq" },
-            { name: "Noruega", flag: "no" }
-        ]
-    },
-    {
-        name: "Grupo J",
-        teams: [
-            { name: "Argentina", flag: "ar", isChampion: true }, // <-- Propiedad agregada aquí
-            { name: "Argelia", flag: "dz" },
-            { name: "Austria", flag: "at" },
-            { name: "Jordania", flag: "jo" }
-        ]
-    },
-    {
-        name: "Grupo K",
-        teams: [
-            { name: "Portugal", flag: "pt" },
-            { name: "RD de Congo", flag: "cd" },
-            { name: "Uzbekistán", flag: "uz" },
-            { name: "Colombia", flag: "co" }
-        ]
-    },
-    {
-        name: "Grupo L",
-        teams: [
-            { name: "Inglaterra", flag: "gb-eng" },
-            { name: "Croacia", flag: "hr" },
-            { name: "Ghana", flag: "gh" },
-            { name: "Panamá", flag: "pa" }
-        ]
+        id: "M8",
+        fecha: "Por determinar",
+        hora: "Por confirmar",
+        estadio: "Estadio por confirmar",
+        ciudad: "Sede por confirmar",
+        team1: { name: "Por Confirmar", flag: "un" },
+        team2: { name: "Por Confirmar", flag: "un" }
     }
 ];
 ---
 
 <Layout
-        title="Calendario y Grupos Mundial 2026 | Tu Destino Mexico"
-        description="Sigue la Fase de Grupos del Mundial 2026 y el partido inaugural en el Estadio Azteca. Asegura tu viaje con las ofertas mundialistas de Tu Destino MX."
+        title="Calendario Octavos de Final Mundial 2026 | Tu Destino Mexico"
+        description="Sigue la fase eliminatoria de Octavos de Final del Mundial 2026. Consulta fechas, horarios y estadios para asegurar tu viaje con Tu Destino MX."
 >
     <Header />
 
     <section class="bg-slate-950 text-white pt-24 pb-12">
         <div class="max-w-7xl mx-auto px-6 text-center">
             <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] px-4 py-2 rounded-full border border-emerald-500/20 mb-4">
-                🏆 FORMATO OFICIAL DE 48 EQUIPOS
+                🔥 ETAPA DE ELIMINACIÓN DIRECTA
             </span>
             <h1 class="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-4">
                 Octavos de final <span class="text-emerald-500">Mundial 2026</span>
             </h1>
             <p class="text-slate-400 text-sm md:text-base font-medium max-w-xl mx-auto leading-relaxed">
-                Sigue de cerca la distribución de las selecciones y prepárate para vivir la máxima fiesta del fútbol global.
+                Los 16 mejores equipos del planeta se juegan el todo por el todo. Revisa los cruces oficiales de esta emocionante ronda.
             </p>
         </div>
     </section>
 
-    <!-- BANNER DEL PARTIDO INAUGURAL -->
     <div class="bg-slate-950 pb-6">
         <div class="max-w-7xl mx-auto px-4 md:px-6">
             <div class="bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-[2rem] p-6 md:p-8 shadow-xl shadow-emerald-950/20 flex flex-col md:flex-row items-center justify-between gap-6">
 
-                {/* Info del Estadio y Torneo (Actualizado a Octavos de Final) */}
                 <div class="flex flex-col text-center md:text-left">
-                <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center justify-center md:justify-start gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> OCTAVOS DE FINAL
-                </span>
+                    <span class="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center justify-center md:justify-start gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> PRÓXIMO ENCUENTRO DEL TRI
+                    </span>
                     <h3 class="text-white text-xl font-black tracking-tight uppercase">Estadio Ciudad de México</h3>
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mt-0.5">CDMX, México</p>
                 </div>
 
-                {/* Marcador Estilizado Versus (México vs Inglaterra) */}
                 <div class="flex items-center gap-4 md:gap-8 my-2 md:my-0">
-                    {/* México */}
                     <div class="flex items-center gap-3">
                         <span class="text-white font-black text-base md:text-xl uppercase tracking-tighter hidden sm:inline">México</span>
                         <img src="https://flagcdn.com/w80/mx.png" alt="México" class="w-12 h-8 md:w-14 md:h-10 object-cover shadow-md border border-white/10" />
                     </div>
 
-                    {/* VS */}
                     <div class="bg-white/10 px-4 py-2 rounded-xl border border-white/10">
                         <span class="text-emerald-400 font-mono text-lg font-black italic tracking-widest">VS</span>
                     </div>
 
-                    {/* Inglaterra (Actualizado con su bandera de San Jorge) */}
                     <div class="flex items-center gap-3">
-                        <img src="https://flagcdn.com/w80/gb-eng.png" alt="Inglaterra" class="w-12 h-8 md:w-14 md:h-10 object-cover shadow-md border border-white/10" />
+                        <img src="https://flagcdn.com/w80/gb-eng.png" alt="Inglaterra" class="w-12 h-8 md:w-14 md:h-10 object-cover rounded-lg shadow-md border border-white/10" />
                         <span class="text-white font-black text-base md:text-xl uppercase tracking-tighter hidden sm:inline">Inglaterra</span>
                     </div>
                 </div>
 
-                {/* Fecha y Hora Oficial (Sincronizado a Domingo 5 de Julio) */}
                 <div class="flex flex-col text-center md:text-right">
                     <span class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">HORARIO DE TRANSMISIÓN</span>
                     <h3 class="text-emerald-400 text-xl font-black tracking-tight uppercase">Domingo 5 de Julio</h3>
@@ -183,60 +139,104 @@ const GROUPS = [
         </div>
     </div>
 
-    <!-- ZONA DE GRUPOS -->
     <Content>
         <div class="py-12">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {GROUPS.map((group) => (
+            <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Cruces de Eliminación Directa</h2>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Paquetes vacacionales y traslados disponibles para cada sede de juego.</p>
+                </div>
+                <span class="bg-slate-100 text-slate-700 text-xs font-black px-4 py-2 rounded-xl border border-slate-200/60 uppercase tracking-wider w-fit">
+                    8 Enfrentamientos
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8">
+                {octavosFixture.map((partido) => (
                         <div
                                 class:list={[
-                                    "bg-white rounded-[2rem] border p-6 transition-all duration-300 shadow-sm",
+                                    "bg-white rounded-[2rem] border p-6 transition-all duration-300 shadow-sm flex flex-col justify-between",
                                     {
-                                        "border-emerald-500 shadow-xl shadow-emerald-100/50 scale-[1.02] ring-2 ring-emerald-500/10": group.highlight,
-                                        "border-slate-100 hover:border-slate-300 hover:shadow-xl": !group.highlight
+                                        "border-emerald-500 shadow-xl shadow-emerald-100/50 ring-2 ring-emerald-500/10": partido.destacado,
+                                        "border-slate-100 hover:border-slate-300 hover:shadow-lg": !partido.destacado
                                     }
                                 ]}
                         >
-                            <div class="flex items-center justify-between mb-5 border-b border-slate-100 pb-3">
-                                <h2 class="text-xl font-black uppercase tracking-tight text-slate-900">
-                                    {group.name}
-                                </h2>
-                                {group.highlight && (
-                                        <span class="text-[9px] font-black bg-emerald-600 text-white px-3 py-1 rounded-full uppercase tracking-wider">
-                                            Grupo de México 🇲🇽
-                                        </span>
-                                )}
+                            {/* Metadata del Partido */}
+                            <div class="flex items-start justify-between border-b border-slate-100 pb-3 mb-4">
+                                <div>
+                                    <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wide">
+                                        ID: {partido.id}
+                                    </span>
+                                    <p class="text-xs font-bold text-slate-800 mt-1">{partido.fecha}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-mono font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md block">
+                                        {partido.hora}
+                                    </span>
+                                </div>
                             </div>
 
-                            <ul class="space-y-3.5">
-                                {group.teams.map((team, index) => (
-                                        <li class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-                                            <div class="flex items-center gap-3">
-                                                <span class="text-xs font-black text-slate-400 w-4 text-center">
-                                                    {index + 1}
+                            {/* Versus del Bloque */}
+                            <div class="space-y-3.5 py-2">
+                                {/* Equipo 1 */}
+                                <div class="flex items-center justify-between p-1.5 rounded-xl bg-slate-50/50 border border-slate-100/40">
+                                    <div class="flex items-center gap-3">
+                                        <img
+                                                src={`https://flagcdn.com/w40/${partido.team1.flag}.png`}
+                                                alt={`Bandera de ${partido.team1.name}`}
+                                                class="w-8 h-5 object-cover rounded shadow-sm border border-slate-200/60"
+                                        />
+                                        <span class="text-sm font-black text-slate-900 tracking-tight">
+                                            {partido.team1.name}
+                                        </span>
+                                        {partido.team1.isChampion && (
+                                                <span class="text-[8px] font-black bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded uppercase tracking-wider select-none">
+                                                    🏆 Campeón
                                                 </span>
-                                                <img
-                                                        src={`https://flagcdn.com/w40/${team.flag}.png`}
-                                                        alt={`Bandera de ${team.name}`}
-                                                        class="w-7 h-5 object-cover shadow-sm border border-slate-100"
-                                                />
-                                                <span class="text-sm font-bold text-slate-800 tracking-tight">
-                                                    {team.name}
-                                                </span>
+                                        )}
+                                    </div>
+                                    <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+                                </div>
 
-                                                {/* NUEVO: Condicional de renderizado para el campeón defensor */}
-                                                {team.isChampion && (
-                                                        <span class="text-[9px] font-black bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm select-none">
-                                                        🏆 Campeón mundial 2022
-                                                    </span>
-                                                )}
-                                            </div>
+                                {/* Divisor Estético VS */}
+                                <div class="text-center -my-2 relative z-10">
+                                    <span class="bg-white text-slate-400 font-mono text-[10px] font-black border border-slate-100 px-3 py-0.5 rounded-full shadow-sm italic">
+                                        VS
+                                    </span>
+                                </div>
 
-                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                                        </li>
-                                ))}
-                            </ul>
+                                {/* Equipo 2 */}
+                                <div class="flex items-center justify-between p-1.5 rounded-xl bg-slate-50/50 border border-slate-100/40">
+                                    <div class="flex items-center gap-3">
+                                        <img
+                                                src={`https://flagcdn.com/w40/${partido.team2.flag}.png`}
+                                                alt={`Bandera de ${partido.team2.name}`}
+                                                class="w-8 h-5 object-cover rounded shadow-sm border border-slate-200/60"
+                                        />
+                                        <span class="text-sm font-black text-slate-900 tracking-tight">
+                                            {partido.team2.name}
+                                        </span>
+                                    </div>
+                                    <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+                                </div>
+                            </div>
+
+                            {/* Ubicación Geográfica de la Sede */}
+                            <div class="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between text-xs font-semibold text-slate-500">
+                                <div class="truncate pr-2">
+                                    <span class="text-slate-900 font-bold block truncate">{partido.estadio}</span>
+                                    <span class="text-[11px] text-slate-400 block truncate">{partido.ciudad}</span>
+                                </div>
+                                <a
+                                        href={`https://wa.me/529987141365?text=Hola! Quiero cotizar opciones de viaje para el partido de Octavos ${partido.team1.name} vs ${partido.team2.name} en ${partido.ciudad}`}
+                                        target="_blank"
+                                        class="shrink-0 text-[10px] font-black uppercase tracking-wider bg-slate-950 text-white px-3 py-2 rounded-xl hover:bg-emerald-600 transition-colors shadow-sm"
+                                >
+                                    Cotizar Viaje
+                                </a>
+                            </div>
                         </div>
                 ))}
             </div>
