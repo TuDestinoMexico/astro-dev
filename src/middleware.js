@@ -1,3 +1,4 @@
+// src/middleware.js
 import { db } from "./lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -29,13 +30,13 @@ export async function onRequest({ url, redirect }, next) {
         return next();
     }
 
-    // 2. Si intentan acceder a /mantenimiento
+    // 2. Lógica para la ruta /mantenimiento
     if (url.pathname === '/mantenimiento') {
-        // Si el mantenimiento está desactivado, ocultar la página (404)
+        // A. Si está desactivado: Redirigir a HOME (en lugar de 404)
         if (!isMaintenance) {
-            return new Response(null, { status: 404, statusText: 'Not Found' });
+            return redirect('/');
         }
-        // Si está activo, permitir acceso
+        // B. Si está activado: Permitir ver la página
         return next();
     }
 
