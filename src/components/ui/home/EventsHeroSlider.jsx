@@ -6,23 +6,25 @@ import { Trophy, Zap, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-re
 const SLIDES = [
     {
         id: "01",
-        badge: "¡RUMBO A DIECISEISAVOS! 🇲🇽 🏆",
-        title: "MÉXICO VS ECUADOR", // String parametrizado con el nuevo rival
-        description: "¡El Tri clasificó como líder y se juega la vida en la fase de eliminación directa! Así como la selección asegura su lugar, asegura tú las mejores ofertas para este crucial partido de Dieciseisavos de Final que se disputa hoy mismo. Vuelos, hoteles de lujo y traslados VIP con tarifas exclusivas.",
+        badge: "¡OCTAVOS DE FINAL! 🇲🇽 🏆",
+        title: "MÉXICO VS INGLATERRA", // Actualizado al nuevo rival
+        description: "¡El Tri hace historia y avanza a Octavos de Final! Acompaña a la selección en este vibrante encuentro eliminatorio contra Inglaterra. Asegura tus vuelos, hoteles de lujo y traslados VIP con nuestras tarifas exclusivas para esta fase.",
         image: "https://images.unsplash.com/photo-1521216774850-01bc1c5fe0da?auto=format&fit=crop&q=80&w=1600",
         accentColor: "text-emerald-400",
         btnColor: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30",
-        // Mensaje de texto plano estructurado para la API de WhatsApp
-        whatsappMsg: "Hola! Vi que México juega hoy contra Ecuador en Dieciseisavos de Final y quiero asegurar mis ofertas mundialistas.",
+        // Mensaje actualizado para el embudo de ventas
+        whatsappMsg: "Hola! Vi que México pasó a Octavos de Final contra Inglaterra y quiero asegurar mis ofertas mundialistas.",
         logos: [
             { src: "https://flagcdn.com/w160/mx.png", alt: "México" },
-            { src: "https://flagcdn.com/w160/ec.png", alt: "Ecuador" } // Código ISO de bandera actualizado a "ec"
+            // Uso del código ISO especial 'gb-eng' para la bandera de Inglaterra
+            { src: "https://flagcdn.com/w160/gb-eng.png", alt: "Inglaterra" }
         ],
-        stat1Label: "Dieciseisavos de Final",
-        stat1Text: "Martes 30 de Junio • 20:00 HRS (Cancún)", // Ajuste del string de tiempo de transmisión
+        stat1Label: "Octavos de Final",
+        // Fecha estimada programada como string plano. ¡Ajusta el día si es necesario!
+        stat1Text: "Domingo 5 de Julio • 20:00 HRS (Cancún)",
         stat1Icon: Trophy,
         stat2Label: "Beneficio de Fase",
-        stat2Text: "Tarifas de Ronda 16avos",
+        stat2Text: "Tarifas de Octavos",
         stat2Icon: Zap
     }
 ];
