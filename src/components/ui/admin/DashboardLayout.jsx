@@ -3,11 +3,12 @@ import { auth } from '../../../lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Loader2, Menu } from 'lucide-react';
 
-// Importamos nuestros sub-componentes (Incluyendo el nuevo MediaManager)
+// Importamos nuestros sub-componentes (Incluyendo el nuevo ConfigView)
 import Sidebar from './Sidebar';
 import LeadsView from './LeadsView';
 import TeamView from './TeamView';
 import MediaManager from './MediaManager';
+import ConfigView from './ConfigView';
 
 export default function DashboardLayout() {
     const [user, setUser] = useState(null);
@@ -75,6 +76,7 @@ export default function DashboardLayout() {
                     {activeTab === 'inicio' && <LeadsView />}
                     {activeTab === 'equipo' && <TeamView />}
                     {activeTab === 'medios' && <MediaManager />}
+                    {activeTab === 'config' && <ConfigView />}
                 </div>
             </main>
 

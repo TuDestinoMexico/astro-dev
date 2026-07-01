@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db, storage } from '../../../lib/firebase';
 import { collection, getDocs, query, orderBy, addDoc, updateDoc, doc, deleteDoc, writeBatch } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Plus, X, Save, Edit2, ArrowUp, Loader2, User, Trash2, Move, Eye, EyeOff, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+// Importamos listAll para poder listar los archivos existentes en el Storage
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
+// Añadimos el ícono Image de lucide-react
+import { Plus, X, Save, Edit2, ArrowUp, Loader2, User, Trash2, Move, Eye, EyeOff, Search, ChevronLeft, ChevronRight, Image } from 'lucide-react';
 
 export default function TeamView() {
     const [team, setTeam] = useState([]);
@@ -14,16 +16,19 @@ export default function TeamView() {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [draggedIndex, setDraggedIndex] = useState(null);
 
-    // NUEVOS ESTADOS: Control de Búsqueda y Paginación
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
+
+    // NUEVOS ESTADOS: Control de la Galería Interna
+    const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+    const [galleryImages, setGalleryImages] = useState([]);
+    const [isLoadingGallery, setIsLoadingGallery] = useState(false);
 
     useEffect(() => {
         fetchTeam();
     }, []);
 
-    // Reiniciar a la página 1 cuando el usuario escribe en el buscador
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery]);
@@ -47,9 +52,27 @@ export default function TeamView() {
         }
     };
 
-    // ==========================================
-    // LÓGICA DE FILTRADO Y PAGINACIÓN (MEMOIZADA)
-    // ==========================================
+    // LÓGICA PARA LEER LAS FOTOS EXISTENTES DEL STORAGE
+    const fetchGalleryImages = async () => {
+        setIsLoadingGallery(true);
+        try {
+            const storageRef = ref(storage, 'equipo/');
+            const res = await listAll(storageRef);
+
+            const imagePromises = res.items.map(async (item) => {
+                const url = await getDownloadURL(item);
+                return { name: item.name, url };
+            });
+
+            const imagesList = await Promise.all(imagePromises);
+            setGalleryImages(imagesList);
+        } catch (error) {
+            console.error("Error listando imágenes de la galería:", error);
+        } finally {
+            setIsLoadingGallery(false);
+        }
+    };
+
     const filteredTeam = useMemo(() => {
         return team.filter(member =>
             member.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -68,7 +91,6 @@ export default function TeamView() {
             indexOfLastItem: lastItem
         };
     }, [filteredTeam, currentPage]);
-
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -172,11 +194,8 @@ export default function TeamView() {
         setIsEditing(true);
     };
 
-    // ==========================================
-    // AJUSTE DE DRAG AND DROP CON PAGINACIÓN
-    // ==========================================
     const handleDragStart = (localIndex) => {
-        if (searchQuery) return; // Desactivar ordenamiento si hay una búsqueda activa
+        if (searchQuery) return;
         setDraggedIndex(localIndex);
     };
 
@@ -184,7 +203,6 @@ export default function TeamView() {
         e.preventDefault();
         if (draggedIndex === null || draggedIndex === localIndex || searchQuery) return;
 
-        // Mapeamos el índice de la página actual al índice global del array completo
         const globalDraggedIdx = indexOfFirstItem + draggedIndex;
         const globalTargetIdx = indexOfFirstItem + localIndex;
 
@@ -215,6 +233,11 @@ export default function TeamView() {
         } catch (error) {
             console.error("Error al guardar el nuevo orden de posiciones:", error);
         }
+    };
+
+    const handleSelectFromGallery = (url) => {
+        setFormData({ ...formData, foto: url });
+        setIsMediaModalOpen(false);
     };
 
     return (
@@ -262,9 +285,22 @@ export default function TeamView() {
                                 )}
                             </div>
 
-                            <div className="flex-1 w-full">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Subir Fotografía</label>
-                                <input type="file" accept="image/*" onChange={handleImageUpload} disabled={isUploading} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-widest file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 transition-colors disabled:opacity-50 cursor-pointer" />
+                            <div className="flex-1 w-full space-y-3">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Fotografía del Perfil</label>
+
+                                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                                    <input type="file" accept="image/*" onChange={handleImageUpload} disabled={isUploading} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-widest file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 transition-colors disabled:opacity-50 cursor-pointer" />
+
+                                    {/* BOTÓN: ABRIR GALERÍA EXISTENTE */}
+                                    <button
+                                        type="button"
+                                        onClick={() => { setIsMediaModalOpen(true); fetchGalleryImages(); }}
+                                        className="flex items-center justify-center gap-2 bg-slate-900 text-white font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors whitespace-nowrap shrink-0"
+                                    >
+                                        <Image size={14} /> Elegir Existente
+                                    </button>
+                                </div>
+
                                 {isUploading && (
                                     <div className="w-full mt-3 h-2 bg-slate-200 rounded-full overflow-hidden">
                                         <div className="h-full bg-indigo-600 transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
@@ -314,8 +350,6 @@ export default function TeamView() {
 
             {/* TABLA PRINCIPAL Y CONTROLES */}
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-10 space-y-4">
-
-                {/* BARRA DE BÚSQUEDA INTERACTIVA */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                     <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">Estructura del Equipo</h2>
                     <div className="relative w-full sm:w-72">
@@ -355,13 +389,12 @@ export default function TeamView() {
                             {currentItems.map((member, index) => (
                                 <tr
                                     key={member.id}
-                                    draggable={!searchQuery} // Deshabilitar arrastre si hay un filtro activo para evitar inconsistencias
+                                    draggable={!searchQuery}
                                     onDragStart={() => handleDragStart(index)}
                                     onDragOver={(e) => handleDragOver(e, index)}
                                     onDragEnd={handleDragEnd}
                                     className={`group text-sm text-slate-700 transition-all duration-150 ${draggedIndex === index ? 'opacity-40 bg-slate-100 scale-[0.98]' : 'hover:bg-slate-50/80'} ${!member.activo ? 'opacity-50 bg-slate-50/50' : ''}`}
                                 >
-                                    {/* Tirador para arrastrar */}
                                     <td className={`py-4 text-center text-slate-300 transition-colors ${!searchQuery ? 'cursor-grab active:cursor-grabbing group-hover:text-slate-400' : 'opacity-20 cursor-not-allowed'}`} title={searchQuery ? "Deshabilita la búsqueda para reordenar perfiles" : "Arrastra para cambiar posición"}>
                                         <div className="flex justify-center"><Move size={16} /></div>
                                     </td>
@@ -416,7 +449,6 @@ export default function TeamView() {
                             </tbody>
                         </table>
 
-                        {/* CONTROLES DE PAGINACIÓN DINÁMICOS */}
                         {totalPages > 1 && (
                             <div className="flex flex-col sm:flex-row items-center justify-between border-t border-slate-100 pt-6 mt-4 gap-4">
                                 <p className="text-xs text-slate-400 font-medium">
@@ -457,6 +489,64 @@ export default function TeamView() {
                     </div>
                 )}
             </div>
+
+            {/* ======================================================= */}
+            {/* COMPONENTE MODAL INTERNO: SELECTOR DE IMÁGENES STORAGE   */}
+            {/* ======================================================= */}
+            {isMediaModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[2rem] max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl border border-slate-100 animate-scale-up">
+
+                        {/* Cabecera del modal */}
+                        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                            <div>
+                                <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Seleccionar de la Galería</h3>
+                                <p className="text-[11px] text-slate-400 font-medium">Elige una fotografía existente de la carpeta 'equipo'</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsMediaModalOpen(false)}
+                                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-200/50 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* Contenido/Grilla de imágenes */}
+                        <div className="p-6 overflow-y-auto flex-1 min-h-[250px] relative bg-white">
+                            {isLoadingGallery ? (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80">
+                                    <Loader2 size={32} className="text-indigo-600 animate-spin mb-2" />
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Leyendo Storage...</span>
+                                </div>
+                            ) : galleryImages.length === 0 ? (
+                                <div className="text-center py-12 text-slate-400">
+                                    <Image size={40} className="mx-auto text-slate-200 mb-2" />
+                                    <p className="text-sm font-medium">No se encontraron imágenes en 'equipo/'</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    {galleryImages.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => handleSelectFromGallery(img.url)}
+                                            className="group flex flex-col bg-slate-50 border border-slate-100 rounded-xl overflow-hidden hover:border-indigo-500 hover:shadow-md transition-all text-left"
+                                        >
+                                            <div className="w-full aspect-square bg-slate-200 relative overflow-hidden flex items-center justify-center">
+                                                <img src={img.url} alt={img.name} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200" />
+                                            </div>
+                                            <div className="p-2 truncate w-full text-[10px] font-bold text-slate-600 group-hover:text-indigo-600 transition-colors">
+                                                {img.name.split('_').slice(1).join('_') || img.name}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
