@@ -1,0 +1,37 @@
+---
+import "../assets/styles/global.css"
+// 1. Forzar el código de estado 503 (Servicio no disponible)
+Astro.response.status = 503;
+
+// 2. Indicar a los buscadores que regresen en 1 hora (3600 segundos)
+Astro.response.headers.set('Retry-After', '3600');
+Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitio en Actualización | Tu Destino México</title>
+    {/* Indicar a los robots que no indexen ESTA página en específico */}
+    <meta name="robots" content="noindex, nofollow">
+</head>
+<body class="bg-slate-950 text-white font-sans flex items-center justify-center min-h-screen p-6">
+<div class="max-w-md text-center space-y-6">
+    <div class="inline-flex p-4 bg-orange-500/10 text-orange-500 rounded-full animate-pulse border border-orange-500/20">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+        </svg>
+    </div>
+    <h1 class="text-3xl font-black uppercase tracking-tight text-white">Estamos actualizando nuestro sitio</h1>
+    <p class="text-slate-400 text-sm leading-relaxed">
+        En <strong>Tu Destino México</strong> estamos preparando las mejores ofertas y paquetes VIP para los Octavos de Final del Mundial. Volveremos en unos minutos.
+    </p>
+    <div class="pt-4 border-t border-slate-900 flex justify-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+        <span>🔒 Modo Seguro</span>
+        <span>•</span>
+        <span>⏱️ Regresamos pronto</span>
+    </div>
+</div>
+</body>
+</html>
