@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../lib/firebase'; // Ajusta la ruta a tu archivo de configuración
+import { db } from '../../../lib/firebase'; // Configuración intacta de Firebase
 import { doc, onSnapshot, updateDoc, increment, setDoc } from 'firebase/firestore';
-import { Trophy, X, BarChart2 } from 'lucide-react';
+import { Trophy, X, BarChart2, Minus } from 'lucide-react';
 
 export default function MatchPoll() {
     const [isOpen, setIsOpen] = useState(true);
+    const [isMinimized, setIsMinimized] = useState(false); // NUEVO: Estado para minimizar
     const [hasVoted, setHasVoted] = useState(false);
     const [votes, setVotes] = useState({ mexico: 0, inglaterra: 0 });
     const [totalVotes, setTotalVotes] = useState(0);
@@ -12,11 +13,9 @@ export default function MatchPoll() {
     const pollDocRef = doc(db, "encuestas", "mexico_inglaterra");
 
     useEffect(() => {
-        // 1. Verificar si el usuario ya votó en este navegador
         const votedBefore = localStorage.getItem('voted_mex_eng');
         if (votedBefore) setHasVoted(true);
 
-        // 2. Escuchar la base de datos de Firebase en Tiempo Real
         const unsubscribe = onSnapshot(pollDocRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
@@ -25,7 +24,6 @@ export default function MatchPoll() {
                 setVotes({ mexico: mex, inglaterra: eng });
                 setTotalVotes(mex + eng);
             } else {
-                // Inicializar el documento en Firebase si no existe todavía
                 setDoc(pollDocRef, { mexico: 0, inglaterra: 0 });
             }
         });
@@ -35,7 +33,6 @@ export default function MatchPoll() {
 
     const handleVote = async (team) => {
         try {
-            // Actualización atómica en Firebase para evitar errores por votos simultáneos
             await updateDoc(pollDocRef, {
                 [team]: increment(1)
             });
@@ -46,11 +43,27 @@ export default function MatchPoll() {
         }
     };
 
-    // Cálculos limpios de porcentajes para las barras de progreso
     const mexPercent = totalVotes > 0 ? Math.round((votes.mexico / totalVotes) * 100) : 0;
     const engPercent = totalVotes > 0 ? Math.round((votes.inglaterra / totalVotes) * 100) : 0;
 
+    // Si el administrador o usuario decide cerrar por completo la encuesta
     if (!isOpen) return null;
+
+    // VISTA ALTERNATIVA: Renderizado cuando la encuesta está minimizada
+    if (isMinimized) {
+        return (
+            <button
+                onClick={() => setIsMinimized(false)}
+                className="fixed bottom-4 right-4 z-50 flex items-center gap-2.5 bg-slate-950 border border-slate-800 text-white px-4 py-3 rounded-full shadow-2xl hover:bg-slate-900 transition-all duration-300 animate-fade-in font-sans group border-emerald-500/20"
+                title="Abrir encuesta de Octavos"
+            >
+                <BarChart2 size={16} className="text-emerald-400 animate-pulse" />
+                <span className="text-[11px] font-black uppercase tracking-wider text-slate-200 group-hover:text-emerald-400 transition-colors">
+                    Ver Encuesta 🇲🇽 vs 🏴󠁧󠁢󠁥󠁮󠁧󠁿
+                </span>
+            </button>
+        );
+    }
 
     return (
         <div className="fixed bottom-4 right-4 z-50 w-80 bg-slate-950 border border-slate-800 text-white p-5 rounded-[2rem] shadow-2xl animate-fade-in font-sans">
@@ -60,18 +73,35 @@ export default function MatchPoll() {
                     <Trophy size={16} className="text-amber-400 animate-bounce" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Encuesta En Vivo</span>
                 </div>
-                <button
-                    onClick={() => setIsOpen(false)}
-                    className="text-slate-500 hover:text-white p-1 rounded-full hover:bg-white/5 transition-colors"
-                >
-                    <X size={14} />
-                </button>
+
+                {/* BOTONES DE CONTROL (MINIMIZAR Y CERRAR) */}
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => setIsMinimized(true)}
+                        className="text-slate-500 hover:text-white p-1 rounded-full hover:bg-white/5 transition-colors"
+                        title="Minimizar"
+                    >
+                        <Minus size={14} />
+                    </button>
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        className="text-slate-500 hover:text-red-400 p-1 rounded-full hover:bg-white/5 transition-colors"
+                        title="Cerrar permanentemente"
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
             </div>
 
             {/* PREGUNTA PRINCIPAL */}
-            <h4 className="text-sm font-black uppercase tracking-tight leading-snug text-slate-100 mb-4">
+            <h4 className="text-sm font-black uppercase tracking-tight leading-snug text-slate-100 mb-1">
                 ¿Quién avanzará a Cuartos de Final del Mundial?
             </h4>
+
+            {/* NUEVO: MENSAJE DE ENCUESTA ANÓNIMA */}
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-4 block select-none">
+                🔒 Voto 100% anónimo y confidencial
+            </p>
 
             {/* VISTA 1: FORMULARIO DE VOTACIÓN */}
             {!hasVoted ? (
@@ -95,7 +125,6 @@ export default function MatchPoll() {
             ) : (
                 /* VISTA 2: RESULTADOS EN TIEMPO REAL */
                 <div className="space-y-4">
-                    {/* Barra México */}
                     <div className="space-y-1">
                         <div className="flex justify-between text-xs font-bold text-slate-200">
                             <span>🇲🇽 México</span>
@@ -109,7 +138,6 @@ export default function MatchPoll() {
                         </div>
                     </div>
 
-                    {/* Barra Inglaterra */}
                     <div className="space-y-1">
                         <div className="flex justify-between text-xs font-bold text-slate-200">
                             <span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra</span>
@@ -123,10 +151,17 @@ export default function MatchPoll() {
                         </div>
                     </div>
 
-                    {/* Footer de la encuesta */}
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider pt-1">
-                        <BarChart2 size={12} />
-                        <span>{totalVotes.toLocaleString()} votos globales</span>
+                    <div className="flex items-center justify-between pt-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5">
+                            <BarChart2 size={12} />
+                            <span>{totalVotes.toLocaleString()} votos</span>
+                        </div>
+                        <button
+                            onClick={() => setIsMinimized(true)}
+                            className="hover:text-emerald-400 transition-colors underline cursor-pointer"
+                        >
+                            Ocultar resultados
+                        </button>
                     </div>
                 </div>
             )}
