@@ -3,10 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import Content from "../components/layout/Content.astro";
 import Grid from "../components/ui/Grid.astro";
 
-// Importamos el nuevo componente
-
-
-// 1. Importa tu configuración de Firebase
 import { db } from "../lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import Header from "../components/layout/Header.astro";
@@ -14,52 +10,68 @@ import Footer from "../components/layout/Footer.astro";
 import MemberCard from "../components/ui/team/MemberCard.astro";
 import MemberSkeleton from "../components/ui/team/MemberSkeleton.astro";
 
-// 2. Realiza la consulta a la colección 'equipo' ordenada por el campo 'posicion'
 const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
 const querySnapshot = await getDocs(q);
 
-// 3. Mapea los documentos a un array de objetos
 const team = querySnapshot.docs
     .map(doc => ({ id: doc.id, ...doc.data() }))
     .filter(member => member.activo !== false);
-;
+
+// Dividimos el equipo en dos mitades
+const midPoint = Math.ceil(team.length / 2);
+const equipoLocal = team.slice(0, midPoint);
+const equipoVisitante = team.slice(midPoint);
 ---
 
 <Layout title="Nosotros | Tu Destino México">
     <Content>
         <Header/>
 
-        <div
-                class="py-20 px-4 md:px-20 bg-cover bg-center bg-no-repeat rounded-3xl mt-8 shadow-inner border border-emerald-900/20"
-                style="background-image: url('https://images.unsplash.com/photo-1589496933738-f5c27bc146e3?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');"
-        >
+        <section class="football-pitch py-20 px-4 md:px-20 rounded-[3rem] mt-8 mb-16 shadow-2xl border-4 border-emerald-800 relative overflow-hidden">
 
-            {/* TÍTULO DEL ÁLBUM */}
-            <div class="text-center mb-12">
-                <span class="inline-block py-1 px-4 rounded-full bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest mb-3 shadow-md">
-                    Tu Destino MX
+            {/* TÍTULO */}
+            <div class="text-center mb-16 relative z-10">
+                <span class="inline-block py-1 px-4 rounded-full bg-white text-emerald-800 text-[10px] font-black uppercase tracking-widest mb-3 shadow-lg">
+                    Duelo de Expertos
                 </span>
-                <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+                <h2 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
                     Selección Oficial
                 </h2>
-                <p class="text-white font-bold mt-3 tracking-wide text-sm md:text-base max-w-xl mx-auto drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]">
-                    Conoce a la alineación titular de expertos que hará de tu próximo viaje una experiencia de campeonato.
-                </p>
             </div>
 
-            <Grid grid={4}>
-                {team.length > 0 ? (
-                    team.map((member) => <MemberCard member={member} />)
-                ) : (
-        <>
-                            <MemberSkeleton />
-                            <MemberSkeleton />
-                            <MemberSkeleton />
-                            <MemberSkeleton />
-                        </>
-                )}
-            </Grid>
-        </div>
+            {/* CONTENEDOR DE LA "CANCHA" (Visible solo en escritorio) */}
+            <div class="hidden md:block relative z-10">
+
+                {/* Equipo Local (Parte Superior) */}
+                <div class="grid grid-cols-4 gap-8 mb-24">
+                    {equipoLocal.map((member) => <MemberCard member={member} />)}
+                </div>
+
+                {/* Línea Central (Divisor) */}
+                <div class="border-t-2 border-white/30 my-12 relative flex justify-center">
+                    <div class="absolute -top-4 w-12 h-12 border-2 border-white/30 rounded-full bg-emerald-700/20"></div>
+                </div>
+
+                {/* Equipo Visitante (Parte Inferior) */}
+                <div class="grid grid-cols-4 gap-8">
+                    {equipoVisitante.map((member) => <MemberCard member={member} />)}
+                </div>
+            </div>
+
+            {/* VERSIÓN MOBILE (Grilla normal sin separar equipos) */}
+            <div class="md:hidden relative z-10">
+                <Grid grid={2}>
+                    {team.map((member) => <MemberCard member={member} />)}
+                </Grid>
+            </div>
+        </section>
     </Content>
     <Footer />
 </Layout>
+
+<style>
+    .football-pitch {
+        background: linear-gradient(180deg, #16a34a 0%, #16a34a 50%, #15803d 50%, #15803d 100%);
+        background-size: 100% 100px;
+    }
+</style>
