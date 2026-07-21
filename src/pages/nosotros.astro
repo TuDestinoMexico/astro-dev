@@ -10,68 +10,52 @@ import Footer from "../components/layout/Footer.astro";
 import MemberCard from "../components/ui/team/MemberCard.astro";
 import MemberSkeleton from "../components/ui/team/MemberSkeleton.astro";
 
+// Consulta a la colección 'equipo' ordenada por 'posicion'
 const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
 const querySnapshot = await getDocs(q);
 
+// Filtrado de miembros activos
 const team = querySnapshot.docs
     .map(doc => ({ id: doc.id, ...doc.data() }))
     .filter(member => member.activo !== false);
-
-// Dividimos el equipo en dos mitades
-const midPoint = Math.ceil(team.length / 2);
-const equipoLocal = team.slice(0, midPoint);
-const equipoVisitante = team.slice(midPoint);
 ---
 
-<Layout title="Nosotros | Tu Destino México">
+<Layout title="Vacation Planners | Tu Destino México">
     <Content>
         <Header/>
 
-        <section class="football-pitch py-20 px-4 md:px-20 rounded-[3rem] mt-8 mb-16 shadow-2xl border-4 border-emerald-800 relative overflow-hidden">
+        {/* CONTENEDOR PRINCIPAL INSTITUCIONAL DE VACATION PLANNERS */}
+        <section class="py-16 px-4 md:px-12 bg-slate-900 rounded-[2.5rem] mt-8 mb-16 shadow-xl border border-slate-800 relative overflow-hidden">
 
-            {/* TÍTULO */}
-            <div class="text-center mb-16 relative z-10">
-                <span class="inline-block py-1 px-4 rounded-full bg-white text-emerald-800 text-[10px] font-black uppercase tracking-widest mb-3 shadow-lg">
-                    Duelo de Expertos
+            {/* ENCABEZADO OPTIMIZADO PARA VENTAS Y SERVICIO */}
+            <div class="text-center mb-12 relative z-10 max-w-2xl mx-auto">
+                <span class="inline-block py-1 px-4 rounded-full bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest mb-3 shadow-md">
+                    Tu Destino MX • Vacation Planners
                 </span>
-                <h2 class="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">
-                    Selección Oficial
+                <h2 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">
+                    Diseñamos Tus Mejores Vacaciones
                 </h2>
+                <p class="text-slate-300 font-medium mt-4 text-sm md:text-base leading-relaxed">
+                    Conoce a nuestros <strong class="text-orange-400">Vacation Planners</strong>: un equipo de expertos dedicados a encontrar las mejores tarifas, destinos y experiencias a tu medida. ¡Déjanos planear el viaje de tus sueños!
+                </p>
             </div>
 
-            {/* CONTENEDOR DE LA "CANCHA" (Visible solo en escritorio) */}
-            <div class="hidden md:block relative z-10">
-
-                {/* Equipo Local (Parte Superior) */}
-                <div class="grid grid-cols-4 gap-8 mb-24">
-                    {equipoLocal.map((member) => <MemberCard member={member} />)}
-                </div>
-
-                {/* Línea Central (Divisor) */}
-                <div class="border-t-2 border-white/30 my-12 relative flex justify-center">
-                    <div class="absolute -top-4 w-12 h-12 border-2 border-white/30 rounded-full bg-emerald-700/20"></div>
-                </div>
-
-                {/* Equipo Visitante (Parte Inferior) */}
-                <div class="grid grid-cols-4 gap-8">
-                    {equipoVisitante.map((member) => <MemberCard member={member} />)}
-                </div>
-            </div>
-
-            {/* VERSIÓN MOBILE (Grilla normal sin separar equipos) */}
-            <div class="md:hidden relative z-10">
-                <Grid grid={2}>
-                    {team.map((member) => <MemberCard member={member} />)}
+            {/* GRILLA DE MIEMBROS DEL EQUIPO */}
+            <div class="relative z-10">
+                <Grid grid={4}>
+                    {team.length > 0 ? (
+                        team.map((member) => <MemberCard member={member} />)
+                    ) : (
+                            <>
+                                <MemberSkeleton />
+                                <MemberSkeleton />
+                                <MemberSkeleton />
+                                <MemberSkeleton />
+                            </>
+                    )}
                 </Grid>
             </div>
         </section>
     </Content>
     <Footer />
 </Layout>
-
-<style>
-    .football-pitch {
-        background: linear-gradient(180deg, #16a34a 0%, #16a34a 50%, #15803d 50%, #15803d 100%);
-        background-size: 100% 100px;
-    }
-</style>
