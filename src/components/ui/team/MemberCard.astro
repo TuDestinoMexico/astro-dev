@@ -5,36 +5,39 @@ import { Icon } from "astro-icon/components";
 const { member } = Astro.props;
 ---
 
-<article class="group flex flex-col items-center bg-white rounded-xl overflow-hidden shadow-xl border-2 border-white/80 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02] p-0 ring-4 ring-black/10">
+<article class="group flex flex-col items-center bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-200 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:border-orange-500/50 p-0">
 
-    <div class="relative w-full bg-slate-100 overflow-hidden">
+    {/* FOTO DE PERFIL */}
+    <div class="relative w-full aspect-[4/5] bg-slate-100 overflow-hidden">
         <img
-                src={member.foto || "https://placehold.co/400x533?text=Perfil"}
+                src={member.foto || "https://placehold.co/400x500?text=Perfil"}
                 alt={member.nombre}
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div class="absolute inset-0 border border-black/10 pointer-events-none"></div>
-        <div class="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity"></div>
     </div>
 
+    {/* INFORMACIÓN DEL INTEGRANTE */}
     <div class="w-full flex flex-col">
 
-        <div class="bg-green-700 text-white text-center py-2.5 px-2 border-b-2 border-white">
-            <h3 class="text-sm md:text-base font-black leading-tight uppercase tracking-widest drop-shadow-sm truncate">
+        {/* NOMBRE DEL INTEGRANTE */}
+        <div class="bg-orange-500 text-white text-center py-3 px-3 border-b border-orange-600">
+            <h3 class="text-sm md:text-base font-black leading-tight uppercase tracking-wider drop-shadow-sm truncate">
                 {member.nombre}
             </h3>
         </div>
 
-        {/* ZONA DEL PUESTO CON MARCA DE AGUA DEL BALÓN GIGANTE */}
-        <div class="bg-white text-center py-5 px-3 relative overflow-hidden flex items-center justify-center">
+        {/* ZONA DEL PUESTO CON MARCA DE AGUA CORPORATIVA */}
+        <div class="bg-white text-center py-4 px-3 relative overflow-hidden flex items-center justify-center min-h-[60px]">
 
+            {/* Ícono sutil de viajes corporativo */}
             <Icon
-                    name="fa7-solid:futbol"
-                    class="absolute text-green-700/15 w-28 h-28 -left-8 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-700 group-hover:rotate-[30deg]"
+                    name="lucide:plane"
+                    class="absolute text-orange-500/10 w-16 h-16 -right-3 -bottom-3 pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:-translate-x-2"
             />
 
-            <p class="relative z-10 text-[9px] sm:text-[10px] font-black text-slate-900 uppercase tracking-widest leading-snug text-balance mx-auto drop-shadow-sm">
-                {member.puesto}
+            <p class="relative z-10 text-[10px] sm:text-[11px] font-bold text-slate-700 uppercase tracking-widest leading-snug mx-auto drop-shadow-sm">
+                {member.puesto || "Vacation Planner"}
             </p>
 
         </div>
