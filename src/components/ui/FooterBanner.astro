@@ -1,27 +1,41 @@
 ---
-// Tu frontmatter se mantiene limpio
+interface Props {
+    bgImage?: string;
+}
+
+const {
+    bgImage = "https://storage.googleapis.com/tudestinomx_bucket/assets/test/fondo_lego_xolito.jpeg"
+} = Astro.props;
 ---
 
+{/* CONTENEDOR PADRE: Sin overflow-hidden para permitir que Xolo sobresalga por arriba */}
 <div
         id="xolo-banner"
-        class="relative mt-14 md:mt-20 bg-green-800 rounded-[2.5rem] h-72 md:h-112.5 flex items-end [clip-path:inset(-200%_-200%_0_-200%)] w-[92%] container mx-auto"
+        class="relative mt-20 md:mt-28 h-72 md:h-112.5 w-[92%] container mx-auto"
 >
-
-    {/* ZONA DEL PERSONAJE (XOLO):
-      Quitamos 'overflow-hidden' para dejar que la silueta rompa el margen superior.
-      Usamos h-[125%] en móvil y tu medida fija h-140 en escritorio para que sobresalga con estilo.
-    */}
-    <div class="absolute inset-0 flex w-full h-full pointer-events-none select-none">
+    {/* 1. CAPA DE FONDO (Con bordes redondeados y recorte aislado) */}
+    <div class="absolute inset-0 rounded-[2.5rem] overflow-hidden z-0">
         <img
-                src="https://storage.googleapis.com/tudestinomx_bucket/assets/test/xolo-seleccion-banner.png"
+                src={bgImage}
+                alt="Fondo Xolo Banner"
+                class="w-full h-full object-cover"
+        />
+        {/* Sombrado para legibilidad del texto */}
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-slate-950/20"></div>
+    </div>
+
+    {/* 2. CAPA DE LA MASCOTA XOLO (Sobresale por arriba con h-[125%] / h-[135%]) */}
+    <div class="absolute inset-0 flex w-full h-full pointer-events-none select-none z-10 items-end justify-center">
+        <img
+                src="https://storage.googleapis.com/tudestinomx_bucket/assets/test/xolo_lego_transparente.png"
                 alt="Xolo Tu Destino Mexico"
-                class="absolute bottom-0 md:-bottom-3 left-0 w-full h-[125%] md:h-140 object-contain object-bottom z-0"
+                class="absolute bottom-0 w-auto h-[125%] md:h-[135%] object-contain object-bottom drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]"
         />
     </div>
 
-    {/* CONTENEDOR DEL TEXTO */}
-    <div class="absolute z-10 w-full flex justify-center bottom-4 md:-bottom-6 left-0 right-0 px-4 pointer-events-none">
-        <h2 class="text-white text-[8.4vw] md:text-7xl lg:text-[150px] font-black tracking-tighter leading-none select-none text-center uppercase whitespace-nowrap drop-shadow-md">
+    {/* 3. CAPA DEL TEXTO PRINCIPAL */}
+    <div class="absolute z-20 w-full flex justify-center bottom-4 md:-bottom-6 left-0 right-0 px-4 pointer-events-none">
+        <h2 class="text-white text-[8.4vw] md:text-7xl lg:text-[150px] font-black tracking-tighter leading-none select-none text-center uppercase whitespace-nowrap drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)]">
             TuDestinoMéxico
         </h2>
     </div>
