@@ -1,0 +1,120 @@
+# Database
+
+> Bases de datos y almacenamiento del proyecto tdmx-astro.
+
+## Resumen
+
+El proyecto utiliza tres fuentes de datos: Firebase Firestore (NoSQL) para datos de aplicación y admin, Firebase Storage para archivos multimedia, y una API REST externa para el catálogo de hoteles y tours.
+
+---
+
+## Firebase Firestore
+
+Instancia única inicializada en `src/lib/firebase.js` con `experimentalForceLongPolling: true` para compatibilidad con Node.js.
+
+### Colecciones detectadas
+
+#### `config/general`
+Documento único con configuración global del sitio.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `sitioNombre` | string | Nombre comercial de la empresa |
+| `logoUrl` | string | URL del logo en Firebase Storage |
+| `whatsappGlobal` | string | Número WhatsApp (solo dígitos, con código país) |
+| `modoMantenimiento` | boolean | Activa/desactiva modo mantenimiento |
+
+**Uso:** `Header.astro` (lectura SSR con timeout 2.5s), `ConfigView.jsx` (CRUD admin), `middleware.js` (lectura con caché 30s).
+
+#### `equipo`
+Colección de miembros del equipo, ordenada por `posicion`.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `nombre` | string | Nombre completo |
+| `puesto` | string | Puesto o rol |
+| `foto` | string | URL de foto en Storage |
+| `posicion` | number | Orden de aparición |
+| `activo` | boolean | Visible en sitio público |
+
+**Uso:** `TeamView.jsx` (CRUD admin con drag & drop, paginación, búsqueda), `nosotros.astro` (SSR).
+
+#### `cotizaciones`
+Colección de leads/cotizaciones del sitio.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `nombre` | string | Nombre del cliente |
+| `destino` | string | Destino de interés |
+| `estatus` | string | Estado de la cotización |
+| `createdAt` | timestamp | Fecha de creación |
+
+**Uso:** `LeadsView.jsx` (lectura admin, ordenado por fecha descendente, limit 5).
+
+#### `encuestas/mexico_inglaterra`
+Documento único con votos de encuesta del Mundial 2026.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `votos` | (no determinado) | Votos de la encuesta |
+
+**Uso:** `MatchPoll.jsx` (lectura/escritura con `onSnapshot` en tiempo real).
+
+---
+
+## Firebase Storage
+
+Almacenamiento de archivos multimedia. Las URLs son públicas (sin token de seguridad).
+
+### Rutas detectadas
+
+| Ruta | Propósito |
+|---|---|
+| `config/` | Logos e imágenes de configuración |
+| `equipo/` | Fotos de miembros del equipo |
+| (carpetas dinámicas) | Navegación libre desde MediaManager |
+
+### Gestión de archivos
+
+- `MediaManager.jsx` — Explorador de archivos con navegación por carpetas, subida, borrado y copia de URLs.
+- `ConfigView.jsx` — Subida de logos con selector de historial.
+- `TeamView.jsx` — Subida de fotos con selector de galería existente.
+
+---
+
+## API REST externa
+
+Endpoint base: `https://api.tudestinomx.com`
+
+Autenticación: Bearer token vía `VITE_API_TOKEN`.
+
+| Endpoint | Propósito | Uso |
+|---|---|---|
+| `GET /api/hotel` | Listado de hoteles | `Welcome.astro`, `hoteles.astro` |
+| `GET /api/hotel/slug/{slug}` | Detalle de hotel | `hotel/[slug].astro` |
+| `GET /api/tour` | Listado de tours | `tours.astro` |
+| `GET /api/tour/slug/{slug}` | Detalle de tour | `tour/[slug].astro` |
+
+Campos detectados en respuestas: `name`, `slug`, `active`, `images` (principal, secundaria, adicional), `description`, `address`, `amenities_list`, `google_maps` (coordenadas), `reviews`, `destino`.
+
+---
+
+## Pendiente de documentar
+
+- Esquema completo de colecciones Firestore (solo parcialmente detectado)
+- Reglas de seguridad de Firestore y Storage
+- Índices compuestos de Firestore
+- Estructura detallada de `encuestas/`
+- Estructura de `cotizaciones` (tipos de campos restantes)
+
+#### `users/{userId}/reservas/{reservaId}`
+
+Reservas vinculadas por clientes autenticados con Google Auth.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `correo_reserva` | string | Email asociado a la reserva |
+| `ct` | string | Código de reserva (CT) |
+| `fechaVinculacion` | timestamp | Momento en que se vinculó |
+
+**Uso:** `ClientReservas.jsx` (lectura con `onSnapshot`, escritura con `addDoc` al consultar una reserva).
