@@ -1,6 +1,7 @@
 ---
 import MenuBar from "../ui/MenuBar.astro";
 import SubMenu from "../ui/SubMenu.astro";
+import ClientLoginButton from "../ui/ClientLoginButton.jsx";
 
 // IMPORTACIÓN DE FIREBASE: Ajusta la ruta de importación de tu db si es necesario
 import { db } from "../../lib/firebase";
@@ -61,6 +62,7 @@ try {
             />
             <MenuBar title="Pagar en linea" subtitle="lo hacemos facil" url="/pagos" color="bg-lime-500" icon="fa7-solid:credit-card" />
             <MenuBar title="Quienes Somos" subtitle="La familia Xolo" url="/nosotros" color="bg-orange-500" icon="fa7-solid:people-group" />
+            <ClientLoginButton client:only="react" />
         </div>
     </div>
 

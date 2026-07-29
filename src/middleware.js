@@ -25,8 +25,8 @@ async function getMaintenanceStatus() {
 export async function onRequest({ url, redirect }, next) {
     const isMaintenance = await getMaintenanceStatus();
 
-    // 1. Excepción: Permitir siempre el panel de administración
-    if (url.pathname.startsWith('/admin')) {
+    // 1. Excepción: Permitir siempre los paneles de administración y clientes
+    if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/cliente')) {
         return next();
     }
 
