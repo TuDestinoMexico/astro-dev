@@ -168,7 +168,7 @@ const data = Array.isArray(raw) ? raw : (raw.data || []);
 | `tour/[slug].astro` | REST (tour detail) | SSR - frontmatter |
 | `PaymentMethods.jsx` | `/api/openpay-cargo` | Client-side fetch |
 | `WelcomeModal.tsx` | `/api/openpay-check` | Client-side fetch |
-| `ClientReservas.jsx` | `/api/crm-consultar` | Client-side fetch |
+| `ClientReservas.jsx` | `/api/crm-consultar` | Client-side fetch (link + ver detalle) |
 
 ---
 

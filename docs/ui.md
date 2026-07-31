@@ -92,6 +92,18 @@ Renderizados en servidor. Sin estado cliente.
 | `CounterPaymentForm.jsx` | — | Pago en ventanilla |
 | `OxxoDepositForm.jsx` | — | Depósito OXXO |
 
+### Cliente
+
+| Componente | Directiva | Propósito |
+|---|---|---|
+| `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + modal Google sign-in |
+| `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
+| `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
+| `ClientOfertas.jsx` | — | Tarjetas de promociones con código y fecha de vencimiento (datos ficticios, pendiente definir fuente) |
+| `ClientFavoritos.jsx` | — | Tarjetas de hoteles/tours guardados con rating y precio (datos ficticios, pendiente definir fuente) |
+| `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas CRM. Modal detalle + PDF download |
+| `LayoutClient.astro` | SSR | Shell layout con Poppins, SEO, Analytics (sin Header.astro) |
+
 ### Admin
 
 | Componente | Directiva | Propósito |

@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '../../../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { Loader2, Menu } from 'lucide-react';
-import ClientSidebar from './ClientSidebar';
+import { Loader2 } from 'lucide-react';
 import ClientReservas from './ClientReservas';
+import ClientOfertas from './ClientOfertas';
+import ClientFavoritos from './ClientFavoritos';
+import ClientTopbar from './ClientTopbar';
 
 export default function ClientPanel() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('reservas');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -34,29 +35,13 @@ export default function ClientPanel() {
 
   return (
     <div class="flex min-h-screen bg-slate-50 font-sans antialiased text-slate-800">
-      <ClientSidebar
-        user={user}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isOpen={isMobileMenuOpen}
-        setIsOpen={setIsMobileMenuOpen}
-      />
-
-      <main class="flex-1 lg:pl-64 flex flex-col min-h-screen transition-all duration-300">
-        <header class="lg:hidden bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-          <span class="text-lg font-black tracking-tighter text-slate-900 uppercase">
-            Tu Destino <span class="text-orange-500">MX</span>
-          </span>
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            class="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors"
-          >
-            <Menu size={20} />
-          </button>
-        </header>
+      <main class="flex-1 flex flex-col min-h-screen transition-all duration-300">
+        <ClientTopbar user={user} activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <div class="p-6 md:p-8 lg:p-12 max-w-6xl mx-auto w-full">
           {activeTab === 'reservas' && <ClientReservas user={user} />}
+          {activeTab === 'ofertas' && <ClientOfertas user={user} />}
+          {activeTab === 'favoritos' && <ClientFavoritos user={user} />}
         </div>
       </main>
     </div>

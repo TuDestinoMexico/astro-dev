@@ -55,6 +55,7 @@ src/
 │   ├── payments/              # PaymentMethods.jsx, type/*.jsx
 │   └── ui/
 │       ├── admin/             # DashboardLayout, LoginForm, Sidebar, etc.
+│       ├── client/            # ClientPanel, ClientTopbar, ClientReservas
 │       ├── home/              # EventsHeroSlider, MatchPoll, Promo ribbons
 │       ├── hotel/             # Gallery.astro, HotelTabs.tsx
 │       ├── recomendacion/     # FacebookReel.jsx
@@ -64,14 +65,19 @@ src/
 │       ├── Banner.astro, BookingCalendar.tsx, Button.astro, etc.
 ├── layouts/
 │   ├── Layout.astro           # Layout público (Poppins, Analytics, SEO)
-│   └── LayoutAdmin.astro      # Layout admin (mismo base que público)
+│   ├── LayoutAdmin.astro      # Layout admin (mismo base que público)
+│   └── LayoutClient.astro     # Layout cliente (sin Header.astro, Poppins + SEO)
 ├── lib/
 │   └── firebase.js            # Singleton Firebase (Auth, Firestore, Storage)
 ├── middleware.js               # Maintenance mode (cada 30s cache)
 └── pages/
     ├── api/
     │   ├── openpay-cargo.ts   # POST - crear cargo
-    │   └── openpay-check.ts   # GET - verificar transacción
+    │   ├── openpay-check.ts   # GET - verificar transacción
+    │   └── crm-consultar.ts   # POST - proxy a CRM de reservas
+    ├── cliente/
+    │   ├── login.astro        # Login cliente (isla ClientLoginButton)
+    │   └── dashboard.astro    # Dashboard cliente (isla ClientPanel)
     ├── admin/
     │   ├── dashboard.astro    # Panel admin (client:only react)
     │   └── login.astro        # Login admin (client:only react)
