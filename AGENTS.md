@@ -43,6 +43,9 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 9. **Estilos:** Tailwind utility classes ante todo. NUNCA CSS modules, styled-components ni archivos .css sueltos (excepto global.css).
 10. **Data fetching en Astro:** fetch() en frontmatter de páginas. En React: fetch() a rutas API propias o Firebase SDK directo.
 11. **Páginas admin:** protegidas client-side con onAuthStateChanged en DashboardLayout.jsx.
+12. **ClientReservas.jsx** usa campos reales del CRM mapping (no asumir nombres como `checkIn`, `monto`, `adultos` como array). Revisar `docs/api.md` sección CRM antes de modificar.
+13. **ClientTopbar.jsx** estructura: los botones con `flex-col items-start justify-between space-y-1.5`. "Mis Reservas" = bg-indigo-600 + LayoutDashboard (hidden mobile, xl:flex). "Mis Ofertas" = bg-emerald-600 + Tag (hidden mobile, xl:flex). "Mis Favoritos" = bg-rose-600 + Heart (hidden mobile, xl:flex). "Mi Cuenta" = bg-purple-800 + foto usuario + dropdown con Volver al Sitio y Cerrar Sesión. Logo dinámico desde Firestore `config/general.logoUrl` con fallback. Dropdown se cierra con click outside (useRef + mousedown listener).
+14. **ClientPanel.jsx** ya no usa ClientSidebar ni hamburger. Layout: `<ClientTopbar>` + contenido. Sin sidebar.
 
 # Buenas prácticas
 
@@ -66,7 +69,6 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 7. **NUNCA** crear archivos de documentación fuera de /docs.
 8. **NUNCA** cambiar el sistema de autenticación (Firebase Auth client-side) sin consultar.
 9. **NUNCA** eliminar Vue de dependencias (es residual, pero no se debe modificar sin orden).
-10. **ClientReservas.jsx** usa campos reales del CRM mapping (no asumir nombres como `checkIn`, `monto`, `adultos` como array). Revisar `docs/api.md` sección CRM antes de modificar.
 10. **NUNCA** renombrar carpetas o archivos sin verificar todas las referencias.
 11. **NUNCA** refactorizar componentes funcionales a clases ni viceversa.
 12. **NUNCA** hacer commit, push ni deploy sin instrucción explícita.
