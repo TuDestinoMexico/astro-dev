@@ -1,7 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Mail, User, Search, Clock, CheckCircle, AlertCircle, Loader2, Trash2, Building, MapPin, DollarSign, Hash, Eye, X, FileText, Users, Phone, Home, Bed, Utensils, Star } from 'lucide-react';
+import { Calendar, Mail, User, Search, Clock, CheckCircle, AlertCircle, Loader2, Trash2, Building, MapPin, DollarSign, Hash, Eye, X, FileText, Users, BedDouble, Utensils, CalendarDays, Plane, PlaneLanding, Moon, Cake, FolderOpen } from 'lucide-react';
 import { db } from '../../../lib/firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore';
+import GrupoDetalle from './GrupoDetalle';
+import DocumentosModal from './DocumentosModal';
+
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+const formatFecha = (value) => {
+  if (!value) return null;
+  const str = String(value).trim();
+  let d = null;
+  let m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (m) {
+    d = new Date(+m[1], +m[2] - 1, +m[3]);
+  } else {
+    m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+    if (m) {
+      d = new Date(+m[3], +m[2] - 1, +m[1]);
+    } else {
+      d = new Date(str);
+    }
+  }
+  if (isNaN(d.getTime())) return null;
+  return `${d.getDate()} de ${MESES[d.getMonth()]} del ${d.getFullYear()}`;
+};
 
 const formatPax = (pax) => {
   if (!pax) return null;
@@ -13,6 +36,14 @@ const formatPax = (pax) => {
   if (ninos && ninos !== '0') result += `, ${ninos} Menor${ninos !== '1' ? 'es' : ''}`;
   if (infantes && infantes !== '0') result += `, ${infantes} Infante${infantes !== '1' ? 's' : ''}`;
   return result;
+};
+
+const mergeLists = (a, b) => {
+  return [...a, ...b].sort((x, y) => {
+    const tx = x.fechaVinculacion?.toDate?.()?.getTime?.() || 0;
+    const ty = y.fechaVinculacion?.toDate?.()?.getTime?.() || 0;
+    return ty - tx;
+  });
 };
 
 const statusColor = (estatus) => {
@@ -34,8 +65,83 @@ function DetalleRow({ icon: Icon, label, value }) {
   );
 }
 
+const statusGradient = (estatus) => {
+  const s = (estatus || '').toLowerCase();
+  if (s.includes('confirm') || s.includes('pagada') || s.includes('activa')) return 'from-emerald-600 to-teal-900';
+  if (s.includes('cancel') || s.includes('rechaz')) return 'from-rose-600 to-red-900';
+  if (s.includes('pendiente') || s.includes('espera')) return 'from-amber-500 to-orange-800';
+  return 'from-purple-700 to-purple-950';
+};
+
+const statusPill = (estatus) => {
+  const s = (estatus || '').toLowerCase();
+  if (s.includes('confirm') || s.includes('pagada') || s.includes('activa'))
+    return { pill: 'bg-emerald-400/15 border-emerald-300/40 text-emerald-50', dot: 'bg-emerald-300' };
+  if (s.includes('cancel') || s.includes('rechaz'))
+    return { pill: 'bg-red-400/15 border-red-300/40 text-red-50', dot: 'bg-red-300' };
+  if (s.includes('pendiente') || s.includes('espera'))
+    return { pill: 'bg-amber-400/15 border-amber-300/40 text-amber-50', dot: 'bg-amber-300' };
+  return { pill: 'bg-white/15 border-white/30 text-white', dot: 'bg-white' };
+};
+
+function InfoChip({ icon: Icon, label, value }) {
+  if (!value) return null;
+  return (
+    <div class="flex items-center gap-2.5 bg-white rounded-xl px-3 py-2.5 border border-slate-100 shadow-sm">
+      <div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+        <Icon size={14} />
+      </div>
+      <div class="min-w-0">
+        <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</p>
+        <p class="text-xs font-bold text-slate-800 truncate">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function StatTile({ icon: Icon, label, value, delay }) {
+  return (
+    <div class={`bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm ${delay}`}>
+      <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-1.5">
+        <Icon size={15} />
+      </div>
+      <p class="text-sm font-black text-slate-800 leading-tight">{value}</p>
+      <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+function PriceCounter({ value }) {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    const target = Number(value);
+    if (isNaN(target)) {
+      setDisplay(0);
+      return;
+    }
+    let raf;
+    const duration = 900;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(target * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return (
+    <span>
+      ${display.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
+    </span>
+  );
+}
+
 export default function ClientReservas({ user }) {
+  const [tipo, setTipo] = useState('ct');
   const [ct, setCt] = useState('');
+  const [gb, setGb] = useState('');
   const [email, setEmail] = useState(user?.email || '');
   const [consultando, setConsultando] = useState(false);
   const [resultado, setResultado] = useState(null);
@@ -47,17 +153,30 @@ export default function ClientReservas({ user }) {
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [errorDetalle, setErrorDetalle] = useState('');
 
+  const [documentosItem, setDocumentosItem] = useState(null);
+
   useEffect(() => {
     if (!user) return;
-    const q = query(
+    const qReservas = query(
       collection(db, 'users', user.uid, 'reservas'),
       orderBy('fechaVinculacion', 'desc')
     );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const lista = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setReservas(lista);
+    const qGrupos = query(
+      collection(db, 'users', user.uid, 'grupos'),
+      orderBy('fechaVinculacion', 'desc')
+    );
+    const unsubReservas = onSnapshot(qReservas, (snapshot) => {
+      const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'ct', ...doc.data() }));
+      setReservas((prev) => mergeLists(lista, prev.filter((p) => p.tipo === 'gb')));
     });
-    return unsubscribe;
+    const unsubGrupos = onSnapshot(qGrupos, (snapshot) => {
+      const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'gb', ...doc.data() }));
+      setReservas((prev) => mergeLists(prev.filter((p) => p.tipo === 'ct'), lista));
+    });
+    return () => {
+      unsubReservas();
+      unsubGrupos();
+    };
   }, [user]);
 
   const handleConsultar = async (e) => {
@@ -65,39 +184,43 @@ export default function ClientReservas({ user }) {
     setError('');
     setResultado(null);
 
-    if (!ct || !email) {
+    const codigo = tipo === 'gb' ? gb : ct;
+    if (!codigo || !email) {
       setError('Completa todos los campos.');
       return;
     }
 
     setConsultando(true);
     try {
-      const res = await fetch('/api/crm-consultar', {
+      const endpoint = tipo === 'gb' ? '/api/crm-grupo-consultar' : '/api/crm-consultar';
+      const body = tipo === 'gb' ? { gb: codigo, email } : { ct: codigo, email };
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ct, email })
+        body: JSON.stringify(body)
       });
       const data = await res.json();
 
       if (!data.success) {
-        setError(data.message || 'No se encontró la reserva.');
+        setError(data.message || 'No se encontró la información.');
         setConsultando(false);
         return;
       }
 
-      setResultado(data.data);
+      setResultado({ ...data.data, tipo });
       setConsultando(false);
 
       setGuardando(true);
       try {
+        const collectionName = tipo === 'gb' ? 'grupos' : 'reservas';
         const docData = {
-          correo_reserva: email,
-          ct: ct,
+          [tipo === 'gb' ? 'correo_grupo' : 'correo_reserva']: email,
+          [tipo === 'gb' ? 'gb' : 'ct']: codigo,
           ...(data.data?.pdf_url && { pdf_url: data.data.pdf_url }),
           detalles: data.data,
           fechaVinculacion: serverTimestamp()
         };
-        await addDoc(collection(db, 'users', user.uid, 'reservas'), docData);
+        await addDoc(collection(db, 'users', user.uid, collectionName), docData);
       } catch (fireErr) {
         console.error('Error guardando en Firebase:', fireErr);
       }
@@ -108,10 +231,12 @@ export default function ClientReservas({ user }) {
     }
   };
 
-  const handleEliminar = async (resId, ctCode) => {
-    if (!window.confirm(`¿Eliminar la reserva ${ctCode} de tu cuenta?`)) return;
+  const handleEliminar = async (res) => {
+    const label = res.tipo === 'gb' ? res.gb : res.ct;
+    if (!window.confirm(`¿Eliminar ${res.tipo === 'gb' ? 'el grupo' : 'la reserva'} ${label} de tu cuenta?`)) return;
     try {
-      await deleteDoc(doc(db, 'users', user.uid, 'reservas', resId));
+      const collectionName = res.tipo === 'gb' ? 'grupos' : 'reservas';
+      await deleteDoc(doc(db, 'users', user.uid, collectionName, res.id));
     } catch (err) {
       console.error('Error al eliminar reserva:', err);
     }
@@ -123,20 +248,22 @@ export default function ClientReservas({ user }) {
     setCargandoDetalle(true);
 
     try {
-      const resApi = await fetch('/api/crm-consultar', {
+      const endpoint = res.tipo === 'gb' ? '/api/crm-grupo-consultar' : '/api/crm-consultar';
+      const body = res.tipo === 'gb' ? { gb: res.gb, email: res.correo_grupo } : { ct: res.ct, email: res.correo_reserva };
+      const resApi = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ct: res.ct, email: res.correo_reserva })
+        body: JSON.stringify(body)
       });
       const data = await resApi.json();
 
       if (!data.success) {
-        setErrorDetalle(data.message || 'No se pudo consultar la reserva.');
+        setErrorDetalle(data.message || 'No se pudo consultar la información.');
         setCargandoDetalle(false);
         return;
       }
 
-      setDetalleReserva(data.data);
+      setDetalleReserva({ ...data.data, tipo: res.tipo });
       setCargandoDetalle(false);
     } catch (err) {
       setErrorDetalle('Error de conexión. Intenta de nuevo.');
@@ -169,20 +296,41 @@ export default function ClientReservas({ user }) {
         <div class="border-t border-slate-100 pt-8">
           <div class="flex items-center gap-2 mb-6">
             <Search size={20} class="text-purple-600" />
-            <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Consultar Reserva</h2>
+            <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Consultar Reserva o Grupo</h2>
+          </div>
+
+          <div class="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 mb-6">
+            <button
+              type="button"
+              onClick={() => { setTipo('ct'); setResultado(null); }}
+              class={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                tipo === 'ct' ? 'bg-purple-800 text-white shadow' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Reserva (CT)
+            </button>
+            <button
+              type="button"
+              onClick={() => { setTipo('gb'); setResultado(null); }}
+              class={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                tipo === 'gb' ? 'bg-cyan-600 text-white shadow' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              Grupo (GB)
+            </button>
           </div>
 
           <form onSubmit={handleConsultar} class="space-y-4 mb-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Código de Reserva (CT)
+                  {tipo === 'gb' ? 'Código de Grupo (GB)' : 'Código de Reserva (CT)'}
                 </label>
                 <input
                   type="text"
-                  value={ct}
-                  onChange={(e) => setCt(e.target.value)}
-                  placeholder="Ej: CT-12345"
+                  value={tipo === 'gb' ? gb : ct}
+                  onChange={(e) => (tipo === 'gb' ? setGb(e.target.value) : setCt(e.target.value))}
+                  placeholder={tipo === 'gb' ? 'Ej: GB-12345' : 'Ej: CT-12345'}
                   class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
                 />
               </div>
@@ -215,7 +363,7 @@ export default function ClientReservas({ user }) {
               {consultando ? (
                 <><Loader2 size={16} class="animate-spin" /> Consultando...</>
               ) : (
-                <><Search size={16} /> Consultar Reserva</>
+                <><Search size={16} /> {tipo === 'gb' ? 'Consultar Grupo' : 'Consultar Reserva'}</>
               )}
             </button>
           </form>
@@ -224,21 +372,32 @@ export default function ClientReservas({ user }) {
             <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 mb-8">
               <div class="flex items-center gap-2 mb-4">
                 <CheckCircle size={20} class="text-emerald-600" />
-                <h3 class="font-black text-emerald-800 uppercase text-sm tracking-wider">Reserva Encontrada</h3>
+                <h3 class="font-black text-emerald-800 uppercase text-sm tracking-wider">{resultado.tipo === 'gb' ? 'Grupo Encontrado' : 'Reserva Encontrada'}</h3>
               </div>
               {guardando && (
                 <p class="text-xs text-emerald-600 flex items-center gap-1 mb-3">
                   <Loader2 size={12} class="animate-spin" /> Vinculando a tu cuenta...
                 </p>
               )}
-              <div class="text-sm text-slate-700 bg-white rounded-xl p-4 border border-emerald-100 space-y-1.5">
-                <DetalleRow icon={Hash} label="CT" value={ct} />
-                <DetalleRow icon={Building} label="Hotel" value={resultado.hotel} />
-                <DetalleRow icon={MapPin} label="Destino" value={resultado.destino} />
-                <DetalleRow icon={Calendar} label="Check-in" value={resultado.checkin} />
-                <DetalleRow icon={Calendar} label="Check-out" value={resultado.checkout} />
-                <DetalleRow icon={DollarSign} label="Total" value={resultado.precio_total ? `$${Number(resultado.precio_total).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN` : null} />
-              </div>
+              {resultado.tipo === 'gb' ? (
+                <div class="text-sm text-slate-700 bg-white rounded-xl p-4 border border-emerald-100 space-y-1.5">
+                  <DetalleRow icon={Hash} label="GB" value={gb} />
+                  <DetalleRow icon={Building} label="Hotel" value={resultado.hoteles?.[0]?.hotel} />
+                  <DetalleRow icon={MapPin} label="Destino" value={resultado.hoteles?.[0]?.destino} />
+                  <DetalleRow icon={Calendar} label="Check-in" value={resultado.hoteles?.[0]?.checkin} />
+                  <DetalleRow icon={Calendar} label="Check-out" value={resultado.hoteles?.[0]?.checkout} />
+                  <DetalleRow icon={DollarSign} label="Total" value={resultado.precio_total ? `$${Number(resultado.precio_total).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN` : null} />
+                </div>
+              ) : (
+                <div class="text-sm text-slate-700 bg-white rounded-xl p-4 border border-emerald-100 space-y-1.5">
+                  <DetalleRow icon={Hash} label="CT" value={ct} />
+                  <DetalleRow icon={Building} label="Hotel" value={resultado.hotel} />
+                  <DetalleRow icon={MapPin} label="Destino" value={resultado.destino} />
+                  <DetalleRow icon={Calendar} label="Check-in" value={resultado.checkin} />
+                  <DetalleRow icon={Calendar} label="Check-out" value={resultado.checkout} />
+                  <DetalleRow icon={DollarSign} label="Total" value={resultado.precio_total ? `$${Number(resultado.precio_total).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN` : null} />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -246,53 +405,58 @@ export default function ClientReservas({ user }) {
         <div class="border-t border-slate-100 pt-8">
           <div class="flex items-center gap-2 mb-6">
             <Calendar size={20} class="text-purple-600" />
-            <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Mis Reservas Vinculadas</h2>
+            <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Mis Reservas y Grupos Vinculados</h2>
           </div>
 
           {reservas.length === 0 ? (
             <div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-10 text-center">
               <Calendar size={40} class="text-slate-300 mx-auto mb-3" />
-              <p class="text-slate-500 font-medium">No tienes reservas vinculadas.</p>
-              <p class="text-sm text-slate-400 mt-1">Ingresa tu CT y correo para consultar y vincular tu reserva.</p>
+              <p class="text-slate-500 font-medium">No tienes reservas ni grupos vinculados.</p>
+              <p class="text-sm text-slate-400 mt-1">Ingresa tu CT o GB y correo para consultar y vincular tu información.</p>
             </div>
           ) : (
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               {reservas.map((res) => {
                 const d = res.detalles || {};
+                const esGrupo = res.tipo === 'gb';
+                const hotel = esGrupo ? (d.hoteles?.[0]?.hotel || d.hotel || d.hotelName || d.nombre) : (d.hotel || d.hotelName || d.nombre);
+                const destino = esGrupo ? (d.hoteles?.[0]?.destino || d.destino || d.destination) : (d.destino || d.destination);
+                const checkin = esGrupo ? (d.hoteles?.[0]?.checkin || d.checkin) : d.checkin;
+                const checkout = esGrupo ? (d.hoteles?.[0]?.checkout || d.checkout) : d.checkout;
                 return (
                   <div key={res.id} class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative group">
                     <div class="flex items-start justify-between mb-3">
                       <div>
-                        <span class="inline-block bg-purple-100 text-purple-800 text-xs font-black px-2.5 py-1 rounded-md tracking-wide">
-                          {res.ct}
+                        <span class={`inline-block text-xs font-black px-2.5 py-1 rounded-md tracking-wide ${esGrupo ? 'bg-cyan-100 text-cyan-800' : 'bg-purple-100 text-purple-800'}`}>
+                          {esGrupo ? res.gb : res.ct}
                         </span>
                       </div>
-                      {d.estatus && (
+                      {!esGrupo && d.estatus ? (
                         <span class={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md ${statusColor(d.estatus)}`}>
                           {d.estatus}
                         </span>
-                      )}
+                      ) : null}
                     </div>
 
                     <div class="space-y-1.5">
-                      {(d.hotel || d.hotelName || d.nombre) && (
+                      {hotel && (
                         <div class="flex items-center gap-2 text-sm">
                           <Building size={14} class="text-slate-400 shrink-0" />
-                          <span class="text-slate-800 font-semibold truncate">{d.hotel || d.hotelName || d.nombre}</span>
+                          <span class="text-slate-800 font-semibold truncate">{hotel}</span>
                         </div>
                       )}
-                      {(d.destino || d.destination) && (
+                      {destino && (
                         <div class="flex items-center gap-2 text-sm">
                           <MapPin size={14} class="text-slate-400 shrink-0" />
-                          <span class="text-slate-600 truncate">{d.destino || d.destination}</span>
+                          <span class="text-slate-600 truncate">{destino}</span>
                         </div>
                       )}
-                      {d.checkin && (
+                      {checkin && (
                         <div class="flex items-center gap-2 text-sm">
                           <Calendar size={14} class="text-slate-400 shrink-0" />
                           <span class="text-slate-600">
-                            {d.checkin}
-                            {d.checkout && <> — {d.checkout}</>}
+                            {formatFecha(checkin)}
+                            {checkout && <> — {formatFecha(checkout)}</>}
                           </span>
                         </div>
                       )}
@@ -317,6 +481,13 @@ export default function ClientReservas({ user }) {
                         >
                           <Eye size={14} />
                         </button>
+                        <button
+                          onClick={() => setDocumentosItem(res)}
+                          class="p-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-all"
+                          title="Documentos"
+                        >
+                          <FolderOpen size={14} />
+                        </button>
                         {(res.pdf_url || d.pdf_url) && (
                           <a
                             href={res.pdf_url || d.pdf_url}
@@ -329,9 +500,9 @@ export default function ClientReservas({ user }) {
                           </a>
                         )}
                         <button
-                          onClick={() => handleEliminar(res.id, res.ct)}
+                          onClick={() => handleEliminar(res)}
                           class="p-2 bg-white border border-slate-200 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
-                          title="Eliminar reserva"
+                          title={esGrupo ? 'Eliminar grupo' : 'Eliminar reserva'}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -345,14 +516,21 @@ export default function ClientReservas({ user }) {
         </div>
       </div>
 
+      {/* MODAL DOCUMENTOS */}
+      {documentosItem && (
+        <DocumentosModal item={documentosItem} user={user} onClose={() => setDocumentosItem(null)} />
+      )}
+
       {/* MODAL DETALLE DE RESERVA */}
       {(cargandoDetalle || detalleReserva || errorDetalle) && (
-        <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => { setDetalleReserva(null); setErrorDetalle(''); }}>
-          <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => { setDetalleReserva(null); setErrorDetalle(''); }}>
+          <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
             <div class="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
               <div class="flex items-center gap-2">
                 <FileText size={20} class="text-purple-600" />
-                <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Detalle de Reserva</h2>
+                <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">
+                  {detalleReserva?.tipo === 'gb' ? 'Detalle de Grupo' : 'Detalle de Reserva'}
+                </h2>
               </div>
               <button
                 onClick={() => { setDetalleReserva(null); setErrorDetalle(''); }}
@@ -366,7 +544,7 @@ export default function ClientReservas({ user }) {
               {cargandoDetalle && (
                 <div class="flex flex-col items-center justify-center py-16 text-slate-400">
                   <Loader2 size={32} class="animate-spin text-purple-500 mb-3" />
-                  <span class="text-xs font-bold uppercase tracking-widest">Consultando reserva...</span>
+                  <span class="text-xs font-bold uppercase tracking-widest">Consultando información...</span>
                 </div>
               )}
 
@@ -384,85 +562,165 @@ export default function ClientReservas({ user }) {
               )}
 
               {detalleReserva && !cargandoDetalle && (
-                <div class="space-y-6">
+                detalleReserva.tipo === 'gb' ? (
+                  <GrupoDetalle grupo={detalleReserva} />
+                ) : (
+                <div class="space-y-4">
 
-                  {detalleReserva.pdf_url && (
-                    <div class="bg-gradient-to-r from-purple-700 to-purple-900 rounded-2xl p-6 text-center">
-                      <a
-                        href={detalleReserva.pdf_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center gap-3 bg-white text-purple-900 font-black text-sm uppercase tracking-widest px-8 py-4 rounded-xl hover:bg-purple-50 transition-all shadow-xl"
-                      >
-                        <FileText size={20} />
-                        Descargar PDF de la Reserva
-                      </a>
+                  {/* HERO */}
+                  <div class={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${statusGradient(detalleReserva.estatus)} p-6 text-white animate-in fade-in slide-in-from-top-2 duration-500`}>
+                    <div class="pointer-events-none absolute -top-12 -right-12 w-52 h-52 rounded-full bg-white/10 blur-2xl"></div>
+                    <div class="pointer-events-none absolute -bottom-16 -left-8 w-44 h-44 rounded-full bg-black/10 blur-2xl"></div>
+
+                    <div class="relative z-10 flex flex-col gap-4">
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                          <div class="flex flex-wrap items-center gap-2 mb-2.5">
+                            <span class={`inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${statusPill(detalleReserva.estatus).pill}`}>
+                              <span class="relative flex h-2 w-2">
+                                <span class={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusPill(detalleReserva.estatus).dot}`}></span>
+                                <span class={`relative inline-flex rounded-full h-2 w-2 ${statusPill(detalleReserva.estatus).dot}`}></span>
+                              </span>
+                              {detalleReserva.estatus || 'Confirmada'}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+                              <Hash size={11} /> {detalleReserva.ct}
+                            </span>
+                          </div>
+                          <h3 class="text-xl md:text-2xl font-black leading-tight drop-shadow-sm truncate">
+                            {detalleReserva.hotel || detalleReserva.hotelName || 'Reserva'}
+                          </h3>
+                          {detalleReserva.destino && (
+                            <p class="flex items-center gap-1.5 text-sm text-white/80 mt-1">
+                              <MapPin size={14} class="shrink-0" /> <span class="truncate">{detalleReserva.destino}</span>
+                            </p>
+                          )}
+                        </div>
+
+                        {detalleReserva.pdf_url && (
+                          <a
+                            href={detalleReserva.pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="shrink-0 inline-flex items-center gap-2 bg-white text-slate-900 font-black text-xs uppercase tracking-widest px-4 py-3 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all"
+                          >
+                            <FileText size={16} /> PDF
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  )}
-
-                  <div class="bg-slate-50 rounded-xl p-4 space-y-2">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Datos del Cliente</h3>
-                    <DetalleRow icon={User} label="Nombre" value={detalleReserva.client_name} />
-                    <DetalleRow icon={Phone} label="Teléfono" value={detalleReserva.phone_number} />
-                    <DetalleRow icon={Phone} label="Tel. Sec." value={detalleReserva.phone_secondary} />
-                    <DetalleRow icon={Mail} label="Email" value={detalleReserva.email} />
-                    <DetalleRow icon={User} label="Edad" value={detalleReserva.client_age} />
-                    <DetalleRow icon={User} label="Acompañante" value={detalleReserva.client_sub} />
-                    <DetalleRow icon={User} label="Edad Acomp." value={detalleReserva.client_sub_age} />
                   </div>
 
-                  {(detalleReserva.address || detalleReserva.city) && (
-                    <div class="bg-slate-50 rounded-xl p-4 space-y-2">
-                      <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Dirección</h3>
-                      <DetalleRow icon={Home} label="Dirección" value={detalleReserva.address} />
-                      <DetalleRow icon={MapPin} label="CP / Ciudad" value={detalleReserva.cp ? `${detalleReserva.cp}, ${detalleReserva.city || ''}` : detalleReserva.city} />
-                      <DetalleRow icon={MapPin} label="Estado" value={detalleReserva.state} />
+                  {/* TIMELINE */}
+                  <div class="bg-white border border-slate-200 rounded-2xl p-5 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-75">
+                    <div class="relative flex items-start">
+                      <div class="absolute top-4 left-[16.66%] right-[16.66%] h-0.5 bg-gradient-to-r from-slate-200 via-slate-300 to-slate-200"></div>
+                      {[
+                        { icon: CalendarDays, label: 'Reserva', value: formatFecha(detalleReserva.date_reserva), delay: 'delay-0', color: 'bg-purple-100 text-purple-700' },
+                        { icon: Plane, label: 'Check-in', value: formatFecha(detalleReserva.checkin), delay: 'delay-100', color: 'bg-emerald-100 text-emerald-700' },
+                        { icon: PlaneLanding, label: 'Check-out', value: formatFecha(detalleReserva.checkout), delay: 'delay-200', color: 'bg-amber-100 text-amber-700' },
+                      ].map((node, i) => (
+                        <div key={i} class="flex-1 flex flex-col items-center text-center gap-1.5 relative z-10">
+                          <div class={`w-8 h-8 rounded-full flex items-center justify-center ${node.color} shadow-sm animate-in zoom-in-95 duration-500 ${node.delay}`}>
+                            <node.icon size={15} />
+                          </div>
+                          <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">{node.label}</p>
+                          <p class="text-xs font-bold text-slate-700 leading-tight">{node.value || '—'}</p>
+                        </div>
+                      ))}
                     </div>
-                  )}
-
-                  <div class="bg-slate-50 rounded-xl p-4 space-y-2">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Datos de la Reserva</h3>
-                    <DetalleRow icon={Hash} label="CT" value={detalleReserva.ct} />
-                    <DetalleRow icon={Hash} label="ID" value={detalleReserva.id} />
-                    <DetalleRow icon={Calendar} label="Fecha Reserva" value={detalleReserva.date_reserva} />
-                    <DetalleRow icon={Building} label="Hotel" value={detalleReserva.hotel} />
-                    <DetalleRow icon={MapPin} label="Destino" value={detalleReserva.destino} />
-                    <DetalleRow icon={Calendar} label="Check-in" value={detalleReserva.checkin} />
-                    <DetalleRow icon={Calendar} label="Check-out" value={detalleReserva.checkout} />
-                    <DetalleRow icon={Calendar} label="Noches" value={detalleReserva.cantidad_noches} />
-                    <DetalleRow icon={Bed} label="Tipo Hab." value={detalleReserva.type_room} />
-                    <DetalleRow icon={Bed} label="Habitaciones" value={detalleReserva.habitaciones} />
-                    <DetalleRow icon={Utensils} label="Plan Alim." value={detalleReserva.plan_alimentos} />
-                    <DetalleRow icon={Star} label="Tipo" value={detalleReserva.reservation_type} />
-                    <DetalleRow icon={Users} label="PAX" value={formatPax(detalleReserva.pax)} />
                   </div>
 
-                  <div class="bg-slate-50 rounded-xl p-4 space-y-2">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Financiero</h3>
-                    <DetalleRow icon={DollarSign} label="Precio Total" value={detalleReserva.precio_total ? `$${Number(detalleReserva.precio_total).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN` : null} />
+                  {/* STATS */}
+                  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <StatTile icon={Moon} label="Noches" value={detalleReserva.cantidad_noches || '—'} delay="animate-in zoom-in-95 duration-500 delay-100" />
+                    <StatTile icon={BedDouble} label="Habitaciones" value={detalleReserva.habitaciones || '—'} delay="animate-in zoom-in-95 duration-500 delay-150" />
+                    <StatTile icon={Users} label="PAX" value={formatPax(detalleReserva.pax) || '—'} delay="animate-in zoom-in-95 duration-500 delay-200" />
+                    <StatTile icon={DollarSign} label="Precio Total" value={detalleReserva.precio_total ? <PriceCounter value={detalleReserva.precio_total} /> : '—'} delay="animate-in zoom-in-95 duration-500 delay-250" />
                   </div>
 
-                  {detalleReserva.ninos && detalleReserva.ninos.length > 0 && (
-                    <div class="bg-slate-50 rounded-xl p-4 space-y-2">
-                      <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Pasajeros</h3>
-                      <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-200 text-sm mb-3 space-y-1">
-                        <p class="font-bold text-emerald-800">Adultos: {detalleReserva.cantidad_adultos || '—'}</p>
-                        <p class="text-emerald-700"><span class="font-medium">Nombre:</span> {detalleReserva.client_name}</p>
-                        {detalleReserva.client_sub && <p class="text-emerald-700"><span class="font-medium">Acompañante:</span> {detalleReserva.client_sub}</p>}
+                  {/* CLIENTE + RESERVA */}
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 rounded-2xl p-5 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+                      <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center">
+                          <User size={15} />
+                        </div>
+                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-700">Datos del Cliente</h3>
                       </div>
                       <div class="space-y-2">
-                        {detalleReserva.ninos.map((nino, idx) => (
-                          <div key={idx} class="bg-white rounded-xl p-3 border border-slate-200 text-sm flex items-center gap-3">
-                            <Users size={16} class="text-slate-400 shrink-0" />
-                            <span class="text-slate-800 font-semibold">{nino.nombre}</span>
-                            <span class="text-slate-300">—</span>
-                            <span class="text-slate-600">{nino.edad} años</span>
+                        <InfoChip icon={User} label="Nombre" value={detalleReserva.client_name} />
+                        <InfoChip icon={Mail} label="Email" value={detalleReserva.email} />
+                        <InfoChip icon={Cake} label="Edad" value={detalleReserva.client_age} />
+                        <InfoChip icon={User} label="Acompañante" value={detalleReserva.client_sub} />
+                        <InfoChip icon={Cake} label="Edad Acomp." value={detalleReserva.client_sub_age} />
+                      </div>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-2xl p-5 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
+                      <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                          <BedDouble size={15} />
+                        </div>
+                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-700">Datos de la Reserva</h3>
+                      </div>
+                      <div class="space-y-2">
+                        <InfoChip icon={Building} label="Hotel" value={detalleReserva.hotel} />
+                        <InfoChip icon={MapPin} label="Destino" value={detalleReserva.destino} />
+                        <InfoChip icon={BedDouble} label="Tipo Hab." value={detalleReserva.type_room} />
+                        <InfoChip icon={BedDouble} label="Habitaciones" value={detalleReserva.habitaciones} />
+                        <InfoChip icon={Utensils} label="Plan Alim." value={detalleReserva.plan_alimentos} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PASAJEROS */}
+                  {((detalleReserva.ninos && detalleReserva.ninos.length > 0) || detalleReserva.client_sub) && (
+                    <div class="bg-slate-50 rounded-2xl p-5 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-250">
+                      <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center">
+                          <Users size={15} />
+                        </div>
+                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-700">Pasajeros</h3>
+                      </div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-white rounded-xl p-3 border border-emerald-200 flex items-center gap-3">
+                          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center font-black text-sm shrink-0">
+                            {(detalleReserva.client_name || '?').charAt(0).toUpperCase()}
+                          </div>
+                          <div class="min-w-0">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Adulto</p>
+                            <p class="text-sm font-bold text-slate-800 truncate">{detalleReserva.client_name || 'Titular'}</p>
+                          </div>
+                        </div>
+                        {detalleReserva.client_sub && (
+                          <div class="bg-white rounded-xl p-3 border border-sky-200 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white flex items-center justify-center font-black text-sm shrink-0">
+                              {detalleReserva.client_sub.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="min-w-0">
+                              <p class="text-[9px] font-black uppercase tracking-widest text-sky-600">Acompañante</p>
+                              <p class="text-sm font-bold text-slate-800 truncate">{detalleReserva.client_sub}</p>
+                            </div>
+                          </div>
+                        )}
+                        {(detalleReserva.ninos || []).map((nino, idx) => (
+                          <div key={idx} class="bg-white rounded-xl p-3 border border-violet-200 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0">
+                              {(nino.nombre || '?').charAt(0).toUpperCase()}
+                            </div>
+                            <div class="min-w-0">
+                              <p class="text-[9px] font-black uppercase tracking-widest text-violet-600">Menor {idx + 1}</p>
+                              <p class="text-sm font-bold text-slate-800 truncate">{nino.nombre}</p>
+                              <p class="text-xs text-slate-500">{nino.edad} años</p>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
                 </div>
+                )
               )}
             </div>
           </div>
