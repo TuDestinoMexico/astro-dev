@@ -4,7 +4,7 @@
 
 ## Resumen
 
-El proyecto expone tres endpoints API server-side (proxy a Openpay y proxy a CRM de reservas) y consume una API REST externa para el catálogo de productos. También genera un robots.txt dinámico.
+El proyecto expone cinco endpoints API server-side (proxy a Openpay y proxys a CRM de reservas y grupos) y consume una API REST externa para el catálogo de productos. También genera un robots.txt dinámico.
 
 ---
 
@@ -54,6 +54,60 @@ Proxy a la API CRM de Tu Destino Mexico. Consulta una reserva por CT y correo.
 - **Error 400:** `{ "success": false, "message": "Faltan CT o email" }`
 - **Error 500:** `{ "success": false, "message": "Error de conexión..." }`
 
+### `POST /api/crm-grupo-consultar`
+
+Proxy a la API CRM de Tu Destino Mexico. Consulta un grupo por GB y correo (validado contra el cliente titular del grupo).
+
+- **Archivo:** `src/pages/api/crm-grupo-consultar.ts`
+- **Método:** POST
+- **Body:**
+  ```json
+  { "gb": "string (required)", "email": "string (email, required)" }
+  ```
+- **Respuesta éxito:** `{ "success": true, "data": { ...datos grupo } }`
+- **Respuesta error:** `{ "success": false, "message": "..." }`
+- **URL destino:** `{API_CRM_URL}/api/grupos/consultar`
+- **Variables de entorno:** `API_CRM_URL`
+- **Error 400:** `{ "success": false, "message": "Faltan GB o email" }`
+- **Error 500:** `{ "success": false, "message": "Error de conexión..." }`
+
+### `POST /api/crm-documentos`
+
+Proxy a la API CRM. Lista los documentos de una reserva (CT) o grupo (GB) vinculado, o genera la URL firmada de previsualización de un documento.
+
+- **Archivo:** `src/pages/api/crm-documentos.ts`
+- **Método:** POST
+- **Body:**
+  ```json
+  { "tipo": "ct|gb (required)", "codigo": "string (required)", "email": "string (email, required)", "documentoId": "number (opcional)" }
+  ```
+  - Sin `documentoId` → lista documentos de la entidad.
+  - Con `documentoId` → devuelve URL firmada (5 min) del documento.
+- **Respuesta listado éxito:** `{ "success": true, "data": [...], "tipos_permitidos": [...], "mime_types_permitidos": [...], "tamano_maximo": 10485760 }`
+- **Respuesta preview éxito:** `{ "success": true, "data": { "url": "...", "file_name": "...", "file_type": "..." } }`
+- **URL destino:** `{API_CRM_URL}/api/{reservas|grupos}/{codigo}/documentos?email=...` o `{API_CRM_URL}/api/documentos/{id}/preview?ct|gb=...&email=...`
+- **Variables de entorno:** `API_CRM_URL`, `API_CRM_TOKEN`
+- **Error 400:** `{ "success": false, "message": "Faltan tipo, código o email" }`
+- **Error 500:** `{ "success": false, "message": "Error de conexión..." }`
+
+### `POST /api/crm-documentos-upload`
+
+Proxy a la API CRM. Sube un documento a la reserva (CT) o grupo (GB) indicado (multipart).
+
+- **Archivo:** `src/pages/api/crm-documentos-upload.ts`
+- **Método:** POST
+- **Body (multipart/form-data):**
+  - `tipo` (required) — `ct` o `gb`
+  - `codigo` (required) — CT o GB
+  - `email` (required) — correo del cliente
+  - `tipo_documento` (required) — uno de los `tipos_permitidos` de la entidad
+  - `descripcion` (opcional)
+  - `archivo` (required) — JPG, PNG, PDF, DOC, DOCX; máx 10MB
+- **Respuesta éxito:** `{ "success": true, "data": { ...documento }, "message": "Documento subido exitosamente" }` (201)
+- **URL destino:** `{API_CRM_URL}/api/{reservas|grupos}/{codigo}/documentos`
+- **Variables de entorno:** `API_CRM_URL`, `API_CRM_TOKEN`
+- **Error 500:** `{ "success": false, "message": "Error de conexión..." }`
+
 ### `GET /robots.txt`
 
 Genera robots.txt dinámico.
@@ -66,11 +120,75 @@ Genera robots.txt dinámico.
 
 ## API externa
 
-### CRM (Reservas)
+### CRM (Reservas y Grupos)
 
 - **Base URL:** `https://xolopi.tudestinomx.com` (configurable vía `API_CRM_URL`)
-- **Uso:** Proxy server-side a través de `/api/crm-consultar`
-- **Autenticación:** Endpoint público (sin token), usa CT + email para validar
+- **Uso:** Proxy server-side a través de `/api/crm-consultar` (reservas), `/api/crm-grupo-consultar` (grupos), `/api/crm-pagos` (pagos por CT), `/api/crm-grupo-pagos` (pagos por GB) y `/api/crm-documentos` / `/api/crm-documentos-upload` (documentos)
+- **Autenticación:** Endpoints públicos (sin token de usuario). Requieren header `X-Api-Token` con el valor de `API_CRM_TOKEN` (server-side, nunca expuesto al cliente). El CRM exige este header en `/api/gb/{gb}/pagos` y en los endpoints de documentos.
+
+### Pagos (CRM)
+
+- **Proxy:** `POST /api/crm-pagos` con body `{ ct }` → `GET {API_CRM_URL}/api/pago/{ct}`
+- **Respuesta:** `{ success: true, data: [...] }` — `data` es un array de registros de pago por reserva
+- **Uso:** `ClientPagos.jsx` (selecciona CT vinculado en Firestore `users/{uid}/reservas`)
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | number | ID interno del pago |
+| `reserva_id` | number | ID de la reserva asociada |
+| `ct` | string | Código de reserva |
+| `abonos` | array | `[{ fecha_abono, cantidad, tipo_pago: { metodo_pago, referencia } }]` |
+| `precio_total` | string | Precio total MXN (ej. "86885.00") |
+| `fecha_liquidacion` | string | Fecha-hora de liquidación |
+| `fecha_cambios` | string | Fecha-hora de últimos cambios |
+| `created_at` | string | ISO creation |
+| `updated_at` | string | ISO last update |
+| `proveedor` | object | `{ proveedor }` — nombre del proveedor |
+| `plan_pagos` | null | Sin uso por ahora |
+
+### Pagos de grupos (CRM)
+
+- **Proxy:** `POST /api/crm-grupo-pagos` con body `{ gb }` → `GET {API_CRM_URL}/api/gb/{gb}/pagos`
+- **Respuesta:** `{ success: true, data: [...] }` — `data` es un array de registros de pago por grupo, cada uno con campo `gb` inyectado y relación `grupo` oculta
+- **Uso:** `ClientPagos.jsx` (selecciona GB vinculado en Firestore `users/{uid}/grupos`)
+- **Estructura:** igual a "Pagos (CRM)" pero con `gb` en lugar de `ct` (los abonos comparten `fecha_abono`, `cantidad`, `tipo_pago.metodo_pago`, `tipo_pago.referencia`)
+
+### Documentos (CRM)
+
+- **Proxys:** `POST /api/crm-documentos` (listar/preview) y `POST /api/crm-documentos-upload` (multipart)
+- **Listado:** `GET {API_CRM_URL}/api/reservas/{ct}/documentos?email=` o `GET {API_CRM_URL}/api/grupos/{gb}/documentos?email=` — valida CT/GB + email (igual que consultar). Devuelve `data`, `tipos_permitidos` (según `reservation_type` Q/NQ), `mime_types_permitidos` y `tamano_maximo`.
+- **Subida (cliente):** `POST {API_CRM_URL}/api/reservas/{ct}/documentos` o `/api/grupos/{gb}/documentos` (multipart con `email`, `archivo`, `tipo_documento`, `descripcion`). Máx 10MB; JPG/PNG/PDF/DOC/DOCX. Las subidas de clientes nacen con `estado=pendiente` (requieren verificación del admin).
+- **Subida (admin/reservas, tdmx_v3):** `POST /api/reservas/{reserva}/documentos` o `/api/grupos/{grupo}/documentos` con `archivo`, `tipo_documento`, `descripcion` y opcionalmente `estado` (`verificado`|`rechazado`, default `verificado`) y `motivo_rechazo` (obligatorio si `estado=rechazado`). El usuario que sube queda como `verificado_por`.
+- **Preview:** `GET {API_CRM_URL}/api/documentos/{id}/preview?ct|gb=...&email=...` — valida que el documento pertenezca a la reserva/grupo del cliente; devuelve URL firmada de 5 min. El cliente puede previsualizar sus propios docs pendientes.
+- **Uso:** `DocumentosModal.jsx` (desde `ClientReservas.jsx`, botón carpeta por tarjeta CT/GB vinculada)
+- **Origen:** los docs subidos por el cliente se registran con `origen=cliente` y `email_cliente`; los del agente con `origen=agente` y `uploaded_by`. Ambos se almacenan en Firebase Storage (bucket `tudestinomx`) y en la tabla compartida `documentos`.
+
+**Verificación (ciclo de estados):** las subidas de clientes nacen `pendiente`. El admin las aprueba o rechaza desde la página Documentos del panel (`tdmx_v3`). Solo al aprobarse (`estado=verificado`) el documento cuenta como cargado para el checklist del cliente. El rechazo es visible para el cliente con el `motivo_rechazo`.
+
+| Estado | Descripción |
+|---|---|
+| `pendiente` | Subido por el cliente, esperando revisión del admin |
+| `verificado` | Aprobado por el admin (también es el estado por defecto de los docs de agente y de los existentes) |
+| `rechazado` | Rechazado por el admin; `motivo_rechazo` opcional |
+
+Estructura de un documento:
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | number | ID interno |
+| `tipo_documento` | string | `pre_confirmacion`, `carta_aceptacion`, `voucher`, `ine_frente`, `ine_vuelta`, `tarjetas_pago`, `tarjetas_club`, `ingresos`, etc. |
+| `tipo_documento_label` | string | Etiqueta legible |
+| `descripcion` | string \| null | Descripción opcional |
+| `file_name` | string | Nombre original del archivo |
+| `file_type` | string | MIME |
+| `file_size` | number | Bytes |
+| `file_size_formatted` | string | Ej. "1.2 MB" |
+| `origen` | string | `cliente` o `agente` |
+| `email_cliente` | string \| null | Correo del cliente que subió el doc (si `origen=cliente`) |
+| `estado` | string | `pendiente`, `verificado` o `rechazado` |
+| `estado_label` | string | Etiqueta legible (Pendiente/Verificado/Rechazado) |
+| `motivo_rechazo` | string \| null | Motivo opcional cuando `estado=rechazado` |
+| `created_at` | string | ISO creation |
 
 ### Estructura de datos de reserva
 
@@ -109,6 +227,40 @@ Genera robots.txt dinámico.
 | `pdf_url` | string | URL del PDF |
 | `created_at` | string | ISO creation |
 | `updated_at` | string | ISO last update |
+
+### Estructura de datos de grupo (GB)
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | number | ID interno |
+| `gb` | string | Código único del grupo |
+| `reservation_type` | string | Tipo (`Q` o `NQ`) |
+| `fecha_reserva` | string | Fecha de reserva |
+| `precio_total` | string | Precio total MXN |
+| `precio_neto` | string | Precio neto MXN |
+| `utilidad` | string | Utilidad MXN |
+| `locked_at` | string \| null | Fecha-hora de bloqueo |
+| `pdf_url` | string | URL del PDF |
+| `cliente` | object | Cliente titular: `client_name`, `email`, `phone_number`, `edad`, `client_ocupacion` |
+| `hoteles` | array | Lista de hoteles del grupo |
+
+Cada elemento de `hoteles`:
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `hotel` | string | Nombre del hotel |
+| `destino` | string | Destino |
+| `checkin` | string | Fecha check-in |
+| `checkout` | string | Fecha check-out |
+| `cantidad_noches` | string | Ej. "5 días 4 noches" |
+| `plan_alimentos` | string | Plan alimenticio |
+| `habitacion` | array | Tipos de habitación |
+| `pax` | number | Total de pasajeros |
+| `cantidad_adultos` | number | Adultos |
+| `cantidad_ninos` | number | Menores |
+| `edades_adultos` | array | Edades de adultos |
+| `edades_ninos` | array | Edades de menores |
+| `tripadvisor` | string \| null | Calificación TripAdvisor |
 
 ### Catálogo (Hoteles y Tours)
 
@@ -168,7 +320,9 @@ const data = Array.isArray(raw) ? raw : (raw.data || []);
 | `tour/[slug].astro` | REST (tour detail) | SSR - frontmatter |
 | `PaymentMethods.jsx` | `/api/openpay-cargo` | Client-side fetch |
 | `WelcomeModal.tsx` | `/api/openpay-check` | Client-side fetch |
-| `ClientReservas.jsx` | `/api/crm-consultar` | Client-side fetch (link + ver detalle) |
+| `ClientReservas.jsx` | `/api/crm-consultar`, `/api/crm-grupo-consultar`, `/api/crm-documentos`, `/api/crm-documentos-upload` | Client-side fetch (consultar/vincular + ver detalle de CT y GB + documentos) |
+| `DocumentosModal.jsx` | `/api/crm-documentos`, `/api/crm-documentos-upload` | Client-side fetch (listar, preview y subir documentos) |
+| `ClientPagos.jsx` | `/api/crm-pagos`, `/api/crm-grupo-pagos` | Client-side fetch (pagos por CT o GB vinculado) |
 
 ---
 
@@ -177,6 +331,7 @@ const data = Array.isArray(raw) ? raw : (raw.data || []);
 | Variable | Propósito |
 |---|---|
 | `API_CRM_URL` | URL base de la API CRM de reservas |
+| `API_CRM_TOKEN` | Token para header `X-Api-Token` en requests al CRM (server-side) |
 
 ## Pendiente de documentar
 

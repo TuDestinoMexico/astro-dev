@@ -2,25 +2,23 @@ import type { APIRoute } from 'astro';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
-        const { ct, email } = await request.json();
+        const { gb } = await request.json();
 
-        if (!ct || !email) {
+        if (!gb) {
             return new Response(JSON.stringify({
                 success: false,
-                message: 'Faltan CT o email'
+                message: 'Falta el GB'
             }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
 
         const apiUrl = import.meta.env.API_CRM_URL;
 
-        const response = await fetch(`${apiUrl}/api/reservas/consultar`, {
-            method: 'POST',
+        const response = await fetch(`${apiUrl}/api/gb/${gb}/pagos`, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Api-Token': import.meta.env.API_CRM_TOKEN,
-            },
-            body: JSON.stringify({ ct, email })
+            }
         });
 
         const data = await response.json();
@@ -32,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
     } catch (error) {
         return new Response(JSON.stringify({
             success: false,
-            message: 'Error de conexión con el servidor de reservas'
+            message: 'Error de conexión con el servidor de pagos de grupo'
         }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 };

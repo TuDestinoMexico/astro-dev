@@ -74,7 +74,12 @@ src/
     ├── api/
     │   ├── openpay-cargo.ts   # POST - crear cargo
     │   ├── openpay-check.ts   # GET - verificar transacción
-    │   └── crm-consultar.ts   # POST - proxy a CRM de reservas
+    │   ├── crm-consultar.ts   # POST - proxy a CRM de reservas (CT)
+    │   ├── crm-pagos.ts       # POST - proxy a CRM de pagos (GET /api/pago/{ct})
+    │   ├── crm-grupo-consultar.ts # POST - proxy a CRM de grupos (GB)
+    │   ├── crm-grupo-pagos.ts # POST - proxy a CRM de pagos de grupo (GET /api/gb/{gb}/pagos)
+    │   ├── crm-documentos.ts  # POST - proxy a CRM de documentos (listar / preview)
+    │   └── crm-documentos-upload.ts # POST - proxy a CRM de documentos (subida multipart)
     ├── cliente/
     │   ├── login.astro        # Login cliente (isla ClientLoginButton)
     │   └── dashboard.astro    # Dashboard cliente (isla ClientPanel)

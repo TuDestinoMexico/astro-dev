@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import ClientReservas from './ClientReservas';
 import ClientOfertas from './ClientOfertas';
 import ClientFavoritos from './ClientFavoritos';
+import ClientPagos from './ClientPagos';
 import ClientTopbar from './ClientTopbar';
 
 export default function ClientPanel() {
@@ -41,6 +42,7 @@ export default function ClientPanel() {
         <div class="p-6 md:p-8 lg:p-12 max-w-6xl mx-auto w-full">
           {activeTab === 'reservas' && <ClientReservas user={user} />}
           {activeTab === 'ofertas' && <ClientOfertas user={user} />}
+          {activeTab === 'pagos' && <ClientPagos user={user} />}
           {activeTab === 'favoritos' && <ClientFavoritos user={user} />}
         </div>
       </main>

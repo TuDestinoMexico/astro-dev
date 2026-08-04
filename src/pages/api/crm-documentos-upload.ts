@@ -2,25 +2,28 @@ import type { APIRoute } from 'astro';
 
 export const POST: APIRoute = async ({ request }) => {
     try {
-        const { ct, email } = await request.json();
+        const formData = await request.formData();
 
-        if (!ct || !email) {
+        const tipo = formData.get('tipo');
+        const codigo = formData.get('codigo');
+
+        if (!tipo || !codigo) {
             return new Response(JSON.stringify({
                 success: false,
-                message: 'Faltan CT o email'
+                message: 'Faltan tipo o código'
             }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
 
         const apiUrl = import.meta.env.API_CRM_URL;
+        const entity = tipo === 'gb' ? 'grupos' : 'reservas';
 
-        const response = await fetch(`${apiUrl}/api/reservas/consultar`, {
+        const response = await fetch(`${apiUrl}/api/${entity}/${encodeURIComponent(String(codigo))}/documentos`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Api-Token': import.meta.env.API_CRM_TOKEN,
             },
-            body: JSON.stringify({ ct, email })
+            body: formData
         });
 
         const data = await response.json();
@@ -32,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
     } catch (error) {
         return new Response(JSON.stringify({
             success: false,
-            message: 'Error de conexión con el servidor de reservas'
+            message: 'Error de conexión con el servidor de documentos'
         }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 };

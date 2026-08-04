@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Globe, LogOut, ChevronDown, LayoutDashboard, Tag, Heart } from 'lucide-react';
+import { User, Globe, LogOut, ChevronDown, LayoutDashboard, Tag, Heart, Wallet } from 'lucide-react';
 import { auth, db } from '../../../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -58,41 +58,52 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
         <div class="flex h-auto flex-row font-bold rounded-bl-xl justify-end items-stretch shadow-lg">
           <button
             onClick={() => handleNavClick('reservas')}
-            class="bg-indigo-600 text-white p-3.5 flex-col items-start justify-between space-y-1.5 flex-1 min-w-35 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer hidden xl:flex"
+            class="bg-indigo-600 text-white p-3 flex-col items-start justify-between space-y-1.5 flex-1 min-w-30 xl:min-w-32 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer hidden xl:flex"
           >
-            <LayoutDashboard size={18} class="shrink-0 text-white/90" />
+            <LayoutDashboard size={16} class="shrink-0 text-white/90" />
             <p class="flex flex-col leading-tight tracking-tight">
-              <span class="text-xs xl:text-sm font-black uppercase tracking-wide whitespace-nowrap">Mis Reservas</span>
-              <span class="text-[11px] xl:text-xs font-medium text-white/90 whitespace-nowrap mt-0.5">Ver panel</span>
+              <span class="text-[11px] xl:text-xs font-black uppercase tracking-wide whitespace-nowrap">Mis Reservas</span>
+              <span class="text-[10px] xl:text-[11px] font-medium text-white/90 whitespace-nowrap mt-0.5">Ver panel</span>
             </p>
           </button>
 
           <button
             onClick={() => handleNavClick('ofertas')}
-            class="bg-emerald-600 text-white p-3.5 flex-col items-start justify-between space-y-1.5 flex-1 min-w-35 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer hidden xl:flex"
+            class="bg-emerald-600 text-white p-3 flex-col items-start justify-between space-y-1.5 flex-1 min-w-30 xl:min-w-32 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer hidden xl:flex"
           >
-            <Tag size={18} class="shrink-0 text-white/90" />
+            <Tag size={16} class="shrink-0 text-white/90" />
             <p class="flex flex-col leading-tight tracking-tight">
-              <span class="text-xs xl:text-sm font-black uppercase tracking-wide whitespace-nowrap">Mis Ofertas</span>
-              <span class="text-[11px] xl:text-xs font-medium text-white/90 whitespace-nowrap mt-0.5">Ver promociones</span>
+              <span class="text-[11px] xl:text-xs font-black uppercase tracking-wide whitespace-nowrap">Mis Ofertas</span>
+              <span class="text-[10px] xl:text-[11px] font-medium text-white/90 whitespace-nowrap mt-0.5">Ver promociones</span>
+            </p>
+          </button>
+
+          <button
+            onClick={() => handleNavClick('pagos')}
+            class="bg-amber-600 text-white p-3 flex-col items-start justify-between space-y-1.5 flex-1 min-w-30 xl:min-w-32 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer hidden xl:flex"
+          >
+            <Wallet size={16} class="shrink-0 text-white/90" />
+            <p class="flex flex-col leading-tight tracking-tight">
+              <span class="text-[11px] xl:text-xs font-black uppercase tracking-wide whitespace-nowrap">Mis Pagos</span>
+              <span class="text-[10px] xl:text-[11px] font-medium text-white/90 whitespace-nowrap mt-0.5">Ver abonos</span>
             </p>
           </button>
 
           <button
             onClick={() => handleNavClick('favoritos')}
-            class="bg-rose-600 text-white p-3.5 flex-col items-start justify-between space-y-1.5 flex-1 min-w-35 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer hidden xl:flex"
+            class="bg-rose-600 text-white p-3 flex-col items-start justify-between space-y-1.5 flex-1 min-w-30 xl:min-w-32 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer hidden xl:flex"
           >
-            <Heart size={18} class="shrink-0 text-white/90" />
+            <Heart size={16} class="shrink-0 text-white/90" />
             <p class="flex flex-col leading-tight tracking-tight">
-              <span class="text-xs xl:text-sm font-black uppercase tracking-wide whitespace-nowrap">Mis Favoritos</span>
-              <span class="text-[11px] xl:text-xs font-medium text-white/90 whitespace-nowrap mt-0.5">Guardados</span>
+              <span class="text-[11px] xl:text-xs font-black uppercase tracking-wide whitespace-nowrap">Mis Favoritos</span>
+              <span class="text-[10px] xl:text-[11px] font-medium text-white/90 whitespace-nowrap mt-0.5">Guardados</span>
             </p>
           </button>
 
           <div class="relative flex flex-1" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              class="bg-purple-800 text-white p-3.5 flex-col items-start justify-between space-y-1.5 flex-1 min-w-35 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer"
+              class="bg-purple-800 text-white p-3 flex-col items-start justify-between space-y-1.5 flex-1 min-w-30 xl:min-w-32 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer"
             >
               {user.photoURL ? (
                 <img
@@ -107,12 +118,12 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
               )}
               <div class="flex items-center justify-between gap-1">
                 <p class="flex flex-col leading-tight tracking-tight min-w-0">
-                  <span class="text-xs xl:text-sm font-black uppercase tracking-wide whitespace-nowrap">Mi Cuenta</span>
-                  <span class="text-[11px] xl:text-xs font-medium text-white/90 whitespace-nowrap truncate mt-0.5">
+                  <span class="text-[11px] xl:text-xs font-black uppercase tracking-wide whitespace-nowrap">Mi Cuenta</span>
+                  <span class="text-[10px] xl:text-[11px] font-medium text-white/90 whitespace-nowrap truncate mt-0.5">
                     {user.displayName || user.email}
                   </span>
                 </p>
-                <ChevronDown size={14} class={`text-white/70 transition-transform shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={13} class={`text-white/70 transition-transform shrink-0 ${dropdownOpen ? 'rotate-180' : ''}`} />
               </div>
             </button>
 

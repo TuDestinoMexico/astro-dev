@@ -98,10 +98,13 @@ Renderizados en servidor. Sin estado cliente.
 |---|---|---|
 | `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + modal Google sign-in |
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
-| `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
+| `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones con código y fecha de vencimiento (datos ficticios, pendiente definir fuente) |
+| `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso liquidación, lista de abonos con método y referencia |
 | `ClientFavoritos.jsx` | — | Tarjetas de hoteles/tours guardados con rating y precio (datos ficticios, pendiente definir fuente) |
-| `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas CRM. Modal detalle + PDF download |
+| `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Modal detalle (reserva / `GrupoDetalle`) + PDF download + botón de documentos por tarjeta |
+| `DocumentosModal.jsx` | — | Modal de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) y preview, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
+| `GrupoDetalle.jsx` | — | Contenido del modal de detalle de grupo: hero con GB y tipo (Q/NQ), timeline, stats, cliente titular, sección de hoteles con pasajeros |
 | `LayoutClient.astro` | SSR | Shell layout con Poppins, SEO, Analytics (sin Header.astro) |
 
 ### Admin
