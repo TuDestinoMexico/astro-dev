@@ -32,7 +32,6 @@ Renderizados en servidor. Sin estado cliente.
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
 | `YouTubeCTA.astro` | `components/ui/home/YouTubeCTA.astro` | CTA de YouTube |
-| `DigitalChannels.astro` | `components/ui/home/DigitalChannels.astro` | Canales digitales |
 | `RecomendacionesBanner.astro` | `components/ui/home/RecomendacionesBanner.astro` | Banner de recomendaciones |
 | `Welcome.astro` | `components/Welcome.astro` | Composición de homepage (hero slider + grid + modales) |
 
@@ -103,7 +102,7 @@ Renderizados en servidor. Sin estado cliente.
 | `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso liquidación, lista de abonos con método y referencia |
 | `ClientFavoritos.jsx` | — | Tarjetas de hoteles/tours guardados con rating y precio (datos ficticios, pendiente definir fuente) |
 | `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Modal detalle (reserva / `GrupoDetalle`) + PDF download + botón de documentos por tarjeta |
-| `DocumentosModal.jsx` | — | Modal de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) y preview, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
+| `DocumentosModal.jsx` | — | Modal de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) sin botón de vista previa, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
 | `GrupoDetalle.jsx` | — | Contenido del modal de detalle de grupo: hero con GB y tipo (Q/NQ), timeline, stats, cliente titular, sección de hoteles con pasajeros |
 | `LayoutClient.astro` | SSR | Shell layout con Poppins, SEO, Analytics (sin Header.astro) |
 

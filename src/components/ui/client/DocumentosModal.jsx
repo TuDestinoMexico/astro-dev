@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Loader2, Upload, FileText, Image, File, Eye, CheckCircle2, User, Building, Hash, AlertCircle, FolderOpen, Clock, XCircle } from 'lucide-react';
+import { X, Loader2, Upload, FileText, Image, File, CheckCircle2, User, Building, Hash, AlertCircle, FolderOpen, Clock, XCircle } from 'lucide-react';
 
 const TIPOS_LABELS = {
   'pre_confirmacion': 'Pre-confirmación',
@@ -184,26 +184,6 @@ export default function DocumentosModal({ item, user, onClose }) {
       setError(err.message || 'Error al subir el archivo.');
     } finally {
       setSubiendo(false);
-    }
-  };
-
-  const handlePreview = async (doc) => {
-    setError('');
-    try {
-      const res = await fetch('/api/crm-documentos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo, codigo, email, documentoId: doc.id })
-      });
-      const data = await res.json();
-
-      if (!data.success || !data.data?.url) {
-        throw new Error(data.message || 'No se pudo obtener el archivo.');
-      }
-
-      window.open(data.data.url, '_blank');
-    } catch (err) {
-      setError(err.message || 'No se pudo obtener el archivo.');
     }
   };
 
@@ -437,13 +417,6 @@ export default function DocumentosModal({ item, user, onClose }) {
                             <p class="text-[11px] text-red-500 mt-0.5">Motivo: {doc.motivo_rechazo}</p>
                           )}
                         </div>
-                        <button
-                          onClick={() => handlePreview(doc)}
-                          class="p-2 text-slate-400 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all shrink-0"
-                          title="Ver documento"
-                        >
-                          <Eye size={16} />
-                        </button>
                       </div>
                       );
                     })}

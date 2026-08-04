@@ -40,7 +40,7 @@ try {
 }
 ---
 <div>
-    <div class="container mx-auto xl:flex justify-between items-center">
+    <div class="container mx-auto flex flex-col xl:flex-row justify-between items-center">
         <div class="h-full flex items-center xl:justify-start justify-center mt-5 xl:mt-0">
             <a href="/">
                 {/* VERSIÓN 1: Logo de la cabecera principal con ancho w-70 */}
@@ -63,6 +63,33 @@ try {
             <MenuBar title="Pagar en linea" subtitle="lo hacemos facil" url="/pagos" color="bg-lime-500" icon="fa7-solid:credit-card" />
             <MenuBar title="Quienes Somos" subtitle="La familia Xolo" url="/nosotros" color="bg-orange-500" icon="fa7-solid:people-group" />
             <ClientLoginButton client:only="react" />
+        </div>
+
+        <div id="mobile-topbar-menu" class="xl:hidden w-full p-3 mt-3 shadow-lg">
+            <div class="flex items-stretch gap-2">
+                <button
+                    id="hamburger-btn"
+                    class="bg-slate-800 text-white p-3 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 hover:brightness-110 cursor-pointer"
+                    aria-label="Menú"
+                    aria-expanded="false"
+                >
+                    <span id="hamburger-icon" class="material-icons-outlined text-white pointer-events-none">menu</span>
+                </button>
+                <ClientLoginButton client:only="react" />
+            </div>
+
+            <div id="mobile-menu-panel" class="grid grid-cols-2 gap-2 mt-3 overflow-hidden opacity-0 -translate-y-2 pointer-events-none invisible h-0 transition-all duration-300 ease-out">
+                <MenuBar title="Solo ventas" subtitle="(998) 980 6611" url="tel:529989806611" color="bg-green-400" icon="fa7-solid:phone" />
+                <MenuBar
+                        title="WhatsApp"
+                        subtitle={`(${whatsappGlobal.slice(2, 5)}) ${whatsappGlobal.slice(5, 8)} ${whatsappGlobal.slice(8)}`}
+                        url={`https://wa.me/${whatsappGlobal}`}
+                        color="bg-green-600"
+                        icon="simple-icons:whatsapp"
+                />
+                <MenuBar title="Pagar en linea" subtitle="lo hacemos facil" url="/pagos" color="bg-lime-500" icon="fa7-solid:credit-card" />
+                <MenuBar title="Quienes Somos" subtitle="La familia Xolo" url="/nosotros" color="bg-orange-500" icon="fa7-solid:people-group" />
+            </div>
         </div>
     </div>
 
@@ -168,5 +195,47 @@ try {
         prevBtn.style.opacity = container.scrollLeft > 10 ? "1" : "0";
         const maxScroll = container.scrollWidth - container.clientWidth;
         nextBtn.style.opacity = container.scrollLeft >= maxScroll - 10 ? "0" : "1";
+    });
+
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const mobilePanel = document.getElementById('mobile-menu-panel');
+    const mobileMenuRoot = document.getElementById('mobile-topbar-menu');
+
+    const closeMobileMenu = () => {
+        if (!mobilePanel || !hamburgerBtn || !hamburgerIcon) return;
+        mobilePanel.classList.add('opacity-0', '-translate-y-2', 'pointer-events-none', 'invisible', 'h-0');
+        mobilePanel.classList.remove('opacity-100', 'translate-y-0', 'visible');
+        hamburgerIcon.textContent = 'menu';
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+    };
+
+    const openMobileMenu = () => {
+        if (!mobilePanel || !hamburgerBtn || !hamburgerIcon) return;
+        mobilePanel.classList.add('opacity-100', 'translate-y-0', 'visible');
+        mobilePanel.classList.remove('opacity-0', '-translate-y-2', 'pointer-events-none', 'invisible', 'h-0');
+        hamburgerIcon.textContent = 'close';
+        hamburgerBtn.setAttribute('aria-expanded', 'true');
+    };
+
+    hamburgerBtn?.addEventListener('click', () => {
+        const isOpen = mobilePanel?.classList.contains('opacity-100');
+        if (isOpen) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
+        }
+    });
+
+    mobilePanel?.addEventListener('click', (e) => {
+        if (e.target.closest('a')) {
+            closeMobileMenu();
+        }
+    });
+
+    document.addEventListener('mousedown', (e) => {
+        if (mobileMenuRoot && !mobileMenuRoot.contains(e.target)) {
+            closeMobileMenu();
+        }
     });
 </script>
