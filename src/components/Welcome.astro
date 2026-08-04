@@ -8,7 +8,6 @@ import Content from "./layout/Content.astro";
 import WelcomeModal from "./modal/WelcomeModal";
 import RecentlyViewed from "./ui/RecentlyViewed";
 import PromoLocker from "./ui/PromoLocker";
-import DigitalChannels from "./ui/home/DigitalChannels.astro";
 import EventsHeroSlider from "./ui/home/EventsHeroSlider";
 
 const token = import.meta.env.VITE_API_TOKEN
@@ -27,8 +26,6 @@ const hoteles = Array.isArray(data) ? data : (data.data || []);
     <WelcomeModal client:only="react" />
 
     <RecentlyViewed client:only="react" />
-
-    <DigitalChannels />
 
     <YouTubeCTA />
 

@@ -468,43 +468,47 @@ export default function ClientReservas({ user }) {
                       )}
                     </div>
 
-                    <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
                         <Clock size={11} />
                         Vinculada {res.fechaVinculacion?.toDate?.()?.toLocaleDateString?.('es-MX') || 'hoy'}
                       </div>
-                      <div class="flex items-center gap-1">
+                      <div class="flex flex-wrap gap-2">
                         <button
                           onClick={() => handleVerDetalle(res)}
-                          class="p-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 transition-all"
+                          class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 transition-all text-[11px] font-bold"
                           title="Ver detalle"
                         >
                           <Eye size={14} />
+                          Detalle
                         </button>
                         <button
                           onClick={() => setDocumentosItem(res)}
-                          class="p-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-all"
+                          class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-all text-[11px] font-bold"
                           title="Documentos"
                         >
                           <FolderOpen size={14} />
+                          Documentos
                         </button>
                         {(res.pdf_url || d.pdf_url) && (
                           <a
                             href={res.pdf_url || d.pdf_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="p-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all"
+                            class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all text-[11px] font-bold"
                             title="Descargar PDF"
                           >
                             <FileText size={14} />
+                            PDF
                           </a>
                         )}
                         <button
                           onClick={() => handleEliminar(res)}
-                          class="p-2 bg-white border border-slate-200 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+                          class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all text-[11px] font-bold"
                           title={esGrupo ? 'Eliminar grupo' : 'Eliminar reserva'}
                         >
                           <Trash2 size={14} />
+                          Eliminar
                         </button>
                       </div>
                     </div>
