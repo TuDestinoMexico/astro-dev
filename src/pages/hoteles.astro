@@ -22,10 +22,47 @@ const hoteles = rawData.filter((hotel: any) => Number(hotel.active) === 1);
 
 // Configuramos cuántos mostrar inicialmente
 const INITIAL_VISIBLE = 8;
+
+const hotelListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: hoteles.slice(0, 20).map((hotel: any, index: number) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+            '@type': 'Hotel',
+            name: hotel.name,
+            url: `https://tudestinomx.com/hotel/${hotel.slug}`,
+            image: hotel.images?.principal?.[0]?.url || hotel.imagenes,
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: hotel.destino,
+                addressRegion: 'Quintana Roo',
+                addressCountry: 'MX'
+            },
+            aggregateRating: hotel.reviews && hotel.reviews_count ? {
+                '@type': 'AggregateRating',
+                ratingValue: parseFloat(hotel.reviews),
+                reviewCount: hotel.reviews_count,
+                bestRating: '5',
+                worstRating: '1'
+            } : undefined,
+            priceRange: hotel.price_range || '$$$'
+        }
+    })),
+    numberOfItems: hoteles.length
+};
 ---
 
-<Layout title="Hoteles Exclusivos | Tu Destino México">
+<Layout 
+  title="Hoteles Exclusivos en México | Tu Destino México" 
+  description="Descubre nuestra selección premium de hoteles en Cancún, Riviera Maya, Los Cabos y más. Reserva con los mejores precios y atención personalizada."
+  image="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
+  type="website"
+>
     <Header/>
+
+    <script type="application/ld+json" set:html={JSON.stringify(hotelListSchema)} />
 
     <Content>
         <HeroBanner

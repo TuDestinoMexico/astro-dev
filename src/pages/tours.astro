@@ -21,10 +21,55 @@ const response = await fetch('https://api.tudestinomx.com/api/tour', {
 const data = await response.json();
 // Manejamos la posibilidad de que venga directo o en un objeto .data
 const tours = Array.isArray(data) ? data : (data.data || []);
+
+const tourListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: tours.slice(0, 20).map((tour: any, index: number) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+            '@type': ['TouristAttraction', 'Event'],
+            name: tour.name,
+            url: `https://tudestinomx.com/tour/${tour.slug}`,
+            image: tour.images?.principal?.[0]?.url || tour.imagenes,
+            location: {
+                '@type': 'Place',
+                address: {
+                    '@type': 'PostalAddress',
+                    addressLocality: tour.destino,
+                    addressRegion: 'Quintana Roo',
+                    addressCountry: 'MX'
+                }
+            },
+            aggregateRating: tour.reviews && tour.reviews_count ? {
+                '@type': 'AggregateRating',
+                ratingValue: parseFloat(tour.reviews),
+                reviewCount: tour.reviews_count,
+                bestRating: '5',
+                worstRating: '1'
+            } : undefined,
+            offers: tour.price ? {
+                '@type': 'Offer',
+                priceCurrency: 'MXN',
+                price: tour.price,
+                availability: 'https://schema.org/InStock'
+            } : undefined
+        }
+    })),
+    numberOfItems: tours.length
+};
 ---
 
-<Layout title="Tours e Incursiones | Tu Destino México">
+<Layout 
+  title="Tours y Experiencias en México | Tu Destino México" 
+  description="Descubre las mejores aventuras: snorkel en Cozumel, ruinas mayas, nado con delfines y más. Tours guiados con transporte incluido. ¡Reserva ahora!"
+  image="https://images.unsplash.com/photo-1544735745-b89b18555f60?q=80&w=2070&auto=format&fit=crop"
+  type="website"
+>
     <Header/>
+
+    <script type="application/ld+json" set:html={JSON.stringify(tourListSchema)} />
 
     <Content>
         <HeroBanner

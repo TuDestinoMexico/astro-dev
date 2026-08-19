@@ -3,15 +3,65 @@ import Analytics from '@vercel/analytics/astro'
 import { SEO } from "astro-seo"
 import "../assets/styles/global.css"
 import MatchPoll from '../components/ui/home/MatchPoll'
+
 interface Props {
-	title? : string,
-	description? : string,
+	title?: string
+	description?: string
+	image?: string
+	type?: 'website' | 'article'
 }
 
-const {title, description} = Astro.props
+const { title, description, image, type = 'website' } = Astro.props
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href
+const ogImage = image || 'https://storage.googleapis.com/tudestinomx_bucket/assets/og-default.jpg'
+const siteName = 'Tu Destino México'
+const twitterHandle = '@tudestinomexico'
+
+const organizationSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'Organization',
+	name: 'Tu Destino México',
+	url: 'https://tudestinomx.com',
+	logo: 'https://storage.googleapis.com/tudestinomx_bucket/assets/test/tdmx_logo_mundial.png',
+	sameAs: [
+		'https://fb.com/tudestinomexicoo',
+		'https://instagram.com/tudestinomexico',
+		'https://tiktok.com/@tudestinomexico',
+		'https://youtube.com/@tudestinomexico'
+	],
+	contactPoint: {
+		'@type': 'ContactPoint',
+		telephone: '+52-998-980-6611',
+		contactType: 'customer service',
+		availableLanguage: ['Spanish'],
+		areaServed: 'MX'
+	},
+	address: {
+		'@type': 'PostalAddress',
+		addressLocality: 'Cancún',
+		addressRegion: 'Quintana Roo',
+		addressCountry: 'MX'
+	}
+}
+
+const websiteSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'WebSite',
+	name: 'Tu Destino México',
+	url: 'https://tudestinomx.com',
+	potentialAction: {
+		'@type': 'SearchAction',
+		target: {
+			'@type': 'EntryPoint',
+			urlTemplate: 'https://tudestinomx.com/buscar?q={search_term_string}'
+		},
+		'query-input': 'required name=search_term_string'
+	},
+	publisher: organizationSchema
+}
 ---
 <!doctype html>
-<html lang="en">
+<html lang="es-MX">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -23,10 +73,37 @@ const {title, description} = Astro.props
 		<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 		<meta name="generator" content={Astro.generator} />
 		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="canonical" href={canonicalURL} />
 		<SEO
 			title={title}
 			description={description}
+			canonical={canonicalURL}
+			openGraph={{
+				type,
+				locale: 'es_MX',
+				url: canonicalURL,
+				siteName,
+				title,
+				description,
+				images: [{
+					url: ogImage,
+					width: 1200,
+					height: 630,
+					alt: title || siteName
+				}]
+			}}
+			twitter={{
+				card: 'summary_large_image',
+				site: twitterHandle,
+				creator: twitterHandle,
+				title,
+				description,
+				images: [ogImage]
+			}}
+			jsonLd={[organizationSchema, websiteSchema]}
 		/>
+		<script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+		<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 	</head>
 	<body>
 		<slot />
