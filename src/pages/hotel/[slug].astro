@@ -55,10 +55,76 @@ const recentlyViewedData = {
     image: principalImage,
     url: `/hotel/${slug}`
 };
+
+const hotelSchema = {
+    '@context': 'https://schema.org',
+    '@type': ['LodgingBusiness', 'Hotel'],
+    name: hotel.name,
+    description: hotel.description,
+    url: `https://tudestinomx.com/hotel/${slug}`,
+    image: principalImage ? [principalImage] : undefined,
+    address: {
+        '@type': 'PostalAddress',
+        streetAddress: hotel.address,
+        addressLocality: hotel.destino || 'Cancún',
+        addressRegion: 'Quintana Roo',
+        addressCountry: 'MX'
+    },
+    geo: coordinates.length >= 2 ? {
+        '@type': 'GeoCoordinates',
+        latitude: parseFloat(coordinates[0]),
+        longitude: parseFloat(coordinates[1])
+    } : undefined,
+    telephone: hotel.phone || '+52-998-980-6611',
+    email: hotel.email,
+    starRating: hotel.stars ? {
+        '@type': 'Rating',
+        ratingValue: hotel.stars,
+        bestRating: '5',
+        worstRating: '1'
+    } : undefined,
+    aggregateRating: hotel.reviews && hotel.reviews_count ? {
+        '@type': 'AggregateRating',
+        ratingValue: parseFloat(hotel.reviews),
+        reviewCount: hotel.reviews_count,
+        bestRating: '5',
+        worstRating: '1'
+    } : undefined,
+    amenityFeature: amenities.map((a: string) => ({
+        '@type': 'LocationFeatureSpecification',
+        name: a,
+        value: true
+    })),
+    checkInTime: '15:00',
+    checkOutTime: '12:00',
+    currenciesAccepted: 'MXN',
+    paymentAccepted: 'Cash, Credit Card, Transfer, OXXO, SPEI',
+    priceRange: hotel.price_range || '$$$',
+    makesOffer: hotel.price ? {
+        '@type': 'Offer',
+        name: `${hotel.name} - Habitación Estándar`,
+        description: hotel.description,
+        url: `https://tudestinomx.com/hotel/${slug}`,
+        priceCurrency: 'MXN',
+        price: hotel.price,
+        availability: 'https://schema.org/InStock',
+        seller: {
+            '@type': 'Organization',
+            name: 'Tu Destino México'
+        }
+    } : undefined
+};
 ---
 
-<Layout title={hotel.name || "Detalle de Hotel"} description={hotel.description || "Detalle de Hotel"}>
+<Layout 
+  title={hotel.name || "Detalle de Hotel"} 
+  description={hotel.description || "Detalle de Hotel"}
+  image={principalImage}
+  type="website"
+>
     <Header/>
+
+    <script type="application/ld+json" set:html={JSON.stringify(hotelSchema)} />
 
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
 

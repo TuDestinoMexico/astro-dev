@@ -53,10 +53,78 @@ const recentlyViewedData = {
     image: principalImage,
     url: `/tour/${slug}`
 };
+
+const tourSchema = {
+    '@context': 'https://schema.org',
+    '@type': ['TouristAttraction', 'Event'],
+    name: tour.name,
+    description: tour.description,
+    url: `https://tudestinomx.com/tour/${slug}`,
+    image: principalImage ? [principalImage] : undefined,
+    location: {
+        '@type': 'Place',
+        name: tour.name,
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: address,
+            addressLocality: tour.destino || 'Cancún',
+            addressRegion: 'Quintana Roo',
+            addressCountry: 'MX'
+        },
+        geo: coordinates.length >= 2 ? {
+            '@type': 'GeoCoordinates',
+            latitude: parseFloat(coordinates[0]),
+            longitude: parseFloat(coordinates[1])
+        } : undefined
+    },
+    organizer: {
+        '@type': 'Organization',
+        name: 'Tu Destino México',
+        url: 'https://tudestinomx.com',
+        telephone: '+52-998-980-6611'
+    },
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    startDate: tour.start_date || new Date().toISOString(),
+    endDate: tour.end_date || new Date(Date.now() + 86400000).toISOString(),
+    offers: tour.price ? {
+        '@type': 'Offer',
+        name: tour.name,
+        description: tour.description,
+        url: `https://tudestinomx.com/tour/${slug}`,
+        priceCurrency: 'MXN',
+        price: tour.price,
+        availability: 'https://schema.org/InStock',
+        validFrom: new Date().toISOString(),
+        seller: {
+            '@type': 'Organization',
+            name: 'Tu Destino México'
+        }
+    } : undefined,
+    aggregateRating: tour.reviews && tour.reviews_count ? {
+        '@type': 'AggregateRating',
+        ratingValue: parseFloat(tour.reviews),
+        reviewCount: tour.reviews_count,
+        bestRating: '5',
+        worstRating: '1'
+    } : undefined,
+    includes: tour.includes ? tour.includes : undefined,
+    audience: {
+        '@type': 'Audience',
+        audienceType: 'Turistas, Familias, Parejas'
+    }
+};
 ---
 
-<Layout title={tour.name || "Detalle de Tour"} description={tour.description || "Detalle de Tour"}>
+<Layout 
+  title={tour.name || "Detalle de Tour"} 
+  description={tour.description || "Detalle de Tour"}
+  image={principalImage}
+  type="website"
+>
     <Header/>
+
+    <script type="application/ld+json" set:html={JSON.stringify(tourSchema)} />
 
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
 
