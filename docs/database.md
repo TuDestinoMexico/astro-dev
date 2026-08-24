@@ -121,6 +121,26 @@ Reservas vinculadas por clientes autenticados con Google Auth.
 
 ---
 
+#### `ofertas/{ofertaId}`
+
+Ofertas exclusivas para clientes, gestionadas desde el admin (`OfertasView.jsx`) y consumidas en tiempo real por `ClientOfertas.jsx`.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `titulo` | string | Título de la oferta |
+| `descripcion` | string | Detalle de la promoción |
+| `descuento` | string | Etiqueta de descuento (ej. `30%`, `2x1`, `-1`) |
+| `codigo` | string | Código promocional (se guarda en mayúsculas) |
+| `color` | string | Color de tarjeta: `emerald` \| `amber` \| `violet` \| `cyan` |
+| `vigencia` | timestamp \| null | Fecha de vencimiento; `null` = sin límite. La oferta es válida todo el día de vencimiento y se oculta al día siguiente (filtro client-side contra inicio del día) |
+| `activo` | boolean | Default `true`; toggle para ocultar sin eliminar |
+| `posicion` | number | Orden manual (drag & drop en admin con `writeBatch`) |
+| `creadoEn` | timestamp | Momento de creación |
+
+**Uso:** `OfertasView.jsx` (CRUD admin con `onSnapshot`) y `ClientOfertas.jsx` (`onSnapshot` ordenado por `posicion` asc; filtra `activo !== false` y vencidas en memoria — no requiere índices compuestos). El botón "Reclamar" abre WhatsApp usando `config/general.whatsappGlobal` (fallback `529987141365`).
+
+---
+
 #### `users/{userId}/favoritos/{tipo-slug}`
 
 Hoteles y tours del catálogo API guardados por clientes desde el sitio público (botón corazón).

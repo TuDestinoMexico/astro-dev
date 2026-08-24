@@ -1,43 +1,11 @@
-import { Tag, Clock, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Tag, Clock, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { db } from '../../../lib/firebase';
+import { collection, query, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
 
-const DUMMY_OFFERS = [
-  {
-    id: 1,
-    title: '30% OFF en Riviera Maya',
-    description: 'Hospedaje 4 noches en hotel 5 estrellas con desayuno incluido. Válido en Hyatt Ziva, Secrets Maroma y más.',
-    discount: '30%',
-    validUntil: '30 Sep 2026',
-    code: 'RIVIERA30',
-    color: 'emerald',
-  },
-  {
-    id: 2,
-    title: '2x1 en Tours a Chichén Itzá',
-    description: 'Recorrido guiado con transporte, comida y entrada incluida. Aplica comprando 2 adultos.',
-    discount: '2x1',
-    validUntil: '31 Dic 2026',
-    code: 'CHICHEN2X1',
-    color: 'amber',
-  },
-  {
-    id: 3,
-    title: 'Noche Gratis en Hoteles Seleccionados',
-    description: 'Reserva 3 noches y paga solo 2. Participan: Fiesta Americana, Royalton, Iberostar.',
-    discount: '-1',
-    validUntil: '15 Oct 2026',
-    code: 'FREE3X2',
-    color: 'violet',
-  },
-  {
-    id: 4,
-    title: 'Traslados Aeropuerto 25% OFF',
-    description: 'Traslado privado Cancún-Riviera Maya. Código exclusivo para clientes registrados.',
-    discount: '25%',
-    validUntil: '30 Nov 2026',
-    code: 'TRASLADO25',
-    color: 'cyan',
-  },
-];
+const WHATSAPP_FALLBACK = '529987141365';
+
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 const colorMap = {
   emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-600', text: 'text-emerald-800', ring: 'ring-emerald-500' },
@@ -46,7 +14,60 @@ const colorMap = {
   cyan: { bg: 'bg-cyan-50', border: 'border-cyan-200', badge: 'bg-cyan-600', text: 'text-cyan-800', ring: 'ring-cyan-500' },
 };
 
+const esVencida = (oferta) => {
+  if (!oferta.vigencia?.toDate) return false;
+  const fecha = oferta.vigencia.toDate();
+  if (isNaN(fecha.getTime())) return false;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return fecha < hoy;
+};
+
+const formatVigencia = (ts) => {
+  const d = ts?.toDate?.();
+  if (!d || isNaN(d.getTime())) return null;
+  return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
+};
+
 export default function ClientOfertas({ user }) {
+  const [ofertas, setOfertas] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [whatsapp, setWhatsapp] = useState(WHATSAPP_FALLBACK);
+
+  useEffect(() => {
+    let activo = true;
+    const cargarConfig = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'config', 'general'));
+        if (activo && snap.exists() && snap.data().whatsappGlobal) {
+          setWhatsapp(snap.data().whatsappGlobal);
+        }
+      } catch (err) {
+        console.warn('[ClientOfertas] No se pudo leer config/general:', err);
+      }
+    };
+    cargarConfig();
+    return () => { activo = false; };
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, 'ofertas'), orderBy('posicion', 'asc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const lista = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setOfertas(lista.filter((o) => o.activo !== false && !esVencida(o)));
+      setCargando(false);
+    }, (error) => {
+      console.error('Error leyendo ofertas:', error);
+      setCargando(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const reclamar = (offer) => {
+    const mensaje = `¡Hola! Me interesa reclamar la oferta "${offer.titulo}"${offer.codigo ? ` con el código ${offer.codigo}` : ''} que vi en Tu Destino México.`;
+    window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}`, '_blank');
+  };
+
   return (
     <div>
       <div class="mb-8">
@@ -57,37 +78,55 @@ export default function ClientOfertas({ user }) {
         <p class="text-sm text-slate-500 mt-1">Promociones y descuentos exclusivos para ti</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {DUMMY_OFFERS.map((offer) => {
-          const c = colorMap[offer.color];
-          return (
-            <div key={offer.id} class={`${c.bg} border ${c.border} rounded-xl p-5 flex flex-col gap-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}>
-              <div class="flex items-start justify-between gap-3">
-                <div class={`${c.badge} text-white text-xs font-black px-3 py-1 rounded-full tracking-wider uppercase shrink-0`}>
-                  {offer.discount}
+      {cargando ? (
+        <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+          <Loader2 size={32} class="animate-spin text-emerald-500 mb-3" />
+          <span class="text-xs font-bold uppercase tracking-widest">Cargando ofertas...</span>
+        </div>
+      ) : ofertas.length === 0 ? (
+        <div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-12 text-center">
+          <Sparkles size={40} class="text-slate-300 mx-auto mb-3" />
+          <p class="text-slate-500 font-medium">No hay ofertas disponibles por el momento.</p>
+          <p class="text-sm text-slate-400 mt-1">Vuelve pronto, estamos preparando promociones exclusivas para ti.</p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {ofertas.map((offer) => {
+            const c = colorMap[offer.color] || colorMap.emerald;
+            return (
+              <div key={offer.id} class={`${c.bg} border ${c.border} rounded-xl p-5 flex flex-col gap-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}>
+                <div class="flex items-start justify-between gap-3">
+                  <div class={`${c.badge} text-white text-xs font-black px-3 py-1 rounded-full tracking-wider uppercase shrink-0`}>
+                    {offer.descuento}
+                  </div>
+                  {formatVigencia(offer.vigencia) && (
+                    <div class="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium shrink-0">
+                      <Clock size={13} />
+                      <span>Vence: {formatVigencia(offer.vigencia)}</span>
+                    </div>
+                  )}
                 </div>
-                <div class="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium shrink-0">
-                  <Clock size={13} />
-                  <span>Vence: {offer.validUntil}</span>
+
+                <h3 class="text-base font-bold text-slate-800 leading-snug">{offer.titulo}</h3>
+                <p class="text-sm text-slate-600 leading-relaxed flex-1 whitespace-pre-line">{offer.descripcion}</p>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-200/60">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Código:</span>
+                    <span class={`text-xs font-mono font-black ${c.text} tracking-wider`}>{offer.codigo}</span>
+                  </div>
+                  <button
+                    onClick={() => reclamar(offer)}
+                    class="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-emerald-700 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    Reclamar <ArrowRight size={14} />
+                  </button>
                 </div>
               </div>
-
-              <h3 class="text-base font-bold text-slate-800 leading-snug">{offer.title}</h3>
-              <p class="text-sm text-slate-600 leading-relaxed flex-1">{offer.description}</p>
-
-              <div class="flex items-center justify-between pt-2 border-t border-slate-200/60">
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] uppercase tracking-widest font-bold text-slate-400">Código:</span>
-                  <span class={`text-xs font-mono font-black ${c.text} tracking-wider`}>{offer.code}</span>
-                </div>
-                <button class="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1 cursor-pointer">
-                  Reclamar <ArrowRight size={14} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
