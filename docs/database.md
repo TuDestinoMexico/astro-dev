@@ -118,3 +118,20 @@ Reservas vinculadas por clientes autenticados con Google Auth.
 | `fechaVinculacion` | timestamp | Momento en que se vinculó |
 
 **Uso:** `ClientReservas.jsx` (lectura con `onSnapshot`, escritura con `addDoc` al consultar una reserva).
+
+---
+
+#### `users/{userId}/favoritos/{tipo-slug}`
+
+Hoteles y tours del catálogo API guardados por clientes desde el sitio público (botón corazón).
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `tipo` | string | `hotel` \| `tour` |
+| `slug` | string | Slug del item en la API externa (URL de detalle: `/{tipo}/{slug}`) |
+| `nombre` | string | Nombre del hotel/tour al guardar |
+| `imagen` | string | URL de imagen principal (snapshot) |
+| `destino` | string | Destino asociado |
+| `fechaGuardado` | timestamp | Momento en que se guardó |
+
+**Uso:** El ID del documento es `${tipo}-${slug}` (determinista vía `setDoc`) → duplicados imposibles. Escritura: `FavoriteButton.jsx` en sitio público a través del store singleton `src/lib/favoritosStore.js` (un solo `onAuthStateChanged` + un solo `onSnapshot` por página, consumido con `useSyncExternalStore`). Lectura/eliminación: `ClientFavoritos.jsx`. Guarda snapshot de visualización, no referencia viva a la API — el token nunca llega al cliente.
