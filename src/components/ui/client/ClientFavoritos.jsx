@@ -1,49 +1,37 @@
-import { Heart, MapPin, Star, Trash2 } from 'lucide-react';
-
-const DUMMY_FAVORITES = [
-  {
-    id: 1,
-    name: 'Hyatt Ziva Cancún',
-    type: 'Hotel',
-    location: 'Cancún, QR',
-    price: '$4,200 MXN',
-    rating: 4.8,
-    image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/test/placeholder-hotel.jpg',
-    tag: 'Todo incluido',
-  },
-  {
-    id: 2,
-    name: 'Xcaret Park',
-    type: 'Tour',
-    location: 'Playa del Carmen, QR',
-    price: '$1,899 MXN',
-    rating: 4.9,
-    image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/test/placeholder-tour.jpg',
-    tag: 'Entrada general',
-  },
-  {
-    id: 3,
-    name: 'Isla Mujeres Tour',
-    type: 'Tour',
-    location: 'Cancún, QR',
-    price: '$850 MXN',
-    rating: 4.6,
-    image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/test/placeholder-tour.jpg',
-    tag: 'Catamarán',
-  },
-  {
-    id: 4,
-    name: 'Secrets Maroma Beach',
-    type: 'Hotel',
-    location: 'Riviera Maya, QR',
-    price: '$5,800 MXN',
-    rating: 4.7,
-    image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/test/placeholder-hotel.jpg',
-    tag: 'Solo adultos',
-  },
-];
+import React, { useEffect, useState } from 'react';
+import { Heart, MapPin, Trash2, Loader2 } from 'lucide-react';
+import { db } from '../../../lib/firebase';
+import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 
 export default function ClientFavoritos({ user }) {
+  const [favoritos, setFavoritos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, 'users', user.uid, 'favoritos'),
+      orderBy('fechaGuardado', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setFavoritos(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+      setCargando(false);
+    }, (error) => {
+      console.error('Error leyendo favoritos:', error);
+      setCargando(false);
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  const handleEliminar = async (fav) => {
+    if (!window.confirm(`¿Quitar "${fav.nombre}" de tus favoritos?`)) return;
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'favoritos', fav.id));
+    } catch (err) {
+      console.error('Error al eliminar favorito:', err);
+    }
+  };
+
   return (
     <div>
       <div class="mb-8">
@@ -54,55 +42,84 @@ export default function ClientFavoritos({ user }) {
         <p class="text-sm text-slate-500 mt-1">Tus hoteles y tours guardados</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {DUMMY_FAVORITES.map((fav) => (
-          <div key={fav.id} class="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col md:flex-row">
-            <div class="w-full md:w-40 h-40 md:h-auto bg-slate-100 shrink-0 flex items-center justify-center text-slate-300 text-xs font-medium">
-              <img
-                src={fav.image}
-                alt={fav.name}
-                class="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.innerHTML = '<span class="text-slate-300 text-xs font-medium">Sin imagen</span>';
-                }}
-              />
-            </div>
+      {cargando ? (
+        <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+          <Loader2 size={32} class="animate-spin text-rose-500 mb-3" />
+          <span class="text-xs font-bold uppercase tracking-widest">Cargando favoritos...</span>
+        </div>
+      ) : favoritos.length === 0 ? (
+        <div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-12 text-center">
+          <Heart size={40} class="text-slate-300 mx-auto mb-3" />
+          <p class="text-slate-500 font-medium">No tienes favoritos guardados.</p>
+          <p class="text-sm text-slate-400 mt-1">Toca el corazón en cualquier hotel o tour del sitio para guardarlos aquí.</p>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {favoritos.map((fav) => {
+            const esHotel = fav.tipo === 'hotel';
+            const urlDetalle = `/${esHotel ? 'hotel' : 'tour'}/${fav.slug}`;
+            return (
+              <div key={fav.id} class="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col md:flex-row">
+                <a href={urlDetalle} class="w-full md:w-40 h-40 md:h-auto bg-slate-100 shrink-0 block relative">
+                  {fav.imagen ? (
+                    <img
+                      src={fav.imagen}
+                      alt={fav.nombre}
+                      class="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
+                        e.target.parentElement.innerHTML = '<span class="text-slate-300 text-xs font-medium">Sin imagen</span>';
+                      }}
+                    />
+                  ) : (
+                    <div class="w-full h-full flex items-center justify-center">
+                      <span class="text-slate-300 text-xs font-medium">Sin imagen</span>
+                    </div>
+                  )}
+                </a>
 
-            <div class="flex-1 p-4 flex flex-col gap-2 min-w-0">
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <h3 class="text-base font-bold text-slate-800 truncate">{fav.name}</h3>
-                  <div class="flex items-center gap-1.5 text-[11px] text-slate-400 mt-0.5">
-                    <MapPin size={12} />
-                    <span class="truncate">{fav.location}</span>
+                <div class="flex-1 p-4 flex flex-col gap-2 min-w-0">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <a href={urlDetalle}>
+                        <h3 class="text-base font-bold text-slate-800 truncate hover:text-rose-600 transition-colors">{fav.nombre}</h3>
+                      </a>
+                      {fav.destino && (
+                        <div class="flex items-center gap-1.5 text-[11px] text-slate-400 mt-0.5">
+                          <MapPin size={12} />
+                          <span class="truncate">{fav.destino}</span>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleEliminar(fav)}
+                      class="text-slate-300 hover:text-red-500 transition-colors cursor-pointer shrink-0 p-1"
+                      title="Quitar de favoritos"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+
+                  <div class="flex items-center justify-between pt-1 mt-auto">
+                    <span class={`font-bold px-2 py-0.5 rounded tracking-wider uppercase text-[10px] ${
+                      esHotel ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'
+                    }`}>
+                      {esHotel ? 'Hotel' : 'Tour'}
+                    </span>
+                    <a
+                      href={urlDetalle}
+                      class="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-rose-600 transition-colors"
+                    >
+                      Ver detalle
+                    </a>
                   </div>
                 </div>
-                <button class="text-slate-300 hover:text-red-500 transition-colors cursor-pointer shrink-0 p-1">
-                  <Trash2 size={15} />
-                </button>
               </div>
-
-              <div class="flex items-center gap-2 text-xs">
-                <span class="bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded tracking-wider uppercase text-[10px]">
-                  {fav.type}
-                </span>
-                <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-medium">
-                  {fav.tag}
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between pt-1 mt-auto">
-                <div class="flex items-center gap-1 text-amber-500">
-                  <Star size={14} fill="currentColor" />
-                  <span class="text-xs font-bold text-slate-700">{fav.rating}</span>
-                </div>
-                <span class="text-sm font-black text-slate-800">{fav.price}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

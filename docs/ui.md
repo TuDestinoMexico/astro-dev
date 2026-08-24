@@ -26,7 +26,7 @@ Renderizados en servidor. Sin estado cliente.
 | `FooterBanner.astro` | `components/ui/FooterBanner.astro` | Banner promocional pre-footer |
 | `HeroBanner.astro` | `components/ui/single/HeroBanner.astro` | Banner de cabecera para páginas de listing |
 | `HeroBannerOutBounds.astro` | `components/ui/single/HeroBannerOutBounds.astro` | Hero banner extendido |
-| `Card.astro` | `components/ui/single/Card.astro` | Tarjeta reutilizable para hoteles/tours |
+| `Card.astro` | `components/ui/single/Card.astro` | Tarjeta reutilizable para hoteles/tours (incluye botón favorito `FavoriteButton.jsx` en zona de imagen) |
 | `Gallery.astro` | `components/ui/hotel/Gallery.astro` | Galería de imágenes con LightGallery |
 | `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta de miembro del equipo |
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
@@ -51,6 +51,13 @@ Renderizados en servidor. Sin estado cliente.
 | `WelcomeModal.tsx` | `client:only` | Modal de estado de pago (check vía query param `id`) |
 | `RecentlyViewed.jsx` | `client:only` | Tarjetas de últimos visitados (localStorage) |
 | `PromoLocker.jsx` | `client:only` | Locker promocional (actualmente comentado) |
+
+### Favoritos
+
+| Componente | Directiva | Propósito |
+|---|---|---|
+| `FavoriteButton.jsx` | `client:idle` (desde `Card.astro`, `hotel/[slug].astro` y `tour/[slug].astro`) | Botón corazón para guardar/quitar favoritos (`users/{uid}/favoritos`, ID `${tipo}-${slug}`); sin sesión redirige a `/cliente/login`; estado sincronizado vía `favoritosStore.js` con `useSyncExternalStore` |
+| `favoritosStore.js` | — | Store singleton en `src/lib/`: un solo listener Firestore + auth por página, expone subscribe/getClaves/getUser/guardar/quitar |
 
 ### Hoteles
 
@@ -100,7 +107,7 @@ Renderizados en servidor. Sin estado cliente.
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones con código y fecha de vencimiento (datos ficticios, pendiente definir fuente) |
 | `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso liquidación, lista de abonos con método y referencia |
-| `ClientFavoritos.jsx` | — | Tarjetas de hoteles/tours guardados con rating y precio (datos ficticios, pendiente definir fuente) |
+| `ClientFavoritos.jsx` | — | Favoritos reales del cliente (Firestore `users/{uid}/favoritos` vía `onSnapshot`, recientes primero): tarjetas con imagen/nombre/destino/badge Hotel-Tour, link al detalle `/{tipo}/{slug}` y eliminar con confirmación |
 | `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Modal detalle (reserva / `GrupoDetalle`) + PDF download + botón de documentos por tarjeta |
 | `DocumentosModal.jsx` | — | Modal de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) sin botón de vista previa, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
 | `GrupoDetalle.jsx` | — | Contenido del modal de detalle de grupo: hero con GB y tipo (Q/NQ), timeline, stats, cliente titular, sección de hoteles con pasajeros |

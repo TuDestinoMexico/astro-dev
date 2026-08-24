@@ -6,6 +6,7 @@ import { Icon } from 'astro-icon/components';
 import Gallery from '../../components/ui/hotel/Gallery.astro';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
+import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
 
 const { slug } = Astro.params;
 
@@ -129,9 +130,19 @@ const hotelSchema = {
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
 
         <div class="space-y-4">
-            <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
-                {hotel.name}
-            </h1>
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+                <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+                    {hotel.name}
+                </h1>
+                <FavoriteButton
+                    client:idle
+                    tipo="hotel"
+                    slug={slug}
+                    nombre={hotel.name}
+                    imagen={principalImage}
+                    destino={hotel.destino}
+                />
+            </div>
 
             <div class="flex flex-wrap items-center gap-y-3 gap-x-6 text-sm md:text-base">
                 <div class="flex items-center gap-1.5 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
