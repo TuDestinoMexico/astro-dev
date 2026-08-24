@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Mail, User, Search, Clock, CheckCircle, AlertCircle, Loader2, Trash2, Building, MapPin, DollarSign, Hash, Eye, X, FileText, Users, BedDouble, Utensils, CalendarDays, Plane, PlaneLanding, Moon, Cake, FolderOpen } from 'lucide-react';
 import { db } from '../../../lib/firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, setDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore';
 import GrupoDetalle from './GrupoDetalle';
 import DocumentosModal from './DocumentosModal';
 
@@ -184,9 +184,22 @@ export default function ClientReservas({ user }) {
     setError('');
     setResultado(null);
 
-    const codigo = tipo === 'gb' ? gb : ct;
+    const codigo = (tipo === 'gb' ? gb : ct).trim();
     if (!codigo || !email) {
       setError('Completa todos los campos.');
+      return;
+    }
+
+    const yaVinculado = reservas.some((r) =>
+      r.tipo === tipo &&
+      String(r.tipo === 'gb' ? r.gb : r.ct || '').trim().toUpperCase() === codigo.toUpperCase()
+    );
+    if (yaVinculado) {
+      setError(
+        tipo === 'gb'
+          ? `El grupo ${codigo} ya está vinculado a tu cuenta.`
+          : `La reserva ${codigo} ya está vinculada a tu cuenta.`
+      );
       return;
     }
 
@@ -220,7 +233,7 @@ export default function ClientReservas({ user }) {
           detalles: data.data,
           fechaVinculacion: serverTimestamp()
         };
-        await addDoc(collection(db, 'users', user.uid, collectionName), docData);
+        await setDoc(doc(db, 'users', user.uid, collectionName, codigo.toUpperCase()), docData);
       } catch (fireErr) {
         console.error('Error guardando en Firebase:', fireErr);
       }
