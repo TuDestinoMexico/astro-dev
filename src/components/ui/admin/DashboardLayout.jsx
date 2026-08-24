@@ -9,6 +9,7 @@ import LeadsView from './LeadsView';
 import TeamView from './TeamView';
 import MediaManager from './MediaManager';
 import ConfigView from './ConfigView';
+import OfertasView from './OfertasView';
 
 export default function DashboardLayout() {
     const [user, setUser] = useState(null);
@@ -76,6 +77,7 @@ export default function DashboardLayout() {
                     {activeTab === 'inicio' && <LeadsView />}
                     {activeTab === 'equipo' && <TeamView />}
                     {activeTab === 'medios' && <MediaManager />}
+                    {activeTab === 'ofertas' && <OfertasView />}
                     {activeTab === 'config' && <ConfigView />}
                 </div>
             </main>

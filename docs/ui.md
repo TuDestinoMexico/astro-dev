@@ -105,7 +105,7 @@ Renderizados en servidor. Sin estado cliente.
 | `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + modal Google sign-in |
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
-| `ClientOfertas.jsx` | — | Tarjetas de promociones con código y fecha de vencimiento (datos ficticios, pendiente definir fuente) |
+| `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |
 | `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso liquidación, lista de abonos con método y referencia |
 | `ClientFavoritos.jsx` | — | Favoritos reales del cliente (Firestore `users/{uid}/favoritos` vía `onSnapshot`, recientes primero): tarjetas con imagen/nombre/destino/badge Hotel-Tour, link al detalle `/{tipo}/{slug}` y eliminar con confirmación |
 | `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Modal detalle (reserva / `GrupoDetalle`) + PDF download + botón de documentos por tarjeta |
@@ -122,6 +122,7 @@ Renderizados en servidor. Sin estado cliente.
 | `Sidebar.jsx` | — | Navegación lateral admin |
 | `LeadsView.jsx` | — | Últimas cotizaciones (Firestore, limit 5) |
 | `TeamView.jsx` | — | CRUD equipo con drag & drop, paginación, búsqueda, selector de fotos |
+| `OfertasView.jsx` | — | CRUD de ofertas (Firestore `ofertas` con `onSnapshot`, tiempo real): formulario (título, descripción, descuento, código, color, vigencia opcional, activo), tabla con drag & drop + búsqueda + paginación, toggle visible/oculta y badge "Vencida" |
 | `MediaManager.jsx` | — | Explorador Firebase Storage con CRUD de archivos/carpetas |
 | `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, maintenance) |
 
