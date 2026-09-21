@@ -64,13 +64,13 @@ Renderizados en servidor. Sin estado cliente.
 | Componente | Directiva | Propósito |
 |---|---|---|
 | `HotelTabs.tsx` | `client:load` | Tabs de descripción/amenidades/ubicación con Google Maps iframe |
-| `BookingCalendar.tsx` | `client:visible` | Calendario de reserva con formulario y envío WhatsApp |
+| `BookingCalendar.tsx` | `client:visible` | Modal responsive de reserva con selector profesional de rango para hoteles (dos meses desktop, uno móvil, preview y mínimo una noche), footer de aplicación y formulario con envío WhatsApp |
 
 ### Tours
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `BookingCalendar.tsx` | `client:visible` | Mismo componente, usado con `isSingleDate=true` |
+| `BookingCalendar.tsx` | `client:visible` | Mismo modal en modo fecha única (`isSingleDate=true`) para tours |
 
 ### Timeline / Mapas
 

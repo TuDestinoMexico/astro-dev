@@ -1,7 +1,12 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, eachDayOfInterval, isWithinInterval, isBefore, isAfter, differenceInDays, startOfToday } from 'date-fns';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { format, addMonths, differenceInDays, isAfter, isBefore, startOfMonth, startOfToday, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar as CalendarIcon, User, Send, Users, ChevronDown } from 'lucide-react';
+import { DayPicker, type DateRange } from 'react-day-picker';
+import 'react-day-picker/style.css';
+import { CalendarDays, User, Send, X } from 'lucide-react';
 import { MinorAges } from './MinorAges';
 
 interface Props {
@@ -9,28 +14,50 @@ interface Props {
     isSingleDate?: boolean; // Opcional para no romper Hoteles
 }
 
-
-const getDayStatus = (day: Date) => {
-    const today = startOfToday();
-    const simulationEnd = addMonths(today, 3);
-    if (isAfter(day, simulationEnd)) return null;
-    const dayOfWeek = day.getDay();
-    if (dayOfWeek === 2 || dayOfWeek === 3) return 'cheap';
-    if (dayOfWeek === 5 || dayOfWeek === 6) return 'high-demand';
-    return 'standard';
+const calendarClassNames = {
+    months: 'flex flex-col md:flex-row gap-6 justify-center',
+    month: 'space-y-4 rounded-2xl border border-slate-100 bg-white p-2 sm:p-3',
+    month_caption: 'hidden',
+    caption_label: 'text-sm font-black capitalize text-slate-800',
+    nav: 'hidden',
+    month_grid: 'border-collapse',
+    weekdays: 'grid grid-cols-7',
+    weekday: 'w-10 text-center text-[10px] font-black uppercase text-slate-400',
+    week: 'grid grid-cols-7 mt-1',
+    day: 'relative flex h-10 w-10 items-center justify-center p-0 text-center text-sm',
+    day_button: 'h-10 w-10 rounded-xl font-bold text-slate-700 transition-all hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer',
+    selected: '[&>button]:!bg-indigo-600 [&>button]:!text-white [&>button]:shadow-md',
+    range_start: '[&>button]:!bg-indigo-600 [&>button]:!text-white [&>button]:rounded-l-xl [&>button]:rounded-r-none [&>button]:shadow-md',
+    range_end: '[&>button]:!bg-indigo-600 [&>button]:!text-white [&>button]:rounded-r-xl [&>button]:rounded-l-none [&>button]:shadow-md',
+    range_middle: '[&>button]:!bg-indigo-50 [&>button]:!text-indigo-800 [&>button]:rounded-none',
+    today: 'font-black text-indigo-600',
+    outside: 'text-slate-200',
+    disabled: '[&>button]:!bg-slate-50 [&>button]:!text-slate-300 [&>button]:!opacity-70 [&>button]:cursor-not-allowed',
+    hidden: 'invisible'
 };
+
 
 export default function BookingCalendar({ hotelName, isSingleDate = false }: Props) {
     // ESTADOS
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
     const [checkIn, setCheckIn] = useState<Date | null>(null);
     const [checkOut, setCheckOut] = useState<Date | null>(null);
+    const [range, setRange] = useState<DateRange | undefined>();
+    const [isClosing, setIsClosing] = useState(false);
     const [formData, setFormData] = useState({ nombre: '', adultos: 2, menores: 0, edadesMenores: [] as string[] });
 
-    // Actualizamos la referencia al nuevo contenedor relativo
-    const calendarContainerRef = useRef<HTMLDivElement>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
+    const modalRef = useRef<HTMLDivElement>(null);
+    const summaryRef = useRef<HTMLDivElement>(null);
+    const calendarViewportRef = useRef<HTMLDivElement>(null);
+    const footerRef = useRef<HTMLDivElement>(null);
+    const monthDirectionRef = useRef<'next' | 'previous'>('next');
     const today = startOfToday();
+    const firstMonth = startOfMonth(today);
+    const lastMonth = startOfMonth(addMonths(today, 24));
+    const lastVisibleMonth = startOfMonth(subMonths(lastMonth, 1));
+    const lastAllowedMonth = isSingleDate ? lastMonth : lastVisibleMonth;
 
     const handleEdadChange = (index: number, edad: string) => {
         const nuevasEdades = [...formData.edadesMenores];
@@ -52,44 +79,139 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
         setFormData({ ...formData, menores: num, edadesMenores: nuevasEdades });
     };
 
-    // Cerrar al hacer clic fuera del widget
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (calendarContainerRef.current && !calendarContainerRef.current.contains(event.target as Node)) {
+    const closeCalendar = () => {
+        if (!isCalendarOpen || isClosing) return;
+        setIsClosing(true);
+
+        const isMobile = window.matchMedia('(max-width: 639px)').matches;
+        const timeline = gsap.timeline({
+            defaults: { ease: 'power2.in' },
+            onComplete: () => {
                 setIsCalendarOpen(false);
+                setIsClosing(false);
             }
+        });
+
+        timeline.to(overlayRef.current, { opacity: 0, duration: 0.2 }, 0);
+        timeline.to(modalRef.current, {
+            y: isMobile ? '100%' : 18,
+            scale: isMobile ? 1 : 0.98,
+            opacity: 0,
+            duration: 0.24
+        }, 0);
+    };
+
+    useEffect(() => {
+        if (!isCalendarOpen) return;
+
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') closeCalendar();
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', handleEscape);
 
-    const days = useMemo(() => {
-        const start = startOfWeek(startOfMonth(currentMonth), { locale: es });
-        const end = endOfWeek(endOfMonth(currentMonth), { locale: es });
-        return eachDayOfInterval({ start, end });
-    }, [currentMonth]);
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [isCalendarOpen]);
 
-    const handleDateClick = (day: Date) => {
-        if (isBefore(day, today)) return;
+    useGSAP(() => {
+        if (!isCalendarOpen || !modalRef.current) return;
 
-        // LÓGICA PARA TOURS (Fecha única)
-        if (isSingleDate) {
-            setCheckIn(day);
-            setCheckOut(null);
-            setTimeout(() => setIsCalendarOpen(false), 300);
+        const media = gsap.matchMedia();
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        gsap.set(overlayRef.current, { opacity: 0 });
+        gsap.set(modalRef.current, { opacity: 0 });
+
+        if (reducedMotion) {
+            gsap.set([overlayRef.current, modalRef.current], { clearProps: 'all', opacity: 1, y: 0, scale: 1 });
+        } else {
+            gsap.to(overlayRef.current, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+            media.add('(max-width: 639px)', () => {
+                gsap.fromTo(modalRef.current, { y: '100%', opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power3.out' });
+            });
+            media.add('(min-width: 640px)', () => {
+                gsap.fromTo(modalRef.current, { y: 24, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.45, ease: 'power3.out' });
+            });
+            gsap.fromTo(
+                [summaryRef.current, calendarViewportRef.current, footerRef.current],
+                { y: 8, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.3, stagger: 0.05, ease: 'power2.out', delay: 0.12 }
+            );
+        }
+
+        return () => media.revert();
+    }, { dependencies: [isCalendarOpen], scope: modalRef });
+
+    useGSAP(() => {
+        if (!isCalendarOpen || !calendarViewportRef.current) return;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const direction = monthDirectionRef.current === 'next' ? 14 : -14;
+
+        if (reducedMotion) {
+            gsap.set(calendarViewportRef.current, { clearProps: 'all' });
             return;
         }
 
-        // LÓGICA PARA HOTELES (Se queda igual)
-        if (!checkIn || (checkIn && checkOut)) {
-            setCheckIn(day);
-            setCheckOut(null);
-        } else if (isBefore(day, checkIn)) {
-            setCheckIn(day);
-        } else {
-            setCheckOut(day);
-            setTimeout(() => setIsCalendarOpen(false), 300);
-        }
+        gsap.fromTo(calendarViewportRef.current,
+            { x: direction, opacity: 0.55 },
+            { x: 0, opacity: 1, duration: 0.24, ease: 'power2.out' }
+        );
+    }, { dependencies: [currentMonth], scope: calendarViewportRef });
+
+    useGSAP(() => {
+        if (!isCalendarOpen || !summaryRef.current) return;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion) return;
+
+        gsap.fromTo(summaryRef.current,
+            { y: 5, opacity: 0.7 },
+            { y: 0, opacity: 1, duration: 0.24, ease: 'power2.out' }
+        );
+    }, { dependencies: [checkIn, checkOut], scope: summaryRef });
+
+    const handleRangeSelect = (nextRange: DateRange | undefined) => {
+        setRange(nextRange);
+        setCheckIn(nextRange?.from || null);
+        setCheckOut(nextRange?.to || null);
+    };
+
+    const handleSingleDateSelect = (date: Date | undefined) => {
+        setCheckIn(date || null);
+        setCheckOut(null);
+    };
+
+    const clearDates = () => {
+        setRange(undefined);
+        setCheckIn(null);
+        setCheckOut(null);
+    };
+
+    const goToPreviousMonth = () => {
+        monthDirectionRef.current = 'previous';
+        setCurrentMonth((month) => isAfter(month, firstMonth) ? subMonths(month, 1) : month);
+    };
+
+    const goToNextMonth = () => {
+        monthDirectionRef.current = 'next';
+        setCurrentMonth((month) => isBefore(month, lastAllowedMonth) ? addMonths(month, 1) : month);
+    };
+
+    const canGoPrevious = isAfter(currentMonth, firstMonth);
+    const canGoNext = isBefore(currentMonth, lastAllowedMonth);
+    const canApplyDates = isSingleDate ? Boolean(checkIn) : Boolean(checkIn && checkOut);
+
+    const openCalendar = () => {
+        if (checkIn) setCurrentMonth(startOfMonth(checkIn));
+        setIsClosing(false);
+        setIsCalendarOpen(true);
+    };
+
+    const applyDates = () => {
+        if (canApplyDates) closeCalendar();
     };
 
     const sendWhatsApp = () => {
@@ -120,83 +242,107 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     return (
         <div className="w-full space-y-4">
 
-            {/* 1. DISPARADOR DE FECHAS Y CALENDARIO FLOTANTE EN UN CONTENEDOR RELATIVO */}
-            <div className="relative w-full" ref={calendarContainerRef}>
-                <div
-                    onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                    className="grid grid-cols-2 gap-px bg-slate-200 border-2 border-slate-100 rounded-2xl overflow-hidden cursor-pointer hover:border-indigo-300 transition-all shadow-sm"
-                >
-                    <div className="bg-white p-4">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Check-in</p>
-                        <p className="text-sm font-bold text-slate-700">
-                            {checkIn ? format(checkIn, 'dd MMM', { locale: es }) : 'Seleccionar'}
+            {/* 1. Resumen de fechas */}
+            <div className="w-full">
+                <div className={`grid ${isSingleDate ? 'grid-cols-1' : 'grid-cols-2'} gap-px overflow-hidden rounded-2xl border-2 border-slate-100 bg-slate-200 shadow-sm`}>
+                    <button type="button" onClick={openCalendar} className="cursor-pointer bg-white p-4 text-left transition-colors hover:bg-indigo-50/40" aria-label="Seleccionar fecha de entrada">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{isSingleDate ? 'Fecha del tour' : 'Check-in'}</p>
+                        <p className={`mt-1 text-sm font-black ${checkIn ? 'text-slate-800' : 'text-slate-400'}`}>
+                            {checkIn ? format(checkIn, 'dd MMM yyyy', { locale: es }) : 'Seleccionar'}
                         </p>
-                    </div>
+                    </button>
                     {!isSingleDate && (
-                        <div className="bg-white p-4 border-l border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Check-out</p>
-                            <p className="text-sm font-bold text-slate-700">
-                                {checkOut ? format(checkOut, 'dd MMM', { locale: es }) : 'Seleccionar'}
+                        <button type="button" onClick={openCalendar} className="cursor-pointer border-l border-slate-100 bg-white p-4 text-left transition-colors hover:bg-indigo-50/40" aria-label="Seleccionar fecha de salida">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Check-out</p>
+                            <p className={`mt-1 text-sm font-black ${checkOut ? 'text-slate-800' : 'text-slate-400'}`}>
+                                {checkOut ? format(checkOut, 'dd MMM yyyy', { locale: es }) : 'Seleccionar'}
                             </p>
-                        </div>
+                        </button>
                     )}
                 </div>
+            </div>
 
-                {/* 2. EL CALENDARIO FLOTANTE - Posicionado respecto al contenedor anterior */}
-                {isCalendarOpen && (
-                    <div
-                        className="absolute top-full left-0 mt-2 w-full z-[100] bg-white rounded-3xl shadow-2xl border border-slate-100 animate-in fade-in slide-in-from-top-2 duration-200"
-                        onClick={(e) => e.stopPropagation()} // Detener propagación
-                    >
-                        <div className="bg-indigo-600 p-4 rounded-t-3xl flex justify-between items-center text-white">
-                            <button onClick={(e) => { e.stopPropagation(); setCurrentMonth(subMonths(currentMonth, 1)) }} className="p-1 hover:bg-white/20 rounded-full">{'<'}</button>
-                            <h2 className="text-sm font-black capitalize">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2>
-                            <button onClick={(e) => { e.stopPropagation(); setCurrentMonth(addMonths(currentMonth, 1)) }} className="p-1 hover:bg-white/20 rounded-full">{'>'}</button>
+            {/* 2. Modal independiente del contenedor */}
+            {isCalendarOpen && typeof document !== 'undefined' && createPortal(
+                <div
+                    ref={overlayRef}
+                    className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:p-6"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) closeCalendar();
+                    }}
+                >
+                    <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="booking-calendar-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-2xl sm:max-h-[min(860px,92vh)] sm:rounded-[2.25rem]">
+                        <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-slate-50/90 px-5 py-5 sm:px-8 sm:py-6">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+                                    <CalendarDays size={19} />
+                                </div>
+                                <div>
+                                    <h2 id="booking-calendar-title" className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
+                                        {isSingleDate ? 'Selecciona la fecha' : 'Selecciona tu estancia'}
+                                    </h2>
+                                    <p className="mt-1 text-xs font-medium text-slate-500 sm:text-sm">
+                                        {isSingleDate ? 'Elige la fecha de tu tour' : checkIn && !checkOut ? 'Ahora selecciona la fecha de salida' : 'Elige entrada y salida para continuar'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button type="button" onClick={closeCalendar} aria-label="Cerrar calendario" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700">
+                                <X size={20} />
+                            </button>
                         </div>
 
-                        <div className="p-4">
-                            <div className="grid grid-cols-7 mb-2">
-                                {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(d => (
-                                    <span key={d} className="text-[9px] font-black text-slate-300 text-center">{d}</span>
-                                ))}
+                        <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-4 sm:px-8 sm:py-6">
+                            <div ref={summaryRef} className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 px-4 py-3 sm:px-5">
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{isSingleDate ? 'Fecha seleccionada' : 'Fechas seleccionadas'}</p>
+                                    <p className="mt-1 truncate text-sm font-black text-indigo-950 sm:text-base">
+                                        {isSingleDate && checkIn
+                                            ? format(checkIn, 'dd MMMM yyyy', { locale: es })
+                                            : !isSingleDate && checkIn && checkOut
+                                                ? `${format(checkIn, 'dd MMM', { locale: es })} → ${format(checkOut, 'dd MMM yyyy', { locale: es })}`
+                                                : 'Aún no has seleccionado fechas'}
+                                    </p>
+                                </div>
+                                {!isSingleDate && checkIn && checkOut && (
+                                    <span className="shrink-0 rounded-xl bg-white px-3 py-2 text-xs font-black text-indigo-700 shadow-sm">
+                                        {differenceInDays(checkOut, checkIn)} {differenceInDays(checkOut, checkIn) === 1 ? 'noche' : 'noches'}
+                                    </span>
+                                )}
                             </div>
-                            <div className="grid grid-cols-7 gap-y-1">
-                                {days.map((day) => {
-                                    const status = getDayStatus(day);
-                                    const isSelectedStart = checkIn && isSameDay(day, checkIn);
-                                    const isSelectedEnd = checkOut && isSameDay(day, checkOut);
-                                    const isInRange = checkIn && checkOut && isWithinInterval(day, { start: checkIn, end: checkOut });
-                                    const disabled = isBefore(day, today);
-                                    const isCurrentMonth = isSameMonth(day, currentMonth);
 
-                                    let containerClass = "h-10 w-full flex items-center justify-center relative ";
-                                    if (isInRange && !isSelectedStart && !isSelectedEnd) containerClass += "bg-indigo-50/50";
-                                    if (isSelectedStart && checkOut) containerClass += "bg-gradient-to-r from-transparent to-indigo-50 rounded-l-full";
-                                    if (isSelectedEnd && checkIn) containerClass += "bg-gradient-to-l from-transparent to-indigo-100 rounded-r-full";
-
-                                    return (
-                                        <div key={day.toString()} className={containerClass}>
-                                            <button
-                                                // Aseguramos detener propagación al hacer clic en los días
-                                                onClick={(e) => { e.stopPropagation(); !disabled && handleDateClick(day) }}
-                                                className={`h-8 w-8 text-[10px] font-black rounded-lg z-10 transition-all flex flex-col items-center justify-center
-                                                    ${disabled ? 'text-slate-100' : isSelectedStart || isSelectedEnd ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-indigo-50'}
-                                                    ${!isCurrentMonth ? 'opacity-0 pointer-events-none' : ''}
-                                                `}
-                                            >
-                                                {format(day, 'd')}
-                                                {!disabled && isCurrentMonth && !isSelectedStart && !isSelectedEnd && status && (
-                                                    <div className={`w-0.5 h-0.5 rounded-full mt-0.5 ${status === 'cheap' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></div>
-                                                )}
-                                            </button>
-                                        </div>
-                                    );
-                                })}
+                            <div ref={calendarViewportRef} className="space-y-4">
+                            <div className="flex items-center justify-between gap-3 px-1">
+                                <button type="button" onClick={goToPreviousMonth} disabled={!canGoPrevious} aria-label="Mes anterior" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-slate-200 text-2xl font-black text-indigo-600 transition-all hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-25">‹</button>
+                                <div className="flex flex-1 items-center justify-center gap-3 text-center sm:gap-10">
+                                    <span className="text-base font-black capitalize text-slate-900 sm:text-lg">{format(currentMonth, 'MMMM yyyy', { locale: es })}</span>
+                                    {!isSingleDate && <span className="hidden text-base font-black capitalize text-slate-400 sm:inline sm:text-lg">{format(addMonths(currentMonth, 1), 'MMMM yyyy', { locale: es })}</span>}
+                                </div>
+                                <button type="button" onClick={goToNextMonth} disabled={!canGoNext} aria-label="Mes siguiente" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-slate-200 text-2xl font-black text-indigo-600 transition-all hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-25">›</button>
                             </div>
+
+                            {isSingleDate ? (
+                                <DayPicker mode="single" locale={es} month={currentMonth} onMonthChange={setCurrentMonth} selected={checkIn || undefined} onSelect={handleSingleDateSelect} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
+                            ) : (
+                                <>
+                                    <div className="hidden md:block">
+                                        <DayPicker mode="range" locale={es} numberOfMonths={2} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
+                                    </div>
+                                    <div className="md:hidden">
+                                        <DayPicker mode="range" locale={es} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
+                                    </div>
+                                </>
+                            )}
+                            </div>
+                        </div>
+
+                        <div ref={footerRef} className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/90 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                            <button type="button" onClick={clearDates} disabled={!checkIn && !checkOut} className="cursor-pointer py-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-35 sm:px-3">Limpiar fechas</button>
+                            <button type="button" onClick={applyDates} disabled={!canApplyDates} className="w-full cursor-pointer rounded-xl bg-indigo-600 px-6 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto">Aplicar fechas</button>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>,
+                document.body
+            )}
 
             {/* 3. FORMULARIO PERMANENTE - Sigue debajo del contenedor anterior */}
             <div className="space-y-3">
