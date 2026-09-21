@@ -179,7 +179,7 @@ const hotelSchema = {
                         <Icon name="fa7-solid:calendar-check" size="24" class="text-emerald-600"/>
                         <h2 class="text-xl font-bold text-slate-800">Reserva tu estadía</h2>
                     </div>
-                    <BookingCalendar client:visible hotelName={hotel.name} />
+                    <BookingCalendar client:only="react" hotelName={hotel.name} />
                 </div>
             </div>
 
