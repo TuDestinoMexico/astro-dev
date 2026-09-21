@@ -114,7 +114,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
             (formData.menores > 0 ? `\n👶 *Edades:* ${formData.edadesMenores.join(', ')}` : '')
         );
 
-        window.open(`https://wa.me/5219981234567?text=${mensaje}`, '_blank');
+        window.open(`https://wa.me/529987141365?text=${mensaje}`, '_blank');
     };
 
     return (
