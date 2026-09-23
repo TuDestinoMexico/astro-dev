@@ -99,13 +99,7 @@ Campos detectados en respuestas: `name`, `slug`, `active`, `images` (principal, 
 
 ---
 
-## Pendiente de documentar
-
-- Esquema completo de colecciones Firestore (solo parcialmente detectado)
-- Reglas de seguridad de Firestore y Storage
-- Índices compuestos de Firestore
-- Estructura detallada de `encuestas/`
-- Estructura de `cotizaciones` (tipos de campos restantes)
+## Colecciones de clientes
 
 #### `users/{userId}/reservas/{reservaId}`
 
@@ -118,6 +112,22 @@ Reservas vinculadas por clientes autenticados con Google Auth.
 | `fechaVinculacion` | timestamp | Momento en que se vinculó |
 
 **Uso:** `ClientReservas.jsx` (lectura con `onSnapshot`, escritura con `setDoc` al consultar una reserva). El ID del documento es el código normalizado (`ct` en mayúsculas, ej. `CT-12345`), lo que hace imposible duplicados a nivel Firestore. Antes de consultar, el componente valida contra el estado local que el CT/GB no esté ya vinculado (comparación case-insensitive) y bloquea con mensaje sin llamar a la API.
+
+---
+
+#### `users/{userId}/grupos/{grupoId}`
+
+Grupos GB vinculados por clientes autenticados.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `correo_grupo` | string | Email asociado al grupo |
+| `gb` | string | Código único del grupo |
+| `detalles` | object | Snapshot de la respuesta CRM, incluyendo `hoteles`, `cliente` y `reservation_type` |
+| `pdf_url` | string | URL del PDF del grupo, cuando existe |
+| `fechaVinculacion` | timestamp | Momento en que se vinculó |
+
+**Uso:** `ClientReservas.jsx` y `ClientPagos.jsx`. El documento se guarda con `setDoc` usando el código GB normalizado como ID para evitar duplicados.
 
 ---
 
@@ -155,3 +165,12 @@ Hoteles y tours del catálogo API guardados por clientes desde el sitio público
 | `fechaGuardado` | timestamp | Momento en que se guardó |
 
 **Uso:** El ID del documento es `${tipo}-${slug}` (determinista vía `setDoc`) → duplicados imposibles. Escritura: `FavoriteButton.jsx` en sitio público a través del store singleton `src/lib/favoritosStore.js` (un solo `onAuthStateChanged` + un solo `onSnapshot` por página, consumido con `useSyncExternalStore`). Lectura/eliminación: `ClientFavoritos.jsx`. Guarda snapshot de visualización, no referencia viva a la API — el token nunca llega al cliente.
+
+---
+
+## Pendiente de documentar
+
+- Reglas de seguridad de Firestore y Storage.
+- Índices compuestos de Firestore.
+- Estructura completa de `encuestas/`.
+- Campos restantes de `cotizaciones`.
