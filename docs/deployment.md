@@ -8,6 +8,38 @@ El proyecto se despliega en Vercel usando el adapter oficial `@astrojs/vercel`. 
 
 ---
 
+## Estrategia de ramas
+
+El repositorio mantiene dos ramas principales con responsabilidades distintas:
+
+| Rama | Propósito | Deployment esperado |
+|---|---|---|
+| `master` | Producción. Solo debe contener cambios validados y listos para usuarios finales. | Production Deployment de Vercel |
+| `dev` | Pruebas e integración. Es la rama de trabajo para validar cambios antes de producción. | Preview Deployment de Vercel |
+
+### Flujo recomendado
+
+1. Confirmar la rama actual con `git branch --show-current` y el estado con `git status`.
+2. Trabajar y probar los cambios en `dev`.
+3. Validar la aplicación en el Preview Deployment asociado a `dev`.
+4. Promover los cambios de `dev` a `master` mediante Pull Request o merge explícito y revisado.
+5. Confirmar el Production Deployment de Vercel después de la promoción.
+
+No se deben probar cambios directamente en `master`, hacer merge de `dev` hacia `master` automáticamente ni asumir que un Preview Deployment es producción.
+
+### Protección recomendada
+
+La configuración externa debe reforzar esta política:
+
+- GitHub: proteger `master` y requerir Pull Request para incorporar cambios.
+- Vercel: configurar `master` como Production Branch y `dev` como rama de Preview.
+- Vercel: mantener variables de entorno separadas entre Production y Preview.
+- Revisar manualmente la rama de destino antes de cualquier merge, push o deploy.
+
+Estas protecciones no se configuran desde este repositorio; deben verificarse en GitHub y en el dashboard de Vercel.
+
+---
+
 ## Plataforma
 
 **Vercel** — Plataforma principal de despliegue.

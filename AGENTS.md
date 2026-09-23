@@ -64,6 +64,7 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 - Para data recurrente (header, footer, config), usar fetch en frontmatter de layouts.
 - Para formularios de pago, mantener la lógica dentro del componente React, llamando a `/api/openpay-*`.
 - Para instalación y desarrollo usar `bun install`, `bun run dev` y `bun run build`; Vercel conserva Node como runtime SSR.
+- `master` es producción y `dev` es la rama de pruebas; verificar siempre la rama actual con `git branch --show-current` antes de modificar archivos.
 
 # Qué nunca debe hacer un agente
 
@@ -79,6 +80,7 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 10. **NUNCA** renombrar carpetas o archivos sin verificar todas las referencias.
 11. **NUNCA** refactorizar componentes funcionales a clases ni viceversa.
 12. **NUNCA** hacer commit, push ni deploy sin instrucción explícita.
+13. **NUNCA** hacer pruebas directamente en `master` ni hacer merge `dev` → `master` sin autorización explícita y validación previa.
 
 # Flujo recomendado para modificar código
 
@@ -104,3 +106,9 @@ Antes de responder o modificar código:
 3. No cargues documentos que no sean necesarios.
 4. Si modificas el proyecto, actualiza únicamente el documento afectado.
 5. Mantén AGENTS.md como un archivo breve de reglas; toda la documentación técnica debe permanecer en /docs.
+
+## Estrategia de ramas
+
+- Usar `dev` para cambios, pruebas e integración.
+- Promover a `master` únicamente cambios validados y listos para producción.
+- Consultar `docs/deployment.md` para el flujo de ramas y la configuración esperada de Vercel.
