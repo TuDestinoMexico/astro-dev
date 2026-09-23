@@ -4,7 +4,7 @@
 
 ## Resumen
 
-Aplicación web SSR con Astro v6, utilizando React para componentes interactivos ("islands") y Firebase como backend de datos. El renderizado es server-side con `output: 'server'` y se despliega en Vercel como funciones serverless.
+Aplicación web SSR con Astro v6, utilizando React para componentes interactivos ("islands") y Firebase como backend de datos. El renderizado es server-side con `output: 'server'` y se despliega en Vercel como funciones serverless. Bun 1.4.0 gestiona la instalación y el build; Node.js permanece como runtime SSR de Vercel.
 
 ---
 
@@ -22,11 +22,11 @@ Cliente (Browser)
     │
     ├── React Islands ──────── Firebase (Auth, Firestore, Storage)
     │       │
-    │       ├── Admin (DashboardLayout, LoginForm, etc.)
+│       ├── Admin (DashboardLayout, LoginForm, OfertasView, etc.)
     │       ├── Payments (PaymentMethods, CreditCardDrawer, etc.)
-    │       └── UI (EventsHeroSlider, BookingCalendar, etc.)
+│       └── UI (EventsHeroSlider, BookingCalendar, FavoriteButton, etc.)
     │
-    ├── API Routes ─────────── Openpay API (proxy server-side)
+    ├── API Routes ─────────── Openpay/CRM APIs (proxies server-side)
     │       /api/openpay-cargo
     │       /api/openpay-check
     │
@@ -39,7 +39,7 @@ Cliente (Browser)
 ## Patrón de renderizado
 
 - **SSR (`output: 'server'`):** todas las páginas se renderizan en el servidor.
-- **React islands:** componentes con directivas `client:only`, `client:load`, `client:visible` para interactividad.
+- **React islands:** componentes con directivas `client:only`, `client:load`, `client:visible` para interactividad. `BookingCalendar` usa `client:only="react"` porque depende de GSAP, `createPortal` y APIs del navegador.
 - **No hay SSG** (no se prerenderizan páginas estáticamente).
 
 ---
@@ -69,6 +69,8 @@ src/
 │   └── LayoutClient.astro     # Layout cliente (sin Header.astro, Poppins + SEO)
 ├── lib/
 │   └── firebase.js            # Singleton Firebase (Auth, Firestore, Storage)
+├── vercel.json                 # Versión Bun usada por Vercel
+├── bun.lock                    # Lockfile de Bun
 ├── middleware.js               # Maintenance mode (cada 30s cache)
 └── pages/
     ├── api/

@@ -30,7 +30,7 @@ Funcionalidades identificadas en el código fuente actual. No incluye planificac
 - [x] Modal de verificación de pago en homepage
 
 ### Panel Administrativo
-- [x] Login con Firebase Auth (email/contraseña)
+- [x] Login con Firebase Auth (Google para clientes, email/contraseña para admin)
 - [x] Dashboard con tabs (Inicio, Equipo, Multimedia, Configuración)
 - [x] Vista de leads/cotizaciones recientes
 - [x] CRUD de equipo con drag & drop, paginación, búsqueda

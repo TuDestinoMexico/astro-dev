@@ -15,7 +15,7 @@ Renderizados en servidor. Sin estado cliente.
 | Componente | Ruta | Propósito |
 |---|---|---|
 | `Header.astro` | `components/layout/Header.astro` | Nav principal con logo, contacto, menú sticky, submenú horizontal |
-| `Footer.astro` | `components/layout/Footer.astro` | Footer con SECTUR, SAT, redes sociales, términos, badge de desarrollo |
+| `Footer.astro` | `components/layout/Footer.astro` | Footer con SECTUR, SAT, redes sociales y términos |
 | `Content.astro` | `components/layout/Content.astro` | Wrapper simple con `<slot/>` |
 | `Banner.astro` | `components/ui/Banner.astro` | Banner promocional con imagen y enlace |
 | `Button.astro` | `components/ui/Button.astro` | Botón reutilizable |
@@ -64,13 +64,13 @@ Renderizados en servidor. Sin estado cliente.
 | Componente | Directiva | Propósito |
 |---|---|---|
 | `HotelTabs.tsx` | `client:load` | Tabs de descripción/amenidades/ubicación con Google Maps iframe |
-| `BookingCalendar.tsx` | `client:visible` | Modal responsive de reserva con selector profesional de rango para hoteles (dos meses desktop, uno móvil, preview y mínimo una noche), footer de aplicación y formulario con envío WhatsApp |
+| `BookingCalendar.tsx` | `client:only="react"` | Modal responsive de reserva con selector profesional de rango para hoteles (dos meses desktop, uno móvil, preview y mínimo una noche), footer de aplicación y formulario con envío WhatsApp. Usa GSAP y portal al `body` |
 
 ### Tours
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `BookingCalendar.tsx` | `client:visible` | Mismo modal en modo fecha única (`isSingleDate=true`) para tours |
+| `BookingCalendar.tsx` | `client:only="react"` | Mismo modal en modo fecha única (`isSingleDate=true`) para tours; `client:only` evita cargar GSAP durante SSR en Vercel |
 
 ### Timeline / Mapas
 
@@ -149,10 +149,9 @@ Renderizados en servidor. Sin estado cliente.
 
 | Directiva | Uso |
 |---|---|
-| `client:only="react"` | Componentes que no deben renderizarse en SSR (LoginForm, DashboardLayout, PaymentMethods, WelcomeModal, RecentlyViewed, EventsHeroSlider) |
+| `client:only="react"` | Componentes que no deben renderizarse en SSR (LoginForm, DashboardLayout, PaymentMethods, WelcomeModal, RecentlyViewed, EventsHeroSlider, BookingCalendar) |
 | `client:load` | HotelTabs (necesario inmediato) |
-| `client:visible` | BookingCalendar (carga cuando entra en viewport) |
-| `client:idle` | No detectado en uso actual |
+| `client:idle` | `FavoriteButton.jsx` dentro de `Card.astro` y botones de favoritos en páginas de detalle |
 
 ---
 

@@ -10,6 +10,13 @@
 
 0.0.1
 
+## Herramientas
+
+- Package manager: Bun 1.4.0
+- Lockfile: `bun.lock` (se conserva `package-lock.json` durante la migración)
+- Runtime local: Bun
+- Runtime SSR en Vercel: Node.js
+
 ## Razón social
 
 TU DESTINO MX ROLANDO X MEXICO S.A. de C.V.
@@ -48,6 +55,7 @@ Plataforma conversional con SSR (Astro) para SEO, catálogo de hoteles y tours d
 | astro-seo | ^1.1.0 | Meta tags SEO |
 | astro-lightgallery | ^2.3.0 | Galería de imágenes |
 | date-fns | ^4.1.0 | Manipulación de fechas |
+| react-day-picker | ^10.0.1 | Selector de fechas y rangos del calendario de reservas |
 | @iconify-json/material-symbols | ^1.2.73 | Iconos Material |
 | @iconify-json/simple-icons | ^1.2.68 | Iconos redes sociales |
 | vue | ^3.5.27 | Residual (no usado en código fuente) |
@@ -68,10 +76,10 @@ Plataforma conversional con SSR (Astro) para SEO, catálogo de hoteles y tours d
 
 | Comando | Acción |
 |---|---|
-| `npm run dev` | Inicia servidor de desarrollo Astro |
-| `npm run build` | Compila para producción |
-| `npm run preview` | Previsualiza build local |
-| `npm run astro` | CLI de Astro |
+| `bun run dev` | Inicia servidor de desarrollo Astro |
+| `bun run build` | Compila para producción |
+| `bun run preview` | Previsualiza build local cuando el adapter lo permite |
+| `bun run astro` | CLI de Astro |
 
 ---
 
@@ -89,6 +97,8 @@ Plataforma conversional con SSR (Astro) para SEO, catálogo de hoteles y tours d
 | `OPENPAY_MERCHANT_ID` | Privado | ID de comercio Openpay |
 | `OPENPAY_PRIVATE_KEY` | Privado | Llave privada Openpay (producción) |
 | `VITE_SX_OPENPAY_PRIVATE_KEY` | Público | Llave sandbox Openpay (comentada en API) |
+| `API_CRM_URL` | Privado | URL base de la API CRM |
+| `API_CRM_TOKEN` | Privado | Token `X-Api-Token` para el CRM |
 
 ---
 

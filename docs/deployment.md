@@ -4,7 +4,7 @@
 
 ## Resumen
 
-El proyecto se despliega en Vercel usando el adapter oficial `@astrojs/vercel`. No se detectaron archivos de configuración de CI/CD, Docker u otras plataformas.
+El proyecto se despliega en Vercel usando el adapter oficial `@astrojs/vercel`. Bun 1.4.0 se usa para instalar dependencias y ejecutar el build; el runtime SSR de las funciones de Vercel continúa siendo Node.js.
 
 ---
 
@@ -27,6 +27,26 @@ adapter: vercel()
 
 `@vercel/analytics` v2.0.1 — Integrado via componente `<Analytics/>` en ambos layouts.
 
+### Configuración de Vercel
+
+`vercel.json` fija la versión de Bun usada por Vercel:
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "bunVersion": "1.4.0"
+}
+```
+
+Configuración del proyecto en el dashboard de Vercel:
+
+| Configuración | Valor |
+|---|---|
+| Install Command | `bun install --frozen-lockfile` |
+| Build Command | `bun run build` |
+| Framework Preset | Astro |
+| Runtime SSR | Node.js mediante `@astrojs/vercel` |
+
 ---
 
 ## Build
@@ -35,9 +55,9 @@ adapter: vercel()
 
 | Comando | Descripción |
 |---|---|
-| `npm run build` | Compila proyecto con `astro build` |
-| `npm run dev` | Servidor de desarrollo |
-| `npm run preview` | Previsualiza build local |
+| `bun run build` | Compila proyecto con `astro build` |
+| `bun run dev` | Servidor de desarrollo |
+| `bun run preview` | No soportado por `@astrojs/vercel`; usar Preview Deployment o `vercel dev` |
 
 ### Output
 
@@ -64,6 +84,8 @@ Todas las variables deben configurarse en el dashboard de Vercel. No hay archivo
 | `VITE_API_TOKEN` | Público | API REST externa |
 | `OPENPAY_MERCHANT_ID` | Privado | Endpoints Openpay |
 | `OPENPAY_PRIVATE_KEY` | Privado | Endpoints Openpay |
+| `API_CRM_URL` | Privado | Proxies de reservas, grupos, pagos y documentos |
+| `API_CRM_TOKEN` | Privado | Header `X-Api-Token` del CRM |
 
 ---
 
@@ -77,13 +99,12 @@ Todas las variables deben configurarse en el dashboard de Vercel. No hay archivo
 
 ## CI/CD
 
-No detectado. No hay archivos en `.github/` ni configuración de pipelines.
+No hay archivos en `.github/` ni configuración de pipelines. Vercel genera deployments automáticos desde las ramas conectadas al proyecto; los Preview Deployments se usan para validar cambios antes de producción.
 
 ---
 
 ## Pendiente de documentar
 
-- Configuración específica de Vercel (regiones, funciones serverless, etc.)
 - Estrategia de caché y CDN
 - Monitoreo y alertas
 - Rollback strategy
