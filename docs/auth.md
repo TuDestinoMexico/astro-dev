@@ -40,13 +40,15 @@ Firebase Authentication con dos flujos: Google para clientes y email/contraseña
 
 ## Protección de rutas admin
 
-- **Mecanismo:** `onAuthStateChanged` en `DashboardLayout.jsx`
+- **Mecanismo visual:** `onAuthStateChanged` + custom claim `admin` en `DashboardLayout.jsx` y `LoginForm.jsx`
 - **Comportamiento:**
   - `loading=true` → spinner "Cargando Panel..."
   - `user=null` → `window.location.href = '/admin/login'`
-  - `user` existe → renderiza contenido
+  - `user` sin `claims.admin === true` → se rechaza el panel y se redirige a `/admin/login` sin cerrar la sesión Firebase
+  - `user` con `claims.admin === true` → renderiza contenido
 - **Middleware:** No bloquea rutas `/admin`. Todo el tráfico admin pasa sin verificación server-side.
-- **No hay** guard server-side, cookies de sesión, JWT validation ni refresh tokens manejados explícitamente.
+- **Seguridad efectiva:** las reglas de Firestore y Storage validan el mismo custom claim.
+- Este guard visual no sustituye las reglas de Firebase: las operaciones directas contra Firebase deben ser rechazadas por las reglas.
 
 ---
 
@@ -85,9 +87,16 @@ Firebase Authentication con dos flujos: Google para clientes y email/contraseña
 
 ---
 
+## Roles administrativos
+
+- El rol se asigna mediante Firebase Admin SDK con el custom claim `{ "admin": true }`.
+- La asignación se hace por UID, desde un entorno administrativo seguro; nunca desde el navegador.
+- Después de asignar o revocar el claim, el usuario debe cerrar sesión y volver a iniciar sesión para renovar el ID token.
+- Una cuenta cliente sin el claim puede conservar su sesión para el portal cliente; cerrar esa sesión desde el login admin es una acción explícita.
+- El procedimiento operativo se mantiene fuera del cliente y no requiere guardar credenciales de servicio en el repositorio.
+
 ## Pendiente de documentar
 
-- Roles y permisos (no implementados)
 - Registro de usuarios (no implementado)
 - Recuperación de contraseña (no implementada)
 - Tiempo de expiración de sesión Firebase

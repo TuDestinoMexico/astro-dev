@@ -18,13 +18,28 @@ export default function DashboardLayout() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (!currentUser) {
                 window.location.href = '/admin/login';
-            } else {
-                setUser(currentUser);
+                setLoading(false);
+                return;
             }
-            setLoading(false);
+
+            try {
+                const tokenResult = await currentUser.getIdTokenResult(true);
+
+                if (tokenResult.claims.admin !== true) {
+                    window.location.href = '/admin/login?error=not-admin';
+                    return;
+                }
+
+                setUser(currentUser);
+            } catch (error) {
+                console.error('No se pudo validar el rol administrativo:', error);
+                window.location.href = '/admin/login?error=auth-check';
+            } finally {
+                setLoading(false);
+            }
         });
         return () => unsubscribe();
     }, []);
