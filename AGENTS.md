@@ -82,9 +82,12 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 
 # Flujo de ramas y despliegue
 
-- Para cambios funcionales, crear una rama `experimental/<alcance>` desde `dev`.
-- Confirmar y revisar los cambios en la rama experimental antes de integrarlos.
-- Integrar la rama experimental en `dev`; el push a `dev` activa el Preview Deployment de Vercel.
+- Para cambios funcionales, crear una rama local `experimental/<alcance>` desde `dev`.
+- Las ramas `experimental/*` nunca se suben al repositorio remoto ni generan Pull Requests.
+- Confirmar y revisar los cambios en la rama experimental local antes de integrarlos.
+- Integrar la rama experimental en `dev`; solo el push a `dev` activa el Preview Deployment de Vercel.
+- Después de integrar correctamente y publicar `dev`, eliminar la rama experimental local con `git branch -d experimental/<alcance>`.
+- Si una rama experimental se abandona antes de integrarse, eliminarla con `git branch -D experimental/<alcance>`.
 - Validar el Preview antes de promover cambios a `master`, rama productiva actual de Vercel.
 - No hacer push directo a `master` ni promover a producción sin aprobación explícita.
 - Antes de cambiar de rama, revisar `git status`, la rama actual y cualquier cambio existente.
