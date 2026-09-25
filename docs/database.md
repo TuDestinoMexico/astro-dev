@@ -168,9 +168,20 @@ Hoteles y tours del catálogo API guardados por clientes desde el sitio público
 
 ---
 
+## Reglas de seguridad
+
+Las reglas se versionan en la raíz del proyecto:
+
+- `firestore.rules` — deniega por defecto, permite escrituras administrativas solo con el custom claim `admin: true` y limita `users/{uid}` al propietario.
+- `storage.rules` — permite lecturas públicas para conservar las URLs actuales y limita subidas, modificaciones y eliminaciones a administradores.
+- `firebase.json` — vincula ambos archivos con Firebase CLI.
+
+`config`, `equipo` y `ofertas` son públicos en lectura porque son consumidos por el sitio. `cotizaciones` queda restringida a administradores. La encuesta conserva escritura anónima únicamente para los dos contadores existentes.
+
+---
+
 ## Pendiente de documentar
 
-- Reglas de seguridad de Firestore y Storage.
 - Índices compuestos de Firestore.
 - Estructura completa de `encuestas/`.
 - Campos restantes de `cotizaciones`.
