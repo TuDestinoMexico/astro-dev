@@ -178,6 +178,17 @@ Si el deployment de producción presenta un problema, detener la promoción y vo
 
 `firestore.rules`, `storage.rules` y `firebase.json` se mantienen localmente y están excluidos por `.gitignore`. No forman parte del Preview de Vercel ni del repositorio. Las reglas de Firebase deben aplicarse manualmente desde un entorno local autorizado y verificarse por separado del despliegue de Astro.
 
+### Indicador de entorno del footer
+
+La insignia `Entorno: Desarrollo` en `Footer.astro` se controla con las variables de entorno de Vercel:
+
+- Desarrollo local (`import.meta.env.DEV`): visible.
+- Preview generado desde la rama `dev` (`VERCEL_ENV=preview` y `VERCEL_GIT_COMMIT_REF=dev`): visible.
+- Preview de otra rama: oculta.
+- Production de `master` (`VERCEL_ENV=production`): oculta.
+
+No se debe reemplazar esta condición por texto hardcodeado ni por una comprobación exclusiva de `import.meta.env.PROD`, porque los Preview Deployments también se construyen en modo producción.
+
 ## CI/CD
 
 No hay archivos en `.github/` ni configuración de pipelines. Vercel genera deployments automáticos desde las ramas conectadas al proyecto: `dev` se usa para Preview y `master` para producción.

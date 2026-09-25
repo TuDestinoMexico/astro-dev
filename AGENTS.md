@@ -89,6 +89,7 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 - No hacer push directo a `master` ni promover a producción sin aprobación explícita.
 - Antes de cambiar de rama, revisar `git status`, la rama actual y cualquier cambio existente.
 - Los archivos locales `firestore.rules`, `storage.rules` y `firebase.json` están ignorados y no deben agregarse al repositorio.
+- La insignia `Entorno: Desarrollo` de `Footer.astro` solo debe mostrarse en desarrollo local o en Preview de la rama `dev`; nunca en Production de `master`.
 
 # Flujo recomendado para modificar código
 
