@@ -87,6 +87,16 @@ Todas las variables deben configurarse en el dashboard de Vercel. No hay archivo
 | `API_CRM_URL` | Privado | Proxies de reservas, grupos, pagos y documentos |
 | `API_CRM_TOKEN` | Privado | Header `X-Api-Token` del CRM |
 
+### Reglas de Firebase
+
+Las reglas se mantienen en `firestore.rules` y `storage.rules`, referenciadas desde `firebase.json`. Para desplegarlas contra un proyecto seleccionado explícitamente:
+
+```bash
+firebase deploy --project PROJECT_ID --only firestore:rules,storage
+```
+
+Antes de desplegar, verificar en el proyecto de prueba que una cuenta con `admin: true` puede operar el panel y que una cuenta de cliente no puede leer ni modificar las colecciones administrativas.
+
 ---
 
 ## Sitemap y SEO

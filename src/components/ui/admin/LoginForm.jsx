@@ -1,23 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../../../lib/firebase';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'; // Importamos onAuthStateChanged
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { LogIn, Loader2 } from 'lucide-react';
 
 export default function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [hasNonAdminSession, setHasNonAdminSession] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isChecking, setIsChecking] = useState(true); // Nuevo estado para verificar sesión
 
     // NUEVO: Verificar si ya hay una sesión activa al cargar
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Si ya existe un usuario, redirigimos
-                window.location.href = '/admin/dashboard';
-            } else {
-                // Si no hay usuario, quitamos la pantalla de carga y mostramos el formulario
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                setHasNonAdminSession(false);
+                setIsChecking(false);
+                return;
+            }
+
+            try {
+                const tokenResult = await user.getIdTokenResult(true);
+
+                if (tokenResult.claims.admin === true) {
+                    window.location.href = '/admin/dashboard';
+                    return;
+                }
+
+                setHasNonAdminSession(true);
+            } catch (err) {
+                console.error('No se pudo validar el rol administrativo:', err);
+                setError('No se pudo validar el acceso administrativo.');
+            } finally {
                 setIsChecking(false);
             }
         });
@@ -52,6 +67,19 @@ export default function LoginForm() {
     return (
         <div className="w-full max-w-md bg-white p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50">
             <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-6">Iniciar Sesión</h2>
+
+            {hasNonAdminSession && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-100 text-amber-700 rounded-xl text-xs font-bold space-y-3">
+                    <p>La cuenta actual no tiene permisos administrativos. Puedes iniciar sesión con otra cuenta sin cerrar esta sesión de cliente.</p>
+                    <button
+                        type="button"
+                        onClick={() => signOut(auth)}
+                        className="text-amber-900 underline hover:no-underline"
+                    >
+                        Cerrar sesión actual
+                    </button>
+                </div>
+            )}
 
             {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-bold">
