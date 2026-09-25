@@ -1,6 +1,12 @@
 ---
 import { Icon } from "astro-icon/components";
 import FooterBanner from "../ui/FooterBanner.astro";
+
+const vercelEnv = import.meta.env.VERCEL_ENV;
+const vercelBranch = import.meta.env.VERCEL_GIT_COMMIT_REF;
+const showDevelopmentBadge =
+    import.meta.env.DEV ||
+    (vercelEnv === "preview" && vercelBranch === "dev");
 ---
 
 <FooterBanner />
@@ -99,15 +105,17 @@ import FooterBanner from "../ui/FooterBanner.astro";
         </div>
 
     </div>
-    <div class="fixed bottom-4 left-4 z-[9999]">
-        <div class="bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg border-2 border-white flex items-center gap-2">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-            </span>
-            Entorno: Desarrollo
+    {showDevelopmentBadge && (
+        <div class="fixed bottom-4 left-4 z-[9999]">
+            <div class="bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg border-2 border-white flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                Entorno: Desarrollo
+            </div>
         </div>
-    </div>
+    )}
 </footer>
 
 <script>
