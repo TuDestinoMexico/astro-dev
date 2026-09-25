@@ -80,6 +80,16 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 11. **NUNCA** refactorizar componentes funcionales a clases ni viceversa.
 12. **NUNCA** hacer commit, push ni deploy sin instrucción explícita.
 
+# Flujo de ramas y despliegue
+
+- Para cambios funcionales, crear una rama `experimental/<alcance>` desde `dev`.
+- Confirmar y revisar los cambios en la rama experimental antes de integrarlos.
+- Integrar la rama experimental en `dev`; el push a `dev` activa el Preview Deployment de Vercel.
+- Validar el Preview antes de promover cambios a `master`, rama productiva actual de Vercel.
+- No hacer push directo a `master` ni promover a producción sin aprobación explícita.
+- Antes de cambiar de rama, revisar `git status`, la rama actual y cualquier cambio existente.
+- Los archivos locales `firestore.rules`, `storage.rules` y `firebase.json` están ignorados y no deben agregarse al repositorio.
+
 # Flujo recomendado para modificar código
 
 1. Leer el archivo completo antes de editarlo.

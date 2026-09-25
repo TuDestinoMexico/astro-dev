@@ -107,9 +107,80 @@ Antes de desplegar, verificar en el proyecto de prueba que una cuenta con `admin
 
 ---
 
+## Flujo de ramas y promoción
+
+El proyecto utiliza un flujo de ramas por ambientes con Preview Deployments:
+
+| Rama | Propósito | Despliegue esperado |
+|---|---|---|
+| `experimental/<alcance>` | Desarrollo aislado de una funcionalidad o corrección | No productivo; puede generar Preview si Vercel está configurado para la rama |
+| `dev` | Integración y validación | Preview Deployment de Vercel |
+| `master` | Producción | Production Deployment de Vercel |
+
+### Flujo estándar
+
+1. Verificar el estado antes de comenzar:
+
+```bash
+git status --short --branch
+git switch dev
+git pull --ff-only origin dev
+```
+
+2. Crear la rama experimental:
+
+```bash
+git switch -c experimental/ALCANCE
+```
+
+3. Implementar, revisar y confirmar los cambios en la rama experimental:
+
+```bash
+git status
+git diff
+git add ARCHIVOS_DEL_CAMBIO
+git diff --cached
+git commit -m "tipo: descripcion del cambio"
+```
+
+4. Integrar en `dev` y activar el Preview de Vercel:
+
+```bash
+git switch dev
+git pull --ff-only origin dev
+git merge --no-ff experimental/ALCANCE -m "merge: integrar ALCANCE en dev"
+git push origin dev
+```
+
+5. Validar el Preview de Vercel antes de promoverlo:
+
+- El deployment y el build terminan correctamente.
+- Las variables de entorno del entorno Preview están configuradas.
+- El flujo principal modificado funciona en escritorio y móvil.
+- La autenticación y autorización se comportan correctamente.
+- Firestore y Storage conservan los permisos esperados.
+- No hay errores relevantes en los logs del deployment o del navegador.
+
+6. Promover a producción únicamente después de aprobar el Preview:
+
+```bash
+git switch master
+git pull --ff-only origin master
+git merge --no-ff dev -m "release: promover dev a produccion"
+git push origin master
+```
+
+### Rollback
+
+Si el deployment de producción presenta un problema, detener la promoción y volver a desplegar el último commit estable desde Vercel. Para corregir el historial de ramas, crear una corrección nueva o revertir el merge con `git revert`; no reescribir historial compartido.
+
+### Archivos locales de Firebase
+
+`firestore.rules`, `storage.rules` y `firebase.json` se mantienen localmente y están excluidos por `.gitignore`. No forman parte del Preview de Vercel ni del repositorio. Las reglas de Firebase deben aplicarse manualmente desde un entorno local autorizado y verificarse por separado del despliegue de Astro.
+
 ## CI/CD
 
-No hay archivos en `.github/` ni configuración de pipelines. Vercel genera deployments automáticos desde las ramas conectadas al proyecto; los Preview Deployments se usan para validar cambios antes de producción.
+No hay archivos en `.github/` ni configuración de pipelines. Vercel genera deployments automáticos desde las ramas conectadas al proyecto: `dev` se usa para Preview y `master` para producción.
 
 ---
 
