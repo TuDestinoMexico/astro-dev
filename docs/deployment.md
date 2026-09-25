@@ -113,7 +113,7 @@ El proyecto utiliza un flujo de ramas por ambientes con Preview Deployments:
 
 | Rama | Propósito | Despliegue esperado |
 |---|---|---|
-| `experimental/<alcance>` | Desarrollo aislado de una funcionalidad o corrección | No productivo; puede generar Preview si Vercel está configurado para la rama |
+| `experimental/<alcance>` | Desarrollo aislado local de una funcionalidad o corrección | No se publica ni genera Preview |
 | `dev` | Integración y validación | Preview Deployment de Vercel |
 | `master` | Producción | Production Deployment de Vercel |
 
@@ -132,6 +132,8 @@ git pull --ff-only origin dev
 ```bash
 git switch -c experimental/ALCANCE
 ```
+
+Las ramas `experimental/*` son exclusivamente locales. No deben publicarse con `git push`, no deben abrir Pull Requests y no deben configurarse como ramas de Vercel.
 
 3. Implementar, revisar y confirmar los cambios en la rama experimental:
 
@@ -152,7 +154,19 @@ git merge --no-ff experimental/ALCANCE -m "merge: integrar ALCANCE en dev"
 git push origin dev
 ```
 
-5. Validar el Preview de Vercel antes de promoverlo:
+5. Eliminar la rama experimental local después de confirmar que la integración y el push a `dev` fueron correctos:
+
+```bash
+git branch -d experimental/ALCANCE
+```
+
+No se debe ejecutar `git push origin experimental/ALCANCE`. Si la rama se abandona antes de integrarse, eliminarla con:
+
+```bash
+git branch -D experimental/ALCANCE
+```
+
+6. Validar el Preview de Vercel antes de promoverlo:
 
 - El deployment y el build terminan correctamente.
 - Las variables de entorno del entorno Preview están configuradas.
@@ -161,7 +175,7 @@ git push origin dev
 - Firestore y Storage conservan los permisos esperados.
 - No hay errores relevantes en los logs del deployment o del navegador.
 
-6. Promover a producción únicamente después de aprobar el Preview:
+7. Promover a producción únicamente después de aprobar el Preview:
 
 ```bash
 git switch master
