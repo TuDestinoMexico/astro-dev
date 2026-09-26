@@ -61,7 +61,7 @@ src/
 │       ├── recomendacion/     # FacebookReel.jsx
 │       ├── single/            # Card.astro, HeroBanner.astro
 │       ├── team/              # MemberCard.astro, MemberSkeleton.astro
-│       ├── timeline/          # MexicoMap.tsx, Timeline.tsx, TimelineItem.tsx
+│       ├── timeline/          # Timeline, navegación, resumen, items y MexicoMap de Xolo Ruta
 │       ├── Banner.astro, BookingCalendar.tsx, Button.astro, etc.
 ├── layouts/
 │   ├── Layout.astro           # Layout público (Poppins, Analytics, SEO)

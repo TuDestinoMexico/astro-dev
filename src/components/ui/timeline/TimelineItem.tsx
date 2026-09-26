@@ -1,48 +1,50 @@
 import React from 'react';
+import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react';
+import type { Milestone } from './Timeline';
 
 interface TimelineItemProps {
-    title: string;
-    description: string;
-    image: string;
-    sideText?: string;
-    buttonText?: string;
-    onButtonClick?: () => void;
+    item: Milestone;
+    index: number;
+    total: number;
+    onPrevious: () => void;
+    onNext: () => void;
 }
 
-const TimelineItem: React.FC<TimelineItemProps> = ({
-                                                       title, description, image, sideText = "XOLO RUTA TDMX", buttonText = "Ver Detalles", onButtonClick
-                                                   }) => {
+function getLocation(title: string) {
+    return title.replace(/^XOLO RUTA\s+/i, '');
+}
+
+export default function TimelineItem({ item, index, total, onPrevious, onNext }: TimelineItemProps) {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[80px_1fr_1fr] gap-8 lg:gap-10 items-center">
-            <div className="hidden lg:block">
-                <p className="whitespace-nowrap -rotate-90 text-[10px] font-bold tracking-[0.5em] text-indigo-300 uppercase origin-center">
-                    {sideText}
-                </p>
-            </div>
-
-            <div className="order-first lg:order-last">
-                <div className="relative group">
-                    <div className="absolute -inset-2 md:-inset-4 bg-indigo-50 rounded-[2rem] md:rounded-[2.5rem] -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
-                    <div className="relative h-60 md:h-80 lg:h-[400px] w-full overflow-hidden rounded-[2rem] shadow-2xl border-4 border-white">
-                        <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        <article className="h-full overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-5 shadow-[0_20px_45px_-25px_rgba(15,23,42,0.45)] sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-4">
+                <div>
+                    <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-brand-primary">
+                        <MapPin size={15} aria-hidden="true" />
+                        <span>{getLocation(item.shortTitle)}</span>
                     </div>
+                    <p className="text-sm font-semibold text-slate-400">{item.date}</p>
                 </div>
-            </div>
-
-            <div className="space-y-4 md:space-y-6 text-center lg:text-left">
-                <div className="space-y-2 flex flex-col items-center lg:items-start">
-                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 leading-tight tracking-tight">{title}</h2>
-                    <div className="h-1 w-16 md:w-20 bg-indigo-500 rounded-full"></div>
-                </div>
-                <p className="text-gray-500 leading-relaxed text-base md:text-lg lg:text-xl font-medium">{description}</p>
-                <div className="pt-2 hidden">
-                    <button onClick={onButtonClick} className="w-full sm:w-auto flex items-center justify-center gap-3 bg-indigo-600 text-white px-8 md:px-10 py-3 md:py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all shadow-lg shadow-indigo-200 active:scale-95 group">
-                        {buttonText} <span className="group-hover:translate-x-1 transition-transform">→</span>
+                <div className="flex items-center gap-2" aria-label={`Hito ${index + 1} de ${total}`}>
+                    <button type="button" onClick={onPrevious} disabled={index === 0} aria-label="Hito anterior" className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-brand-primary hover:bg-brand-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary disabled:cursor-not-allowed disabled:opacity-25">
+                        <ArrowLeft size={18} aria-hidden="true" />
+                    </button>
+                    <button type="button" onClick={onNext} disabled={index === total - 1} aria-label="Hito siguiente" className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-brand-primary hover:bg-brand-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary disabled:cursor-not-allowed disabled:opacity-25">
+                        <ArrowRight size={18} aria-hidden="true" />
                     </button>
                 </div>
             </div>
-        </div>
-    );
-};
 
-export default TimelineItem;
+            <div className="space-y-6">
+                <div>
+                    <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Etapa {String(index + 1).padStart(2, '0')}</p>
+                    <h1 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl xl:text-[2.75rem]">{item.fullTitle}</h1>
+                </div>
+                <p className="text-base leading-relaxed text-slate-600 sm:text-lg">{item.description}</p>
+                <div className="relative overflow-hidden rounded-[1.5rem] border-4 border-white bg-slate-100 shadow-xl">
+                    <img src={item.image} alt={`${item.shortTitle}: ${item.fullTitle}`} className="aspect-[16/9] w-full object-cover transition-transform duration-700 hover:scale-[1.03]" loading={index === 0 ? 'eager' : 'lazy'} />
+                </div>
+            </div>
+        </article>
+    );
+}

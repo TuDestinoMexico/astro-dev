@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import TimelineItem from './TimelineItem';
-import MexicoMap from './MexicoMap'; // Importamos el componente del mapa
+import MexicoMap from './MexicoMap';
+import RouteSummary from './RouteSummary';
+import TimelineNavigation from './TimelineNavigation';
 
-interface Milestone {
+export interface Milestone {
     id: number;
     date: string;
     shortTitle: string;
@@ -15,185 +17,68 @@ interface Milestone {
 }
 
 const milestones: Milestone[] = [
-    {
-        "id": 0,
-        "date": "Marzo 20, 2024",
-        "shortTitle": "XOLO RUTA MONTERREY",
-        "fullTitle": "Lanzamiento y Conexión en la Sultana",
-        "description": "Iniciamos nuestra presencia en las ferias turísticas más importantes del norte, compartiendo nuestra pasión por los viajes y conectando con la comunidad regia para llevar la magia de México a cada rincón.",
-        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2024.png",
-        "coords": { "lat": 25.6866, "lng": -100.3161 }
-    },
-    {
-        "id": 1,
-        "date": "Octubre 2, 2025",
-        "shortTitle": "XOLO RUTA MERIDA",
-        "fullTitle": "Mérida: El Corazón del Mundo Maya",
-        "description": "Nuestra agencia llega a la Blanca Mérida para participar en foros de turismo cultural, fortaleciendo alianzas con proveedores locales para ofrecerte experiencias exclusivas en el sureste mexicano.",
-        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-merida-2025.png",
-        "coords": { "lat": 20.9674, "lng": -89.5926 }
-    },
-    {
-        "id": 2,
-        "date": "Diciembre 15, 2025",
-        "shortTitle": "XOLO RUTA MONTERREY",
-        "fullTitle": "Cumbre de Viajes: Edición Invierno",
-        "description": "Cerramos el ciclo de exposiciones del año en Monterrey, presentando nuestros paquetes premium de temporada y asesorando a viajeros que buscan vivir experiencias inolvidables en sus próximas vacaciones.",
-        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2025.png",
-        "coords": { "lat": 25.6714, "lng": -100.3067 }
-    },
-    {
-        "id": 3,
-        "date": "Enero 15, 2026",
-        "shortTitle": "XOLO RUTA MONTERREY",
-        "fullTitle": "Kick-off 2026: Nuevos Horizontes",
-        "description": "Arrancamos el año en el centro de convenciones más importante de Nuevo León, lanzando oficialmente nuestro catálogo 2026 con destinos emergentes y rutas diseñadas para el viajero moderno.",
-        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2026.png",
-        "coords": { "lat": 25.7000, "lng": -100.3500 }
-    },
-    {
-        "id": 4,
-        "date": "MARZO 21, 2026",
-        "shortTitle": "XOLO RUTA CHIHUAHUA",
-        "fullTitle": "Chihuahua: Aventura y Negocios Turísticos",
-        "description": "Exploramos el estado más grande de México participando en foros de turismo de aventura, listos para posicionar la ruta de las Barrancas del Cobre como el destino imperdible de nuestra nueva temporada.",
-        "image": "https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-chihuahua-2026.png",
-        "coords": { "lat": 28.6330, "lng": -106.0691 }
-    }
+    { id: 0, date: 'Marzo 20, 2024', shortTitle: 'XOLO RUTA MONTERREY', fullTitle: 'Lanzamiento y Conexión en la Sultana', description: 'Iniciamos nuestra presencia en las ferias turísticas más importantes del norte, compartiendo nuestra pasión por los viajes y conectando con la comunidad regia para llevar la magia de México a cada rincón.', image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2024.png', coords: { lat: 25.6866, lng: -100.3161 } },
+    { id: 1, date: 'Octubre 2, 2025', shortTitle: 'XOLO RUTA MERIDA', fullTitle: 'Mérida: El Corazón del Mundo Maya', description: 'Nuestra agencia llega a la Blanca Mérida para participar en foros de turismo cultural, fortaleciendo alianzas con proveedores locales para ofrecerte experiencias exclusivas en el sureste mexicano.', image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-merida-2025.png', coords: { lat: 20.9674, lng: -89.5926 } },
+    { id: 2, date: 'Diciembre 15, 2025', shortTitle: 'XOLO RUTA MONTERREY', fullTitle: 'Cumbre de Viajes: Edición Invierno', description: 'Cerramos el ciclo de exposiciones del año en Monterrey, presentando nuestros paquetes premium de temporada y asesorando a viajeros que buscan vivir experiencias inolvidables en sus próximas vacaciones.', image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2025.png', coords: { lat: 25.6714, lng: -100.3067 } },
+    { id: 3, date: 'Enero 15, 2026', shortTitle: 'XOLO RUTA MONTERREY', fullTitle: 'Kick-off 2026: Nuevos Horizontes', description: 'Arrancamos el año en el centro de convenciones más importante de Nuevo León, lanzando oficialmente nuestro catálogo 2026 con destinos emergentes y rutas diseñadas para el viajero moderno.', image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-monterrey-2026.png', coords: { lat: 25.7, lng: -100.35 } },
+    { id: 4, date: 'Marzo 21, 2026', shortTitle: 'XOLO RUTA CHIHUAHUA', fullTitle: 'Chihuahua: Aventura y Negocios Turísticos', description: 'Exploramos el estado más grande de México participando en foros de turismo de aventura, listos para posicionar la ruta de las Barrancas del Cobre como el destino imperdible de nuestra nueva temporada.', image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/web/xolo-ruta/xolo-ruta-chihuahua-2026.png', coords: { lat: 28.633, lng: -106.0691 } },
 ];
 
 export default function TimelineWithMap() {
     const [activeIndex, setActiveIndex] = useState(0);
-    const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
-    const lineRef = useRef<HTMLDivElement>(null);
-    const navRef = useRef<HTMLDivElement>(null);
-    const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
+    const containerRef = useRef<HTMLDivElement>(null);
     const { contextSafe } = useGSAP({ scope: containerRef });
+    const active = milestones[activeIndex];
 
-    // Actualiza la línea elástica y el scroll del menú
-    const updateNavigation = contextSafe((index: number) => {
-        const targetBtn = buttonRefs.current[index];
-        const line = lineRef.current;
+    const changeTab = contextSafe((index: number) => {
+        if (index === activeIndex || !milestones[index]) return;
 
-        if (targetBtn && line) {
-            gsap.to(line, {
-                x: targetBtn.offsetLeft,
-                width: targetBtn.offsetWidth,
-                duration: 0.7,
-                ease: "elastic.out(1, 0.8)"
-            });
-
-            if (navRef.current) {
-                const containerWidth = navRef.current.offsetWidth;
-                const scrollTarget = targetBtn.offsetLeft - (containerWidth / 2) + (targetBtn.offsetWidth / 2);
-                navRef.current.scrollTo({ left: scrollTarget, behavior: 'smooth' });
-            }
-        }
-    });
-
-    const changeTab = (index: number) => {
-        if (index === activeIndex) return;
-
-        updateNavigation(index);
-
-        // Animación de salida y entrada del contenido
         gsap.to(contentRef.current, {
             opacity: 0,
-            y: 20,
-            filter: "blur(10px)",
-            duration: 0.4,
-            ease: "power2.in",
+            y: 12,
+            duration: 0.18,
+            ease: 'power2.in',
             onComplete: () => {
                 setActiveIndex(index);
-                gsap.fromTo(contentRef.current,
-                    { opacity: 0, y: -20, filter: "blur(10px)", scale: 0.95 },
-                    { opacity: 1, y: 0, filter: "blur(0px)", scale: 1, duration: 0.6, ease: "back.out(1.2)" }
-                );
-            }
+                gsap.fromTo(contentRef.current, { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
+            },
         });
-    };
+    });
 
-    // Sincronizar posición inicial de la línea
-    useEffect(() => {
-        const initialBtn = buttonRefs.current[0];
-        if (initialBtn && lineRef.current) {
-            gsap.set(lineRef.current, { x: initialBtn.offsetLeft, width: initialBtn.offsetWidth });
-        }
-    }, []);
+    const period = `${milestones[0].date.slice(-4)}–${milestones[milestones.length - 1].date.slice(-4)}`;
 
     return (
-        <div ref={containerRef} className="space-y-4 py-10">
+        <div ref={containerRef} className="space-y-6 py-8 md:py-12">
+            <RouteSummary count={milestones.length} period={period} />
 
-            {/* 1. MAPA INTERACTIVO (Llamada al componente hijo) */}
-            <MexicoMap
-                activeIndex={activeIndex}
-                onMarkerClick={changeTab}
-                milestones={milestones}
-            />
-
-            {/* 2. TIMELINE PADRE (Contenedor blanco) */}
-            <div className="w-full container mx-auto bg-white rounded-4xl md:rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden border border-gray-50">
-
-                {/* Menú de fechas scrollable */}
-                <div className="relative bg-slate-50/50 pt-6 md:pt-10">
-                    <div ref={navRef} className="flex flex-row overflow-x-auto no-scrollbar relative z-10 px-4 md:px-12 scroll-smooth">
-                        {milestones.map((item, idx) => (
-                            <button
-                                key={item.id}
-                                 ref={(el) => {
-                                     buttonRefs.current[idx] = el;
-                                 }}
-                                onClick={() => changeTab(idx)}
-                                className={`shrink-0 w-37.5 md:flex-1 py-6 md:py-8 transition-all duration-500 group ${idx === activeIndex ? 'scale-105' : 'opacity-40 hover:opacity-100'}`}
-                            >
-                                <p className={`text-xs md:text-lg font-black mb-1 transition-colors ${idx === activeIndex ? 'text-indigo-600' : 'text-slate-400'}`}>
-                                    {item.date}
-                                </p>
-                                <p className="text-[8px] md:text-[10px] font-bold tracking-widest md:tracking-[0.2em] uppercase text-slate-500">
-                                    {item.shortTitle}
-                                </p>
-                            </button>
-                        ))}
-
-                        <div className="absolute bottom-0 left-0 w-full h-1.5 bg-slate-200/20 rounded-full">
-                            <div ref={lineRef} className="absolute bottom-0 h-full bg-indigo-600 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.4)]" style={{ width: 0 }}></div>
-                        </div>
-                    </div>
+            <section aria-label="Hito seleccionado" className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-stretch">
+                <div ref={contentRef} className="order-1 min-w-0">
+                    <TimelineItem
+                        item={active}
+                        index={activeIndex}
+                        total={milestones.length}
+                        onPrevious={() => changeTab(Math.max(0, activeIndex - 1))}
+                        onNext={() => changeTab(Math.min(milestones.length - 1, activeIndex + 1))}
+                    />
                 </div>
-
-                {/* Área de visualización del TimelineItem */}
-                <div className="p-6 md:p-16 lg:p-24 relative">
-                    <div ref={contentRef}>
-                        <TimelineItem
-                            title={milestones[activeIndex].fullTitle}
-                            description={milestones[activeIndex].description}
-                            image={milestones[activeIndex].image}
-                            onButtonClick={() => window.open('/ruta-detalle', '_blank')}
-                        />
-                    </div>
-
-                    {/* Controles de Flecha */}
-                    <div className="flex gap-4 mt-12 lg:mt-0 lg:absolute lg:left-24 lg:bottom-16 justify-center md:justify-start">
-                        <button
-                            onClick={() => changeTab(Math.max(0, activeIndex - 1))}
-                            disabled={activeIndex === 0}
-                            className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border-2 border-slate-100 flex items-center justify-center hover:bg-indigo-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-                        > ← </button>
-                        <button
-                            onClick={() => changeTab(Math.min(milestones.length - 1, activeIndex + 1))}
-                            disabled={activeIndex === milestones.length - 1}
-                            className="w-12 h-12 md:w-14 md:h-14 rounded-2xl border-2 border-slate-100 flex items-center justify-center hover:bg-indigo-600 hover:text-white disabled:opacity-20 transition-all shadow-sm"
-                        > → </button>
-                    </div>
+                <div className="order-2 min-w-0 lg:sticky lg:top-28 lg:self-start">
+                    <MexicoMap activeIndex={activeIndex} onMarkerClick={changeTab} milestones={milestones} />
                 </div>
-            </div>
+            </section>
 
-            <style>{`
-                .no-scrollbar::-webkit-scrollbar { display: none; }
-                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
+            <section aria-label="Explorar cronología" className="space-y-3">
+                <div className="flex items-end justify-between gap-4 px-1">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-primary">La cronología</p>
+                        <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">Cada parada cuenta una historia</h2>
+                    </div>
+                    <span className="shrink-0 text-xs font-semibold text-slate-400">{activeIndex + 1} de {milestones.length}</span>
+                </div>
+                <TimelineNavigation milestones={milestones} activeIndex={activeIndex} onSelect={changeTab} />
+            </section>
+
+            <div className="sr-only" aria-live="polite">Mostrando {active.shortTitle}, {active.date}.</div>
         </div>
     );
 }
