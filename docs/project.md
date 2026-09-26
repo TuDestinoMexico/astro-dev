@@ -96,9 +96,24 @@ Plataforma conversional con SSR (Astro) para SEO, catálogo de hoteles y tours d
 | `VITE_API_TOKEN` | Público | Token API REST externa |
 | `OPENPAY_MERCHANT_ID` | Privado | ID de comercio Openpay |
 | `OPENPAY_PRIVATE_KEY` | Privado | Llave privada Openpay (producción) |
+| `OPENPAY_API_BASE_URL` | Privado | Base URL de Openpay Sandbox o Production |
+| `OPENPAY_MIN_AMOUNT` | Privado | Importe mínimo permitido para cargos |
+| `OPENPAY_MAX_AMOUNT` | Privado | Importe máximo permitido para cargos |
+| `SITE_URL` | Privado | URL del sitio usada para redirecciones Openpay |
+| `OPENPAY_WEBHOOK_TOKEN` | Privado | Token secreto para autenticar webhooks Openpay |
 | `VITE_SX_OPENPAY_PRIVATE_KEY` | Público | Llave sandbox Openpay (comentada en API) |
 | `API_CRM_URL` | Privado | URL base de la API CRM |
 | `API_CRM_TOKEN` | Privado | Token `X-Api-Token` para el CRM |
+| `FIREBASE_ADMIN_PROJECT_ID` | Privado | Project ID para Firebase Admin SDK server-side |
+| `FIREBASE_ADMIN_CLIENT_EMAIL` | Privado | Email de la cuenta de servicio Firebase Admin |
+| `FIREBASE_ADMIN_PRIVATE_KEY` | Privado | Llave privada Firebase Admin; nunca se expone al cliente |
+| `UPSTASH_REDIS_REST_URL` | Privado | Endpoint Redis para rate limit e idempotencia |
+| `UPSTASH_REDIS_REST_TOKEN` | Privado | Token Redis server-side |
+| `OPENPAY_RATE_LIMIT_USER_MAX` | Privado | Máximo de cargos por usuario |
+| `OPENPAY_RATE_LIMIT_USER_WINDOW_SECONDS` | Privado | Ventana de rate limit por usuario |
+| `OPENPAY_RATE_LIMIT_IP_MAX` | Privado | Máximo de cargos por IP |
+| `OPENPAY_RATE_LIMIT_IP_WINDOW_SECONDS` | Privado | Ventana de rate limit por IP |
+| `OPENPAY_IDEMPOTENCY_TTL_SECONDS` | Privado | TTL de las claves idempotentes |
 
 ---
 

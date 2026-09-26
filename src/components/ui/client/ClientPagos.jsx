@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Wallet, Loader2, AlertCircle, Landmark, CreditCard, Receipt, CalendarDays, CheckCircle2, Clock, Hash, Building2, TrendingUp, Users } from 'lucide-react';
+import { Wallet, Loader2, AlertCircle, Landmark, CreditCard, Receipt, CalendarDays, CheckCircle2, Clock, Hash, Building2, TrendingUp, Users, ExternalLink } from 'lucide-react';
 import { db } from '../../../lib/firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
@@ -29,6 +29,137 @@ const formatMonto = (value) => {
   if (isNaN(n)) return value;
   return `$${n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`;
 };
+
+const formatFirestoreFecha = (value) => {
+  const date = value?.toDate?.();
+  return date ? formatFecha(date.toISOString()) : null;
+};
+
+const openpayMethodLabel = (method) => {
+  if (method === 'card') return 'Tarjeta';
+  if (method === 'store') return 'Tienda de conveniencia';
+  if (method === 'bank_account') return 'Transferencia bancaria';
+  return method || 'Openpay';
+};
+
+const openpayStatusLabel = (status) => {
+  if (status === 'completed') return 'Completado';
+  if (status === 'failed') return 'Fallido';
+  if (status === 'cancelled') return 'Cancelado';
+  return 'Pendiente';
+};
+
+function OpenpayHistory({ user }) {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!user) {
+      setPayments([]);
+      setLoading(false);
+      return undefined;
+    }
+
+    setLoading(true);
+    const paymentsQuery = query(
+      collection(db, 'users', user.uid, 'pagos'),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(paymentsQuery, (snapshot) => {
+      setPayments(snapshot.docs.map((paymentDoc) => ({ id: paymentDoc.id, ...paymentDoc.data() })));
+      setError('');
+      setLoading(false);
+    }, (snapshotError) => {
+      console.error('Error leyendo historial Openpay:', snapshotError);
+      setError('No se pudo cargar el historial de vouchers.');
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  return (
+    <section class="bg-white rounded-2xl border border-indigo-100 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-indigo-100 bg-indigo-50/60 flex items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm font-black text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+            <CreditCard size={16} /> Historial de vouchers Openpay
+          </h3>
+          <p class="text-xs text-indigo-700/70 mt-1">Cargos generados desde tu cuenta, independientes de reservas CT o GB.</p>
+        </div>
+        {payments.length > 0 && <span class="text-xs font-black text-indigo-700">{payments.length}</span>}
+      </div>
+
+      {loading ? (
+        <div class="flex items-center justify-center gap-2 py-8 text-slate-400 text-sm">
+          <Loader2 size={18} class="animate-spin" /> Cargando vouchers...
+        </div>
+      ) : error ? (
+        <div class="flex items-center justify-center gap-2 py-8 text-red-600 text-sm">
+          <AlertCircle size={18} /> {error}
+        </div>
+      ) : payments.length === 0 ? (
+        <div class="py-8 px-6 text-center text-sm text-slate-400">Todavía no tienes vouchers Openpay.</div>
+      ) : (
+        <div class="divide-y divide-slate-100">
+          {payments.map((payment) => {
+            const voucher = payment.voucher || {};
+            const voucherUrl = voucher.url || voucher.url_spei;
+            const reference = voucher.reference || voucher.name;
+            const status = payment.status || 'pending';
+            const isCompleted = status === 'completed';
+
+            return (
+              <article key={payment.id} class="px-6 py-5 space-y-4">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-black text-slate-800">{payment.description}</p>
+                    <p class="text-xs text-slate-400 mt-1">
+                      {openpayMethodLabel(payment.method)} · {formatFirestoreFecha(payment.createdAt) || 'Fecha pendiente'}
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-base font-black text-slate-800">{formatMonto(payment.amount)}</p>
+                    <span class={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border mt-1 ${
+                      isCompleted
+                        ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                        : status === 'failed' || status === 'cancelled'
+                          ? 'bg-red-100 text-red-700 border-red-200'
+                          : 'bg-amber-100 text-amber-700 border-amber-200'
+                    }`}>
+                      {isCompleted ? <CheckCircle2 size={11} /> : <Clock size={11} />}
+                      {openpayStatusLabel(status)}
+                    </span>
+                  </div>
+                </div>
+
+                {reference && (
+                  <div class="bg-slate-50 rounded-xl px-4 py-3">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Referencia</p>
+                    <p class="font-mono font-bold text-slate-800 mt-1 break-all">{reference}</p>
+                  </div>
+                )}
+
+                <div class="flex flex-wrap items-center gap-3">
+                  {voucher.barcode_url && (
+                    <img src={voucher.barcode_url} alt="Código de barras del voucher" class="h-12 w-auto border border-slate-200 rounded-lg p-1" />
+                  )}
+                  {voucherUrl && (
+                    <a href={voucherUrl} target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors">
+                      <ExternalLink size={14} /> Ver voucher
+                    </a>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
 
 const methodIcon = (metodo) => {
   const m = (metodo || '').toLowerCase();
@@ -136,6 +267,8 @@ export default function ClientPagos({ user }) {
         </h2>
         <p class="text-sm text-slate-500 mt-1">Historial de abonos de tus reservas y grupos vinculados</p>
       </div>
+
+      <OpenpayHistory user={user} />
 
       {vinculadas.length === 0 ? (
         <div class="bg-white border border-dashed border-slate-200 rounded-2xl p-10 text-center">

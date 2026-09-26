@@ -4,7 +4,7 @@
 
 ## Resumen
 
-El proyecto expone cinco endpoints API server-side (proxy a Openpay y proxys a CRM de reservas y grupos) y consume una API REST externa para el catálogo de productos. También genera un robots.txt dinámico.
+El proyecto expone endpoints API server-side (proxy y webhook de Openpay, además de proxys a CRM de reservas y grupos) y consume una API REST externa para el catálogo de productos. También genera un robots.txt dinámico.
 
 ---
 
@@ -16,12 +16,31 @@ Crea un cargo en Openpay.
 
 - **Archivo:** `src/pages/api/openpay-cargo.ts`
 - **Método:** POST
-- **Body:** JSON — cualquier payload válido para Openpay charges API
-- **Respuesta:** JSON con la respuesta de Openpay (status code espejeado)
-- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`
-- **URL destino:** `https://api.openpay.mx/v1/{merchantId}/charges`
-- **Auth:** Basic Auth con `OPENPAY_PRIVATE_KEY`
-- **Error:** Retorna `{ error: 'Error interno del servidor' }` con status 500
+- **Autenticación:** Bearer ID token de Firebase; requiere email verificado.
+- **Protección:** rate limit distribuido por UID/IP e `Idempotency-Key` obligatorio.
+- **Body permitido:**
+  ```json
+  {
+    "method": "card|store|bank_account",
+    "amount": "number con máximo dos decimales",
+    "description": "string",
+    "customer": {
+      "name": "string",
+      "last_name": "string",
+      "phone_number": "string"
+    }
+  }
+  ```
+- **Validaciones server-side:** método permitido, importe entre `OPENPAY_MIN_AMOUNT` y `OPENPAY_MAX_AMOUNT`, datos básicos del cliente, body JSON y tamaño máximo.
+- **Campos controlados por servidor:** email desde el token Firebase, `confirm`, `send_email` y `redirect_url`.
+- **Respuesta éxito:** `{ success: true, id, status, payment_method }` con solo los campos necesarios del voucher Openpay.
+- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`, `OPENPAY_API_BASE_URL`, `OPENPAY_MIN_AMOUNT`, `OPENPAY_MAX_AMOUNT`, `SITE_URL` y credenciales `FIREBASE_ADMIN_*`.
+- **URL destino:** `{OPENPAY_API_BASE_URL}/v1/{merchantId}/charges`
+- **Auth externa:** Basic Auth con `OPENPAY_PRIVATE_KEY`; nunca se expone al cliente.
+- **Errores:** `400` payload inválido, `401` sesión ausente o inválida, `403` email no verificado, `409` idempotencia en proceso, `413` body demasiado grande, `415` content type incorrecto, `429` rate limit, `502` respuesta Openpay inválida, `503` protección no disponible y `500` configuración/error interno.
+- **Headers requeridos:** `Authorization: Bearer <id-token>` e `Idempotency-Key` de 8 a 128 caracteres seguros.
+
+Los formularios de pago adjuntan el Bearer token y una `Idempotency-Key` generada en cliente. La clave se conserva durante reintentos y se limpia después de una respuesta exitosa. Los cargos exitosos se guardan server-side en `users/{uid}/pagos/{paymentId}`.
 
 ### `GET /api/openpay-check`
 
@@ -29,13 +48,29 @@ Verifica el estado de una transacción Openpay.
 
 - **Archivo:** `src/pages/api/openpay-check.ts`
 - **Método:** GET
-- **Query params:** `id` (string, requerido) — Transaction ID
-- **Respuesta:** JSON con la respuesta de Openpay
-- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`
-- **URL destino:** `https://api.openpay.mx/v1/{merchantId}/charges/{transactionId}`
-- **Auth:** Basic Auth con `OPENPAY_PRIVATE_KEY`
-- **Error 400:** `{ error: 'Falta el transactionId' }`
-- **Error 500:** `{ error: 'Error interno del servidor' }`
+- **Autenticación:** Bearer ID token de Firebase; requiere email verificado.
+- **Query params:** `paymentId` (string, requerido) — ID del documento en `users/{uid}/pagos`.
+- **Respuesta:** respuesta normalizada del cargo, limitada a los campos necesarios para mostrar su estado.
+- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`, `OPENPAY_API_BASE_URL` y credenciales `FIREBASE_ADMIN_*`.
+- **Flujo:** primero verifica que el `paymentId` pertenezca al usuario autenticado; después obtiene el `openpayChargeId` guardado y consulta Openpay.
+- **Actualización:** sincroniza el estado del documento de historial.
+- **Redirect Openpay:** Openpay puede regresar a `SITE_URL?id={openpayChargeId}`. `WelcomeModal` acepta ese parámetro, lo usa como `paymentId` y conserva el retorno al login sin permitir URLs externas.
+- **Errores:** `400` paymentId inválido, `401` sesión ausente o inválida, `403` email no verificado, `404` pago no encontrado, `502` error de Openpay y `500` error interno.
+
+### `POST /api/openpay-webhook`
+
+Recibe notificaciones de estado de cargos desde Openpay.
+
+- **Archivo:** `src/pages/api/openpay-webhook.ts`
+- **Método:** POST
+- **Autenticación:** token secreto server-side mediante `X-Openpay-Webhook-Token` o el query param `token` configurado en la URL del webhook.
+- **Body:** JSON de Openpay; acepta el cargo en `transaction`, `charge` o `data`.
+- **Eventos:** creación, éxito/completado, rechazo, fallo, cancelación, expiración y reembolso.
+- **Flujo:** extrae el ID del cargo, busca `users/{uid}/pagos` por `openpayChargeId` mediante `collectionGroup` y actualiza únicamente el documento encontrado.
+- **Idempotencia:** las notificaciones repetidas actualizan el mismo documento y no crean pagos nuevos. Los cargos desconocidos se confirman sin exponer información.
+- **Variables de entorno:** `OPENPAY_WEBHOOK_TOKEN` y credenciales `FIREBASE_ADMIN_*`.
+- **Configuración Openpay:** registrar `https://tu-dominio/api/openpay-webhook?token=OPENPAY_WEBHOOK_TOKEN` en Sandbox y Production. No usar el mismo token entre entornos.
+- **Errores:** `400` payload inválido, `401` token ausente/incorrecto, `413` body demasiado grande, `415` content type incorrecto y `500` error interno.
 
 ### `POST /api/crm-consultar`
 

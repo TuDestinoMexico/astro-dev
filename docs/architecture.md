@@ -122,7 +122,8 @@ src/
 
 ### API Routes
 - `/api/openpay-cargo` — Proxy POST a Openpay API (crear cargo). Usa `OPENPAY_MERCHANT_ID` y `OPENPAY_PRIVATE_KEY` del servidor.
-- `/api/openpay-check` — Proxy GET a Openpay API (verificar transacción por `id`).
+- `/api/openpay-check` — Proxy GET autenticado a Openpay API; verifica pertenencia del `paymentId` en `users/{uid}/pagos` antes de consultar el cargo.
+- `/api/openpay-webhook` — POST autenticado con token secreto; sincroniza el estado de un cargo existente por `openpayChargeId`.
 
 ---
 
@@ -139,4 +140,4 @@ src/
 ### Pagos (Openpay)
 1. Componente React (`PaymentMethods`) muestra opciones de pago.
 2. Formularios específicos (`CreditCardDrawer`, etc.) envían datos a `/api/openpay-cargo`.
-3. Modal `WelcomeModal` en homepage verifica estado vía `/api/openpay-check?id=...`.
+3. Modal `WelcomeModal` en homepage acepta el `id` que Openpay agrega a `SITE_URL`, lo consulta como `paymentId` vía `/api/openpay-check` con el token Firebase del usuario.

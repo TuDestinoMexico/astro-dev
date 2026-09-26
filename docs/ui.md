@@ -90,10 +90,10 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `PaymentMethods.jsx` | `client:only` | Grid de métodos con modales dinámicos y animación GSAP |
-| `CreditCardDrawer.jsx` | — | Formulario tarjeta crédito/débito |
-| `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia |
-| `BankTransferForm.jsx` | — | Pago servicios BBVA |
+| `PaymentMethods.jsx` | `client:only` | Grid de métodos con modales dinámicos y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
+| `CreditCardDrawer.jsx` | — | Formulario tarjeta crédito/débito; envía ID token Firebase e `Idempotency-Key` al crear el cargo |
+| `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia con autenticación e idempotencia |
+| `BankTransferForm.jsx` | — | Pago servicios BBVA con autenticación e idempotencia |
 | `DirectTransferForm.jsx` | — | Transferencia interbancaria SPEI |
 | `CounterPaymentForm.jsx` | — | Pago en ventanilla |
 | `OxxoDepositForm.jsx` | — | Depósito OXXO |
@@ -106,7 +106,7 @@ Renderizados en servidor. Sin estado cliente.
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |
-| `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso liquidación, lista de abonos con método y referencia |
+| `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso, lista de abonos con método y referencia, e historial independiente de vouchers Openpay |
 | `ClientFavoritos.jsx` | — | Favoritos reales del cliente (Firestore `users/{uid}/favoritos` vía `onSnapshot`, recientes primero): tarjetas con imagen/nombre/destino/badge Hotel-Tour, link al detalle `/{tipo}/{slug}` y eliminar con confirmación |
 | `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Modal detalle (reserva / `GrupoDetalle`) + PDF download + botón de documentos por tarjeta |
 | `DocumentosModal.jsx` | — | Modal de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) sin botón de vista previa, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
