@@ -77,9 +77,11 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `Timeline.tsx` | (no determinada) | Línea de tiempo |
-| `TimelineItem.tsx` | (no determinada) | Item de línea de tiempo |
-| `MexicoMap.tsx` | (no determinada) | Mapa de México interactivo |
+| `Timeline.tsx` | `client:only="react"` | Controlador de Xolo Ruta: hito activo, resumen, transición GSAP, navegación y sincronización con mapa |
+| `TimelineItem.tsx` | — | Card editorial del hito activo con ciudad, fecha, contenido, imagen y navegación anterior/siguiente |
+| `TimelineNavigation.tsx` | — | Cronología accesible agrupada por año, con navegación por teclado y scroll horizontal móvil |
+| `RouteSummary.tsx` | — | Resumen visual de paradas y periodo de Xolo Ruta |
+| `MexicoMap.tsx` | — | Mapa de México interactivo con marcadores, carga, error recuperable y fallback de ciudades |
 
 ### Recomendaciones
 
