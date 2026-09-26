@@ -93,7 +93,7 @@ Renderizados en servidor. Sin estado cliente.
 |---|---|---|
 | `PaymentMethods.jsx` | `client:only` | Grid accesible de métodos con botones nativos navegables por teclado (Enter/Espacio), diálogo dinámico con trap de foco y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
 | `CreditCardDrawer.jsx` | — | Formulario tarjeta crédito/débito; envía ID token Firebase e `Idempotency-Key` al crear el cargo |
-| `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia con autenticación e idempotencia |
+| `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia con autenticación e idempotencia; modal de tiendas con scroll exterior responsive basado en `100dvh` |
 | `BankTransferForm.jsx` | — | Pago servicios BBVA con autenticación e idempotencia |
 | `DirectTransferForm.jsx` | — | Transferencia interbancaria SPEI |
 | `CounterPaymentForm.jsx` | — | Pago en ventanilla |
