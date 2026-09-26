@@ -56,16 +56,16 @@ const {
 
     <!-- 5. El Personaje "Out of Bounds" -->
     {characterSrc && (
+            /*
+            Claves del efecto:
+            - absolute bottom-0 right-0: Lo ancla a la esquina inferior derecha.
+            - h-[120%] md:h-[130%]: Lo hace más alto que el contenedor padre, forzándolo a salir por arriba.
+            - z-40: Lo pone por encima de todo.
+            - drop-shadow-2xl: Le da una sombra que se proyecta fuera de la caja, aumentando el efecto 3D.
+            */
             <img
-                    src={characterSrc}
-                    alt="Personaje destacado"
-        /*
-        Claves del efecto:
-        - absolute bottom-0 right-0: Lo ancla a la esquina inferior derecha.
-        - h-[120%] md:h-[130%]: Lo hace más alto que el contenedor padre, forzándolo a salir por arriba.
-        - z-40: Lo pone por encima de todo.
-        - drop-shadow-2xl: Le da una sombra que se proyecta fuera de la caja, aumentando el efecto 3D.
-        */
+                     src={characterSrc}
+                     alt="Personaje destacado"
         class="absolute bottom-0 right-0 md:right-10 z-40 h-[120%] md:h-[130%] w-auto object-contain drop-shadow-2xl pointer-events-none"
         />
         )}
