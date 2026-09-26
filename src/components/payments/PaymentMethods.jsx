@@ -60,14 +60,15 @@ export default function PaymentMethods({ baseUrl }) {
         <div ref={containerRef} className="py-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {paymentData.map((method) => (
-                    <div
+                    <button
+                        type="button"
                         key={method.id}
                         onClick={() => handleMethodSelect(method.id)}
-                        className="payment-card cursor-pointer bg-[#00c0a5] hover:bg-[#00a891] p-10 rounded-2xl flex flex-col items-center justify-center text-center transition-all shadow-md hover:shadow-xl group min-h-[220px]"
+                        className="payment-card w-full cursor-pointer border-0 text-inherit focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white bg-[#00c0a5] hover:bg-[#00a891] p-10 rounded-2xl flex flex-col items-center justify-center text-center transition-all shadow-md hover:shadow-xl group min-h-[220px]"
                     >
                         <span className="text-5xl mb-4 group-hover:scale-110 transition-transform">{method.icon}</span>
                         <h3 className="text-white font-bold text-xl leading-tight">{method.title}</h3>
-                    </div>
+                    </button>
                 ))}
             </div>
 
