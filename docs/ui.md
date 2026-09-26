@@ -90,7 +90,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `PaymentMethods.jsx` | `client:only` | Grid de métodos con modales dinámicos y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
+| `PaymentMethods.jsx` | `client:only` | Grid accesible de métodos con botones nativos navegables por teclado (Enter/Espacio), modales dinámicos y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
 | `CreditCardDrawer.jsx` | — | Formulario tarjeta crédito/débito; envía ID token Firebase e `Idempotency-Key` al crear el cargo |
 | `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia con autenticación e idempotencia |
 | `BankTransferForm.jsx` | — | Pago servicios BBVA con autenticación e idempotencia |
