@@ -84,8 +84,27 @@ Todas las variables deben configurarse en el dashboard de Vercel. No hay archivo
 | `VITE_API_TOKEN` | Público | API REST externa |
 | `OPENPAY_MERCHANT_ID` | Privado | Endpoints Openpay |
 | `OPENPAY_PRIVATE_KEY` | Privado | Endpoints Openpay |
+| `OPENPAY_API_BASE_URL` | Privado | Base URL de Openpay Sandbox o Production |
+| `OPENPAY_MIN_AMOUNT` | Privado | Importe mínimo permitido para cargos |
+| `OPENPAY_MAX_AMOUNT` | Privado | Importe máximo permitido para cargos |
+| `SITE_URL` | Privado | URL server-side permitida para redirecciones Openpay |
+| `OPENPAY_WEBHOOK_TOKEN` | Privado | Token secreto para autenticar notificaciones Openpay |
 | `API_CRM_URL` | Privado | Proxies de reservas, grupos, pagos y documentos |
 | `API_CRM_TOKEN` | Privado | Header `X-Api-Token` del CRM |
+| `FIREBASE_ADMIN_PROJECT_ID` | Privado | Firebase Admin SDK server-side |
+| `FIREBASE_ADMIN_CLIENT_EMAIL` | Privado | Cuenta de servicio de Firebase Admin SDK |
+| `FIREBASE_ADMIN_PRIVATE_KEY` | Privado | Llave de servicio para verificar ID tokens; nunca se expone al cliente |
+| `UPSTASH_REDIS_REST_URL` | Privado | Endpoint REST de Redis para rate limit e idempotencia |
+| `UPSTASH_REDIS_REST_TOKEN` | Privado | Token REST de Redis |
+| `OPENPAY_RATE_LIMIT_USER_MAX` | Privado | Máximo de cargos por usuario en la ventana configurada |
+| `OPENPAY_RATE_LIMIT_USER_WINDOW_SECONDS` | Privado | Ventana de rate limit por usuario |
+| `OPENPAY_RATE_LIMIT_IP_MAX` | Privado | Máximo de cargos por IP en la ventana configurada |
+| `OPENPAY_RATE_LIMIT_IP_WINDOW_SECONDS` | Privado | Ventana de rate limit por IP |
+| `OPENPAY_IDEMPOTENCY_TTL_SECONDS` | Privado | Tiempo de retención de claves idempotentes |
+
+Las variables `FIREBASE_ADMIN_*` deben configurarse en los entornos Preview y Production de Vercel. La llave privada se obtiene desde Firebase Console → Project Settings → Service Accounts y nunca se guarda en el repositorio.
+
+El webhook debe registrarse por separado en Openpay Sandbox y Production. La URL debe incluir el token correspondiente al entorno: `https://dominio/api/openpay-webhook?token=...`. Si el token se rota, hay que actualizar la URL registrada en Openpay.
 
 ### Reglas de Firebase
 

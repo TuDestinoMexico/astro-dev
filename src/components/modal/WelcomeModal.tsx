@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
+import { auth } from '../../lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const PaymentStatusModal = () => {
     const [paymentData, setPaymentData] = useState<any>(null);
@@ -10,27 +12,39 @@ const PaymentStatusModal = () => {
     const modalRef = useRef(null);
 
     useEffect(() => {
-        const fetchPaymentStatus = async () => {
-            const params = new URLSearchParams(window.location.search);
-            const transactionId = params.get('id');
+        // Openpay appends ?id=... to the configured redirect URL.
+        const params = new URLSearchParams(window.location.search);
+        const paymentId = params.get('id') || params.get('paymentId');
+        if (!paymentId) return undefined;
 
-            if (transactionId) {
-                setLoading(true);
-                setIsOpen(true);
-                try {
-                    const response = await fetch(`/api/openpay-check?id=${transactionId}`);
-                    const data = await response.json();
-                    if (response.ok) {
-                        setPaymentData(data);
-                    }
-                } catch (error) {
-                    console.error("Error de red", error);
-                } finally {
-                    setLoading(false);
+        setLoading(true);
+        setIsOpen(true);
+        let requested = false;
+
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (requested) return;
+            requested = true;
+
+            try {
+                if (!user) {
+                    const returnTo = `/?id=${paymentId}`;
+                    window.location.href = `/cliente/login?returnTo=${encodeURIComponent(returnTo)}`;
+                    return;
                 }
+                const token = await user.getIdToken();
+                const response = await fetch(`/api/openpay-check?paymentId=${encodeURIComponent(paymentId)}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await response.json();
+                if (response.ok) setPaymentData(data);
+            } catch (error) {
+                console.error('Error consultando el pago:', error);
+            } finally {
+                setLoading(false);
             }
-        };
-        fetchPaymentStatus();
+        });
+
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {

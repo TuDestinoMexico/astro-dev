@@ -1,29 +1,23 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { createIdempotencyKey, createOpenpayCharge } from '../../../lib/openpayClient';
 
 export default function CreditCardDrawer({ baseUrl }) {
     const [form, setForm] = useState({
         method: 'card',
         amount: '',
         description: '',
-        customer: {
-            name: '',
-            last_name: '',
-            phone_number: '',
-            email: ''
-        },
-        confirm: 'false',
-        send_email: 'true',
-        redirect_url: `${baseUrl}`,
+        customer: { name: '', last_name: '', phone_number: '' },
     });
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const [paymentUrl, setPaymentUrl] = useState('');
+    const idempotencyKeyRef = useRef(null);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
-        if (['name', 'last_name', 'phone_number', 'email'].includes(id)) {
+        if (['name', 'last_name', 'phone_number'].includes(id)) {
             setForm(prev => ({
                 ...prev,
                 customer: { ...prev.customer, [id]: value }
@@ -40,22 +34,16 @@ export default function CreditCardDrawer({ baseUrl }) {
         setSuccess('');
 
         try {
-            const res = await fetch('/api/openpay-cargo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form)
-            });
+            if (!idempotencyKeyRef.current) idempotencyKeyRef.current = createIdempotencyKey();
+            const data = await createOpenpayCharge(form, idempotencyKeyRef.current);
 
-            const data = await res.json();
-
-            if (res.ok) {
+            if (data.success) {
                 setSuccess('¡Cargo generado con éxito!');
                 setPaymentUrl(data.payment_method.url);
-            } else {
-                setError(data.description || 'Error al procesar el pago');
+                idempotencyKeyRef.current = null;
             }
         } catch (err) {
-            setError('Error de conexión con el servidor');
+            setError(err.message || 'Error de conexión con el servidor');
         } finally {
             setLoading(false);
         }
@@ -83,12 +71,6 @@ export default function CreditCardDrawer({ baseUrl }) {
                         <label className={labelStyle}>Apellidos</label>
                         <input id="last_name" type="text" placeholder="Ej. Pérez" className={inputStyle} onChange={handleChange} required />
                     </div>
-                </div>
-
-                {/* Email */}
-                <div className="text-left">
-                    <label className={labelStyle}>Correo Electrónico</label>
-                    <input id="email" type="email" placeholder="correo@ejemplo.com" className={inputStyle} onChange={handleChange} required />
                 </div>
 
                 {/* Teléfono */}

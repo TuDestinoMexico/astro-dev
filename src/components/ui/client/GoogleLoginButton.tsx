@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 import { auth } from '../../../lib/firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
+function getSafeReturnTo() {
+    const returnTo = new URLSearchParams(window.location.search).get('returnTo');
+    if (returnTo === '/pagos' || returnTo === '/cliente/dashboard') return returnTo;
+
+    const paymentReturn = returnTo?.match(/^\/\?id=([A-Za-z0-9._:-]{1,200})$/);
+    return paymentReturn ? `/?id=${paymentReturn[1]}` : '/cliente/dashboard';
+}
+
 export default function GoogleLoginButton() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -12,7 +20,7 @@ export default function GoogleLoginButton() {
         try {
             const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
-            window.location.href = '/cliente/dashboard';
+            window.location.href = getSafeReturnTo();
         } catch (err) {
             if (err.code === 'auth/popup-closed-by-user') {
                 setError('');

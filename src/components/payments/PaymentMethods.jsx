@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { auth } from '../../lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import CreditCardDrawer from "./type/CreditCardDrawer.jsx";
 import StorePaymentForm from "./type/StorePaymentForm.jsx";
 import BankTransferForm from "./type/BankTransferForm.jsx";
@@ -17,7 +19,11 @@ const paymentData = [
 
 export default function PaymentMethods({ baseUrl }) {
     const [selectedId, setSelectedId] = useState(null);
+    const [user, setUser] = useState(null);
+    const [authMessage, setAuthMessage] = useState('');
     const containerRef = useRef(null);
+
+    useEffect(() => onAuthStateChanged(auth, setUser), []);
 
     useEffect(() => {
         let ctx = gsap.context(() => {
@@ -36,13 +42,27 @@ export default function PaymentMethods({ baseUrl }) {
 
     const activeMethod = paymentData.find(m => m.id === selectedId);
 
+    const handleMethodSelect = (methodId) => {
+        if (!user) {
+            window.location.href = '/cliente/login?returnTo=/pagos';
+            return;
+        }
+
+        if (!user.emailVerified) {
+            setAuthMessage('Verifica tu correo electrónico antes de generar un voucher de pago.');
+            return;
+        }
+
+        setSelectedId(methodId);
+    };
+
     return (
         <div ref={containerRef} className="py-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {paymentData.map((method) => (
                     <div
                         key={method.id}
-                        onClick={() => setSelectedId(method.id)}
+                        onClick={() => handleMethodSelect(method.id)}
                         className="payment-card cursor-pointer bg-[#00c0a5] hover:bg-[#00a891] p-10 rounded-2xl flex flex-col items-center justify-center text-center transition-all shadow-md hover:shadow-xl group min-h-[220px]"
                     >
                         <span className="text-5xl mb-4 group-hover:scale-110 transition-transform">{method.icon}</span>
@@ -51,7 +71,14 @@ export default function PaymentMethods({ baseUrl }) {
                 ))}
             </div>
 
-            {/* Modal Dinámico */}
+             {(!user || authMessage) && (
+                 <div className="mt-8 mx-auto max-w-xl rounded-2xl border border-purple-100 bg-purple-50 p-5 text-center">
+                     <p className="font-bold text-purple-900">{authMessage || 'Inicia sesión para generar un voucher de pago.'}</p>
+                     <p className="mt-1 text-sm text-purple-700">Tu sesión permite proteger el cargo y consultar su historial posteriormente.</p>
+                 </div>
+             )}
+
+             {/* Modal Dinámico */}
             {selectedId && (
                 <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <div className={`bg-white rounded-3xl p-8 w-full shadow-2xl overflow-y-auto max-h-[90vh] ${selectedId === 1 ? 'max-w-2xl' : 'max-w-md'}`}>

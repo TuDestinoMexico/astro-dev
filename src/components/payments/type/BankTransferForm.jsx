@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { createIdempotencyKey, createOpenpayCharge } from '../../../lib/openpayClient';
 
 export default function BankTransferForm() {
     const [form, setForm] = useState({
@@ -8,14 +9,14 @@ export default function BankTransferForm() {
         customer: {
             name: '',
             last_name: '',
-            phone_number: '',
-            email: ''
+            phone_number: ''
         }
     });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [paymentData, setPaymentData] = useState(null);
+    const idempotencyKeyRef = useRef(null);
 
     // Función auxiliar para dar formato a la referencia
     const formatReference = (ref) => {
@@ -25,7 +26,7 @@ export default function BankTransferForm() {
 
     const handleChange = (e) => {
         const { id, value } = e.target;
-        if (['name', 'last_name', 'phone_number', 'email'].includes(id)) {
+        if (['name', 'last_name', 'phone_number'].includes(id)) {
             setForm(prev => ({
                 ...prev,
                 customer: { ...prev.customer, [id]: value }
@@ -41,21 +42,15 @@ export default function BankTransferForm() {
         setError('');
 
         try {
-            const res = await fetch('/api/openpay-cargo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form)
-            });
+            if (!idempotencyKeyRef.current) idempotencyKeyRef.current = createIdempotencyKey();
+            const data = await createOpenpayCharge(form, idempotencyKeyRef.current);
 
-            const data = await res.json();
-
-            if (res.ok) {
+            if (data.success) {
                 setPaymentData(data.payment_method);
-            } else {
-                setError(data.description || 'Error al generar los datos de transferencia');
+                idempotencyKeyRef.current = null;
             }
         } catch (err) {
-            setError('Error de conexión con el servidor');
+            setError(err.message || 'Error de conexión con el servidor');
         } finally {
             setLoading(false);
         }
@@ -131,10 +126,6 @@ export default function BankTransferForm() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-                    <div>
-                        <label className={labelStyle}>Correo Electrónico</label>
-                        <input id="email" type="email" placeholder="correo@ejemplo.com" className={inputStyle} onChange={handleChange} required />
-                    </div>
                     <div>
                         <label className={labelStyle}>Teléfono</label>
                         <input id="phone_number" type="tel" placeholder="10 dígitos" className={inputStyle} onChange={handleChange} required />

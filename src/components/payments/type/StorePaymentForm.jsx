@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { createIdempotencyKey, createOpenpayCharge } from '../../../lib/openpayClient';
 
 // Listado de tiendas y comisiones
 const stores = [
@@ -17,17 +18,18 @@ export default function StorePaymentForm() {
         method: 'store',
         amount: '',
         description: '',
-        customer: { name: '', last_name: '', phone_number: '', email: '' }
+        customer: { name: '', last_name: '', phone_number: '' }
     });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [paymentData, setPaymentData] = useState(null);
     const [showStoreInfo, setShowStoreInfo] = useState(false);
+    const idempotencyKeyRef = useRef(null);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
-        if (['name', 'last_name', 'phone_number', 'email'].includes(id)) {
+        if (['name', 'last_name', 'phone_number'].includes(id)) {
             setForm(prev => ({ ...prev, customer: { ...prev.customer, [id]: value } }));
         } else {
             setForm(prev => ({ ...prev, [id]: value }));
@@ -39,23 +41,18 @@ export default function StorePaymentForm() {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('/api/openpay-cargo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form)
-            });
-            const data = await res.json();
-            if (res.ok) {
+            if (!idempotencyKeyRef.current) idempotencyKeyRef.current = createIdempotencyKey();
+            const data = await createOpenpayCharge(form, idempotencyKeyRef.current);
+            if (data.success) {
                 setPaymentData({
                     id: data.id,
                     barcode_url: data.payment_method.barcode_url,
                     reference: data.payment_method.reference
                 });
-            } else {
-                setError(data.description || 'Error al generar la ficha');
+                idempotencyKeyRef.current = null;
             }
         } catch (err) {
-            setError('Error de conexión');
+            setError(err.message || 'Error de conexión');
         } finally {
             setLoading(false);
         }
@@ -125,10 +122,6 @@ export default function StorePaymentForm() {
 
                 {/* Email y Teléfono */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-                    <div>
-                        <label className={labelStyle}>Correo Electrónico</label>
-                        <input id="email" type="email" placeholder="correo@ejemplo.com" className={inputStyle} onChange={handleChange} required />
-                    </div>
                     <div>
                         <label className={labelStyle}>Teléfono</label>
                         <input id="phone_number" type="tel" placeholder="10 dígitos" className={inputStyle} onChange={handleChange} required />

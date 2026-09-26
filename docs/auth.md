@@ -49,6 +49,8 @@ Firebase Authentication con dos flujos: Google para clientes y email/contraseña
 - **Middleware:** No bloquea rutas `/admin`. Todo el tráfico admin pasa sin verificación server-side.
 - **Seguridad efectiva:** las reglas de Firestore y Storage validan el mismo custom claim.
 - Este guard visual no sustituye las reglas de Firebase: las operaciones directas contra Firebase deben ser rechazadas por las reglas.
+- `src/lib/firebaseAdmin.ts` verifica server-side los ID tokens usados por endpoints protegidos, incluido `openpay-cargo`.
+- Los formularios Openpay obtienen el ID token desde la sesión Firebase vigente; el servidor continúa siendo la autoridad para validar identidad y email.
 
 ---
 
@@ -70,6 +72,14 @@ Firebase Authentication con dos flujos: Google para clientes y email/contraseña
 | `PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Sender ID |
 | `PUBLIC_FIREBASE_APP_ID` | App ID |
 
+### Variables privadas server-side
+
+| Variable | Propósito |
+|---|---|
+| `FIREBASE_ADMIN_PROJECT_ID` | Project ID usado por Firebase Admin SDK |
+| `FIREBASE_ADMIN_CLIENT_EMAIL` | Email de la cuenta de servicio server-side |
+| `FIREBASE_ADMIN_PRIVATE_KEY` | Llave privada de la cuenta de servicio; nunca se expone al cliente |
+
 ---
 
 ## Archivos clave
@@ -77,6 +87,7 @@ Firebase Authentication con dos flujos: Google para clientes y email/contraseña
 | Archivo | Rol |
 |---|---|
 | `src/lib/firebase.js` | Inicialización Firebase (auth, db, storage) |
+| `src/lib/firebaseAdmin.ts` | Inicialización Firebase Admin y verificación de ID tokens server-side |
 | `src/pages/admin/login.astro` | Página login |
 | `src/pages/admin/dashboard.astro` | Página dashboard |
 | `src/components/ui/admin/LoginForm.jsx` | Formulario login |
