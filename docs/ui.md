@@ -85,7 +85,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `FacebookReel.jsx` | (no determinada) | Reel embebido de Facebook |
+| `FacebookReel.jsx` | `client:only="react"` | Reel embebido de Facebook con formato vertical máximo de 315x560px y ancho adaptable en móviles |
 
 ### Pagos
 
