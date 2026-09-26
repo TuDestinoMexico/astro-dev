@@ -1,0 +1,37 @@
+---
+interface Props {
+    type: 'hotel' | 'tour';
+}
+
+const { type } = Astro.props;
+const label = type === 'hotel' ? 'hotel' : 'tour';
+const catalogPath = type === 'hotel' ? '/hoteles' : '/tours';
+---
+
+<main class="container mx-auto my-8 px-5 xl:px-0">
+    <section class="min-h-[50vh] flex flex-col items-center justify-center text-center rounded-3xl bg-slate-50 border border-slate-200 px-6 py-16">
+        <span class="inline-block rounded-full bg-orange-50 border border-orange-200 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">
+            Catálogo temporalmente no disponible
+        </span>
+        <h1 class="mt-6 text-3xl md:text-4xl font-black text-slate-900">
+            No pudimos cargar este {label}
+        </h1>
+        <p class="mt-4 max-w-xl text-sm md:text-base leading-relaxed text-slate-500">
+            Estamos teniendo problemas para consultar nuestro catálogo. Intenta nuevamente más tarde o explora otras opciones disponibles.
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+                href={catalogPath}
+                class="w-full sm:w-auto rounded-2xl bg-indigo-600 px-6 py-3 text-center text-xs font-black uppercase tracking-widest text-white transition hover:bg-slate-900"
+            >
+                Ver catálogo
+            </a>
+            <a
+                href="/"
+                class="w-full sm:w-auto rounded-2xl border-2 border-slate-200 bg-white px-6 py-3 text-center text-xs font-black uppercase tracking-widest text-slate-700 transition hover:bg-slate-50"
+            >
+                Volver al inicio
+            </a>
+        </div>
+    </section>
+</main>
