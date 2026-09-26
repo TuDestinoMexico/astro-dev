@@ -75,6 +75,13 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
         setFormData({ ...formData, edadesMenores: nuevasEdades });
     };
 
+    const isValidMinorAge = (edad: string) => {
+        if (edad.trim() === '') return false;
+
+        const parsed = Number(edad);
+        return Number.isInteger(parsed) && parsed >= 0 && parsed <= 17;
+    };
+
     const handleMenoresChange = (cantidad: number) => {
         const num = Math.max(0, cantidad);
         // Ajustamos el arreglo de edades para que coincida con la cantidad
@@ -208,7 +215,16 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     const canApplyDates = isSingleDate ? Boolean(checkIn) : Boolean(checkIn && checkOut);
     const hasValidAdults = typeof formData.adultos === 'number' && Number.isInteger(formData.adultos) && formData.adultos >= 1;
     const hasValidChildren = Number.isInteger(formData.menores) && formData.menores >= 0;
-    const hasValidChildrenAges = formData.menores === 0 || formData.edadesMenores.every((edad) => edad.trim() !== '');
+    const hasValidChildrenAges = formData.menores === 0 || (
+        formData.edadesMenores.length === formData.menores &&
+        formData.edadesMenores.every(isValidMinorAge)
+    );
+    const hasOutOfRangeMinorAge = formData.edadesMenores.some((edad) => {
+        if (edad.trim() === '') return false;
+
+        const parsed = Number(edad);
+        return !Number.isInteger(parsed) || parsed < 0 || parsed > 17;
+    });
     const canSendWhatsApp = Boolean(
         formData.nombre.trim() &&
         canApplyDates &&
@@ -398,6 +414,12 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
                         onChange={handleEdadChange}
                     />
                 </div>
+
+                {hasOutOfRangeMinorAge && (
+                    <p role="alert" aria-live="assertive" className="text-sm font-semibold text-red-600">
+                        Las edades de los menores deben estar entre 0 y 17 años.
+                    </p>
+                )}
 
                 {validationMessage && (
                     <p role="alert" aria-live="assertive" className="text-sm font-semibold text-red-600">
