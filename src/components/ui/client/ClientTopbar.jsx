@@ -135,8 +135,16 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
     <div>
       <div class="container mx-auto flex flex-col xl:flex-row justify-between items-center">
         <div class="h-full flex items-center xl:justify-start justify-center mt-5 xl:mt-0">
-          <a href="/">
-            <img class="w-70" src={logoUrl} alt="Tu Destino Mexico" />
+          <a href="/" class="block w-70 aspect-[4/1] shrink-0">
+            <img
+              class="w-full h-full object-contain"
+              src={logoUrl}
+              alt="Tu Destino Mexico"
+              width="280"
+              height="70"
+              loading="eager"
+              decoding="async"
+            />
           </a>
         </div>
 

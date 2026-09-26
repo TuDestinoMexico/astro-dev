@@ -14,7 +14,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Ruta | Propósito |
 |---|---|---|
-| `Header.astro` | `components/layout/Header.astro` | Nav principal con logo, contacto, menú sticky, submenú horizontal y panel móvil responsive de una columna hasta 399px |
+| `Header.astro` | `components/layout/Header.astro` | Nav principal con logo de dimensiones reservadas, contacto, menú sticky, submenú horizontal y panel móvil responsive de una columna hasta 399px |
 | `Footer.astro` | `components/layout/Footer.astro` | Footer con SECTUR, SAT, redes sociales y términos |
 | `Content.astro` | `components/layout/Content.astro` | Wrapper simple con `<slot/>` |
 | `Banner.astro` | `components/ui/Banner.astro` | Banner promocional con imagen y enlace |
@@ -105,7 +105,7 @@ Renderizados en servidor. Sin estado cliente.
 |---|---|---|
 | `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + diálogo accesible de Google sign-in |
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
-| `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
+| `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico con dimensiones reservadas (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |
 | `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso, tarjetas monetarias responsive de 1/2/3 columnas con formato compacto MXN, lista de abonos con método y referencia, e historial independiente de vouchers Openpay |
 | `ClientFavoritos.jsx` | — | Favoritos reales del cliente (Firestore `users/{uid}/favoritos` vía `onSnapshot`, recientes primero): tarjetas con imagen/nombre/destino/badge Hotel-Tour, link al detalle `/{tipo}/{slug}` y eliminar con confirmación |
