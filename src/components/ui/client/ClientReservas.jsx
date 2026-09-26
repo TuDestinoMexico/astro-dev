@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Calendar, Mail, User, Search, Clock, CheckCircle, AlertCircle, Loader2, Trash2, Building, MapPin, DollarSign, Hash, Eye, X, FileText, Users, BedDouble, Utensils, CalendarDays, Plane, PlaneLanding, Moon, Cake, FolderOpen } from 'lucide-react';
 import { db } from '../../../lib/firebase';
-import { collection, query, orderBy, onSnapshot, setDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, setDoc, serverTimestamp, doc, deleteDoc, updateDoc, deleteField } from 'firebase/firestore';
 import GrupoDetalle from './GrupoDetalle';
 import DocumentosModal from './DocumentosModal';
 
@@ -46,14 +46,6 @@ const mergeLists = (a, b) => {
   });
 };
 
-const statusColor = (estatus) => {
-  const s = (estatus || '').toLowerCase();
-  if (s.includes('confirm') || s.includes('pagada') || s.includes('activa')) return 'bg-emerald-100 text-emerald-700';
-  if (s.includes('cancel') || s.includes('rechaz')) return 'bg-red-100 text-red-700';
-  if (s.includes('pendiente') || s.includes('espera')) return 'bg-amber-100 text-amber-700';
-  return 'bg-slate-100 text-slate-600';
-};
-
 function DetalleRow({ icon: Icon, label, value }) {
   if (!value) return null;
   return (
@@ -82,6 +74,27 @@ const statusPill = (estatus) => {
   if (s.includes('pendiente') || s.includes('espera'))
     return { pill: 'bg-amber-400/15 border-amber-300/40 text-amber-50', dot: 'bg-amber-300' };
   return { pill: 'bg-white/15 border-white/30 text-white', dot: 'bg-white' };
+};
+
+const authenticatedHeaders = async (user) => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${await user.getIdToken()}`,
+});
+
+const cleanLegacyCrmFields = (snapshot) => {
+  snapshot.docs.forEach((entry) => {
+    const data = entry.data();
+    const legacyFields = {};
+
+    if (Object.prototype.hasOwnProperty.call(data, 'detalles')) legacyFields.detalles = deleteField();
+    if (Object.prototype.hasOwnProperty.call(data, 'pdf_url')) legacyFields.pdf_url = deleteField();
+
+    if (Object.keys(legacyFields).length > 0) {
+      updateDoc(entry.ref, legacyFields).catch((error) => {
+        console.error('Error limpiando datos CRM heredados:', error);
+      });
+    }
+  });
 };
 
 function InfoChip({ icon: Icon, label, value }) {
@@ -166,10 +179,12 @@ export default function ClientReservas({ user }) {
       orderBy('fechaVinculacion', 'desc')
     );
     const unsubReservas = onSnapshot(qReservas, (snapshot) => {
+      cleanLegacyCrmFields(snapshot);
       const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'ct', ...doc.data() }));
       setReservas((prev) => mergeLists(lista, prev.filter((p) => p.tipo === 'gb')));
     });
     const unsubGrupos = onSnapshot(qGrupos, (snapshot) => {
+      cleanLegacyCrmFields(snapshot);
       const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'gb', ...doc.data() }));
       setReservas((prev) => mergeLists(prev.filter((p) => p.tipo === 'ct'), lista));
     });
@@ -209,7 +224,7 @@ export default function ClientReservas({ user }) {
       const body = tipo === 'gb' ? { gb: codigo, email } : { ct: codigo, email };
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authenticatedHeaders(user),
         body: JSON.stringify(body)
       });
       const data = await res.json();
@@ -229,8 +244,6 @@ export default function ClientReservas({ user }) {
         const docData = {
           [tipo === 'gb' ? 'correo_grupo' : 'correo_reserva']: email,
           [tipo === 'gb' ? 'gb' : 'ct']: codigo,
-          ...(data.data?.pdf_url && { pdf_url: data.data.pdf_url }),
-          detalles: data.data,
           fechaVinculacion: serverTimestamp()
         };
         await setDoc(doc(db, 'users', user.uid, collectionName, codigo.toUpperCase()), docData);
@@ -262,10 +275,10 @@ export default function ClientReservas({ user }) {
 
     try {
       const endpoint = res.tipo === 'gb' ? '/api/crm-grupo-consultar' : '/api/crm-consultar';
-      const body = res.tipo === 'gb' ? { gb: res.gb, email: res.correo_grupo } : { ct: res.ct, email: res.correo_reserva };
+      const body = res.tipo === 'gb' ? { gb: res.gb, detail: true } : { ct: res.ct, detail: true };
       const resApi = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authenticatedHeaders(user),
         body: JSON.stringify(body)
       });
       const data = await resApi.json();
@@ -430,12 +443,7 @@ export default function ClientReservas({ user }) {
           ) : (
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               {reservas.map((res) => {
-                const d = res.detalles || {};
                 const esGrupo = res.tipo === 'gb';
-                const hotel = esGrupo ? (d.hoteles?.[0]?.hotel || d.hotel || d.hotelName || d.nombre) : (d.hotel || d.hotelName || d.nombre);
-                const destino = esGrupo ? (d.hoteles?.[0]?.destino || d.destino || d.destination) : (d.destino || d.destination);
-                const checkin = esGrupo ? (d.hoteles?.[0]?.checkin || d.checkin) : d.checkin;
-                const checkout = esGrupo ? (d.hoteles?.[0]?.checkout || d.checkout) : d.checkout;
                 return (
                   <div key={res.id} class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative group">
                     <div class="flex items-start justify-between mb-3">
@@ -444,41 +452,11 @@ export default function ClientReservas({ user }) {
                           {esGrupo ? res.gb : res.ct}
                         </span>
                       </div>
-                      {!esGrupo && d.estatus ? (
-                        <span class={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md ${statusColor(d.estatus)}`}>
-                          {d.estatus}
-                        </span>
-                      ) : null}
                     </div>
 
-                    <div class="space-y-1.5">
-                      {hotel && (
-                        <div class="flex items-center gap-2 text-sm">
-                          <Building size={14} class="text-slate-400 shrink-0" />
-                          <span class="text-slate-800 font-semibold truncate">{hotel}</span>
-                        </div>
-                      )}
-                      {destino && (
-                        <div class="flex items-center gap-2 text-sm">
-                          <MapPin size={14} class="text-slate-400 shrink-0" />
-                          <span class="text-slate-600 truncate">{destino}</span>
-                        </div>
-                      )}
-                      {checkin && (
-                        <div class="flex items-center gap-2 text-sm">
-                          <Calendar size={14} class="text-slate-400 shrink-0" />
-                          <span class="text-slate-600">
-                            {formatFecha(checkin)}
-                            {checkout && <> — {formatFecha(checkout)}</>}
-                          </span>
-                        </div>
-                      )}
-                      {(d.precio_total) && (
-                        <div class="flex items-center gap-2 text-sm">
-                          <DollarSign size={14} class="text-slate-400 shrink-0" />
-                          <span class="text-slate-800 font-bold">${Number(d.precio_total).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN</span>
-                        </div>
-                      )}
+                    <div class="flex items-center gap-2 text-sm text-slate-500">
+                      <FileText size={14} class="text-slate-400 shrink-0" />
+                      <span>Consulta el detalle para ver la información actualizada.</span>
                     </div>
 
                     <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -503,18 +481,6 @@ export default function ClientReservas({ user }) {
                           <FolderOpen size={14} />
                           Documentos
                         </button>
-                        {(res.pdf_url || d.pdf_url) && (
-                          <a
-                            href={res.pdf_url || d.pdf_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition-all text-[11px] font-bold"
-                            title="Descargar PDF"
-                          >
-                            <FileText size={14} />
-                            PDF
-                          </a>
-                        )}
                         <button
                           onClick={() => handleEliminar(res)}
                           class="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all text-[11px] font-bold"
