@@ -49,6 +49,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     const [formData, setFormData] = useState({ nombre: '', adultos: 2, menores: 0, edadesMenores: [] as string[] });
 
     const titleId = useId();
+    const fieldPrefix = useId();
     const overlayRef = useRef<HTMLDivElement>(null);
     const summaryRef = useRef<HTMLDivElement>(null);
     const calendarViewportRef = useRef<HTMLDivElement>(null);
@@ -335,7 +336,9 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
             <div className="space-y-3">
                 <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                    <label htmlFor={`${fieldPrefix}-name`} className="sr-only">Nombre completo</label>
                     <input
+                        id={`${fieldPrefix}-name`}
                         type="text" placeholder="Nombre completo"
                         className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-50 rounded-2xl text-sm font-bold focus:border-indigo-500 outline-none transition-all shadow-sm"
                         onChange={e => setFormData({...formData, nombre: e.target.value})}
@@ -344,16 +347,18 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
 
                 <div className="grid grid-cols-2 gap-3">
                     <div className="relative bg-white border-2 border-slate-50 rounded-2xl p-3 shadow-sm">
-                        <p className="text-[9px] font-black text-slate-400 uppercase">Adultos</p>
+                        <label htmlFor={`${fieldPrefix}-adults`} className="block text-[9px] font-black text-slate-400 uppercase">Adultos</label>
                         <input
+                            id={`${fieldPrefix}-adults`}
                             type="number" min="1" value={formData.adultos}
                             onChange={e => setFormData({...formData, adultos: parseInt(e.target.value)})}
                             className="w-full text-sm font-bold outline-none bg-transparent"
                         />
                     </div>
                     <div className="relative bg-white border-2 border-slate-50 rounded-2xl p-3 shadow-sm">
-                        <p className="text-[9px] font-black text-slate-400 uppercase">Menores</p>
+                        <label htmlFor={`${fieldPrefix}-children`} className="block text-[9px] font-black text-slate-400 uppercase">Menores</label>
                         <input
+                            id={`${fieldPrefix}-children`}
                             type="number" min="0" value={formData.menores}
                             onChange={e => handleMenoresChange(parseInt(e.target.value) || 0)}
                             className="w-full text-sm font-bold outline-none bg-transparent"

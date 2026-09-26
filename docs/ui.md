@@ -140,6 +140,8 @@ Los modales críticos reutilizan `src/hooks/useAccessibleDialog.ts`. El patrón 
 
 El hook no controla la animación ni el portal: cada componente conserva su comportamiento visual y solo entrega la referencia del contenedor. `BookingCalendar.tsx` usa el mismo patrón junto con GSAP y `createPortal`.
 
+Los formularios deben asociar cada `label` con su control mediante `htmlFor` e `id`. El `placeholder` se utiliza únicamente como ejemplo o ayuda contextual; nunca reemplaza el nombre visible o accesible del campo. Los controles dinámicos, como las edades de `MinorAges.tsx`, deben generar IDs únicos por instancia.
+
 ## Estilos
 
 - **Framework:** Tailwind CSS v4 (plugin Vite, sin archivo de configuración)
