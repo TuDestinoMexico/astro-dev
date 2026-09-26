@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HERO_WHATSAPP_NUMBER } from '../../../data/homeHeroSlides';
 
@@ -14,68 +13,82 @@ export default function EventsHeroControls({ slides }) {
     const firstRender = useRef(true);
 
     useEffect(() => {
-        const hero = document.getElementById('home-hero');
-        const slide = slides[currentIndex];
-        if (!hero || !slide) return undefined;
+        let cancelled = false;
+        let timeline;
+        let cleanupImageEvents = () => {};
 
-        const image = hero.querySelector('[data-hero-image]');
-        const badge = hero.querySelector('[data-hero-badge]');
-        const location = hero.querySelector('[data-hero-location]');
-        const locationText = hero.querySelector('[data-hero-location-text]');
-        const title = hero.querySelector('[data-hero-title]');
-        const description = hero.querySelector('[data-hero-description]');
-        const cta = hero.querySelector('[data-hero-cta]');
-        const revealElements = [badge, title, description, cta].filter(Boolean);
+        const updateSlide = async () => {
+            const hero = document.getElementById('home-hero');
+            const slide = slides[currentIndex];
+            if (!hero || !slide) return;
 
-        if (firstRender.current) {
-            firstRender.current = false;
-            return undefined;
-        }
+            if (firstRender.current) {
+                firstRender.current = false;
+                return;
+            }
 
-        const timeline = gsap.timeline();
-        let animationStarted = false;
+            const { default: gsap } = await import('gsap');
+            if (cancelled) return;
 
-        const reveal = () => {
-            if (animationStarted) return;
-            animationStarted = true;
-            timeline
-                .fromTo(image,
-                    { scale: 1.05, opacity: 0, filter: 'brightness(0.25)' },
-                    { scale: 1, opacity: 1, filter: 'brightness(0.55)', duration: 0.9, ease: 'power2.out' }
-                )
-                .fromTo(revealElements,
-                    { y: 35, opacity: 0, skewY: 1 },
-                    { y: 0, opacity: 1, skewY: 0, stagger: 0.08, duration: 0.65, ease: 'expo.out' },
-                    '-=0.65'
-                )
-                .fromTo(location,
-                    { scale: 0.8, opacity: 0 },
-                    { scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(1.5)' },
-                    '-=0.45'
-                );
+            const image = hero.querySelector('[data-hero-image]');
+            const badge = hero.querySelector('[data-hero-badge]');
+            const location = hero.querySelector('[data-hero-location]');
+            const locationText = hero.querySelector('[data-hero-location-text]');
+            const title = hero.querySelector('[data-hero-title]');
+            const description = hero.querySelector('[data-hero-description]');
+            const cta = hero.querySelector('[data-hero-cta]');
+            const revealElements = [badge, title, description, cta].filter(Boolean);
+            let animationStarted = false;
+
+            const reveal = () => {
+                if (animationStarted || cancelled) return;
+                animationStarted = true;
+                timeline = gsap.timeline()
+                    .fromTo(image,
+                        { scale: 1.05, opacity: 0, filter: 'brightness(0.25)' },
+                        { scale: 1, opacity: 1, filter: 'brightness(0.55)', duration: 0.9, ease: 'power2.out' }
+                    )
+                    .fromTo(revealElements,
+                        { y: 35, opacity: 0, skewY: 1 },
+                        { y: 0, opacity: 1, skewY: 0, stagger: 0.08, duration: 0.65, ease: 'expo.out' },
+                        '-=0.65'
+                    )
+                    .fromTo(location,
+                        { scale: 0.8, opacity: 0 },
+                        { scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(1.5)' },
+                        '-=0.45'
+                    );
+            };
+
+            gsap.killTweensOf([image, ...revealElements, location]);
+            gsap.set(revealElements, { y: 35, opacity: 0, skewY: 1 });
+            gsap.set(location, { scale: 0.8, opacity: 0 });
+
+            badge.textContent = slide.badge;
+            locationText.textContent = slide.location;
+            title.textContent = slide.title;
+            description.textContent = slide.description;
+            cta.href = whatsappHref(slide.whatsappMsg);
+            cta.className = `${BASE_CTA_CLASSES} ${slide.btnColor}`;
+            image.alt = slide.title;
+            image.onload = reveal;
+            image.onerror = reveal;
+            image.src = slide.image;
+
+            cleanupImageEvents = () => {
+                image.onload = null;
+                image.onerror = null;
+            };
+
+            if (image.complete) reveal();
         };
 
-        gsap.killTweensOf([image, ...revealElements, location]);
-        gsap.set(revealElements, { y: 35, opacity: 0, skewY: 1 });
-        gsap.set(location, { scale: 0.8, opacity: 0 });
-
-        badge.textContent = slide.badge;
-        locationText.textContent = slide.location;
-        title.textContent = slide.title;
-        description.textContent = slide.description;
-        cta.href = whatsappHref(slide.whatsappMsg);
-        cta.className = `${BASE_CTA_CLASSES} ${slide.btnColor}`;
-        image.alt = slide.title;
-        image.onload = reveal;
-        image.onerror = reveal;
-        image.src = slide.image;
-
-        if (image.complete) reveal();
+        updateSlide();
 
         return () => {
-            image.onload = null;
-            image.onerror = null;
-            timeline.kill();
+            cancelled = true;
+            cleanupImageEvents();
+            timeline?.kill();
         };
     }, [currentIndex, slides]);
 
