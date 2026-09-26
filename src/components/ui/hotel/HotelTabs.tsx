@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState } from 'react';
+import { useAccessibleDialog } from '../../../hooks/useAccessibleDialog';
 
 interface Props {
     description: string;
@@ -11,6 +12,11 @@ const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, addre
     const [activeTab, setActiveTab] = useState<'desc' | 'amenities' | 'location'>('desc');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // Estado para la carga
+    const titleId = useId();
+    const { dialogRef } = useAccessibleDialog({
+        open: isModalOpen,
+        onClose: () => setIsModalOpen(false),
+    });
 
     const apiKey = "AIzaSyCXKmnPdBL8H7egOAKRnfdSYDc2H0fAI5E";
     const lat = coordinates[0];
@@ -29,14 +35,6 @@ const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, addre
         }, 600);
     };
 
-    useEffect(() => {
-        if (isModalOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-    }, [isModalOpen]);
-
     const visibleAmenities = amenities.slice(0, 10);
     const hasMore = amenities.length > 10;
 
@@ -46,6 +44,7 @@ const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, addre
             <div className="flex border-b border-slate-100 bg-white sticky top-0 z-10">
                 {(['desc', 'amenities', 'location'] as const).map((tab) => (
                     <button
+                        type="button"
                         key={tab}
                         onClick={() => handleTabChange(tab)}
                         className={`flex-1 py-4 text-center font-bold text-xs md:text-sm transition-all relative ${
@@ -96,6 +95,7 @@ const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, addre
                                 </div>
                                 {hasMore && (
                                     <button
+                                        type="button"
                                         onClick={() => setIsModalOpen(true)}
                                         className="w-full py-3 text-blue-600 font-bold border-2 border-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all text-sm"
                                     >
@@ -139,15 +139,27 @@ const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, addre
             {/* MODAL (Se mantiene igual que antes) */}
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center p-4 md:p-10" style={{ zIndex: 9999 }}>
-                    <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setIsModalOpen(false)}></div>
-                    <div className="relative bg-white w-full max-w-3xl max-h-[85vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col scale-up-center">
+                    <div
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+                        onMouseDown={(event) => {
+                            if (event.target === event.currentTarget) setIsModalOpen(false);
+                        }}
+                    ></div>
+                    <div
+                        ref={dialogRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby={titleId}
+                        tabIndex={-1}
+                        className="relative bg-white w-full max-w-3xl max-h-[85vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col scale-up-center"
+                    >
                         {/* ... contenido del modal ... */}
                         <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0">
                             <div>
-                                <h2 className="text-2xl font-black text-slate-800">Servicios y Amenidades</h2>
+                                <h2 id={titleId} className="text-2xl font-black text-slate-800">Servicios y Amenidades</h2>
                                 <p className="text-slate-500 text-sm">Todo lo que incluye tu estadía</p>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} className="p-3 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-all">
+                            <button type="button" onClick={() => setIsModalOpen(false)} className="p-3 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-all" aria-label="Cerrar amenidades">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
@@ -164,7 +176,7 @@ const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, addre
                             </div>
                         </div>
                         <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex justify-center">
-                            <button onClick={() => setIsModalOpen(false)} className="bg-slate-800 text-white px-10 py-3 rounded-xl font-bold hover:bg-slate-700 transition-all">Entendido</button>
+                            <button type="button" onClick={() => setIsModalOpen(false)} className="bg-slate-800 text-white px-10 py-3 rounded-xl font-bold hover:bg-slate-700 transition-all">Entendido</button>
                         </div>
                     </div>
                 </div>

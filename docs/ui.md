@@ -48,7 +48,7 @@ Renderizados en servidor. Sin estado cliente.
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |
 | `MatchPoll.jsx` | (no determinada) | Encuesta en tiempo real (Firestore onSnapshot) |
-| `WelcomeModal.tsx` | `client:only` | Modal de estado de pago (check vía query param `id`) |
+| `WelcomeModal.tsx` | `client:only` | Modal accesible de estado de pago (check vía query param `id`) |
 | `RecentlyViewed.jsx` | `client:only` | Tarjetas de últimos visitados (localStorage) |
 | `PromoLocker.jsx` | `client:only` | Locker promocional (actualmente comentado) |
 
@@ -64,13 +64,13 @@ Renderizados en servidor. Sin estado cliente.
 | Componente | Directiva | Propósito |
 |---|---|---|
 | `HotelTabs.tsx` | `client:load` | Tabs de descripción/amenidades/ubicación con Google Maps iframe |
-| `BookingCalendar.tsx` | `client:only="react"` | Modal responsive de reserva con selector profesional de rango para hoteles (dos meses desktop, uno móvil, preview y mínimo una noche), footer de aplicación y formulario con envío WhatsApp. Usa GSAP y portal al `body` |
+| `BookingCalendar.tsx` | `client:only="react"` | Modal accesible responsive de reserva con selector profesional de rango para hoteles (dos meses desktop, uno móvil, preview y mínimo una noche), footer de aplicación y formulario con envío WhatsApp. Usa GSAP, portal al `body` y trap de foco |
 
 ### Tours
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `BookingCalendar.tsx` | `client:only="react"` | Mismo modal en modo fecha única (`isSingleDate=true`) para tours; `client:only` evita cargar GSAP durante SSR en Vercel |
+| `BookingCalendar.tsx` | `client:only="react"` | Mismo modal accesible en modo fecha única (`isSingleDate=true`) para tours; `client:only` evita cargar GSAP durante SSR en Vercel |
 
 ### Timeline / Mapas
 
@@ -90,7 +90,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `PaymentMethods.jsx` | `client:only` | Grid accesible de métodos con botones nativos navegables por teclado (Enter/Espacio), modales dinámicos y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
+| `PaymentMethods.jsx` | `client:only` | Grid accesible de métodos con botones nativos navegables por teclado (Enter/Espacio), diálogo dinámico con trap de foco y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
 | `CreditCardDrawer.jsx` | — | Formulario tarjeta crédito/débito; envía ID token Firebase e `Idempotency-Key` al crear el cargo |
 | `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia con autenticación e idempotencia |
 | `BankTransferForm.jsx` | — | Pago servicios BBVA con autenticación e idempotencia |
@@ -102,14 +102,14 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + modal Google sign-in |
+| `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + diálogo accesible de Google sign-in |
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |
 | `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso, lista de abonos con método y referencia, e historial independiente de vouchers Openpay |
 | `ClientFavoritos.jsx` | — | Favoritos reales del cliente (Firestore `users/{uid}/favoritos` vía `onSnapshot`, recientes primero): tarjetas con imagen/nombre/destino/badge Hotel-Tour, link al detalle `/{tipo}/{slug}` y eliminar con confirmación |
 | `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Modal detalle (reserva / `GrupoDetalle`) + PDF download + botón de documentos por tarjeta |
-| `DocumentosModal.jsx` | — | Modal de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) sin botón de vista previa, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
+| `DocumentosModal.jsx` | — | Diálogo accesible de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) sin botón de vista previa, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
 | `GrupoDetalle.jsx` | — | Contenido del modal de detalle de grupo: hero con GB y tipo (Q/NQ), timeline, stats, cliente titular, sección de hoteles con pasajeros |
 | `LayoutClient.astro` | SSR | Shell layout con Poppins, SEO, Analytics (sin Header.astro) |
 
@@ -133,6 +133,12 @@ Renderizados en servidor. Sin estado cliente.
 | `MinorAges.tsx` | Inputs de edades para menores (usado por BookingCalendar) |
 
 ---
+
+## Diálogos accesibles
+
+Los modales críticos reutilizan `src/hooks/useAccessibleDialog.ts`. El patrón aplica `role="dialog"`, `aria-modal="true"`, foco inicial, trap de foco con `Tab`/`Shift+Tab`, cierre con `Escape`, restauración del foco disparador y bloqueo reversible del scroll del `body`. El contenedor del diálogo debe incluir `aria-labelledby` y `tabIndex={-1}`; los botones de cierre deben declarar `type="button"` y una etiqueta accesible cuando solo contienen un icono.
+
+El hook no controla la animación ni el portal: cada componente conserva su comportamiento visual y solo entrega la referencia del contenedor. `BookingCalendar.tsx` usa el mismo patrón junto con GSAP y `createPortal`.
 
 ## Estilos
 

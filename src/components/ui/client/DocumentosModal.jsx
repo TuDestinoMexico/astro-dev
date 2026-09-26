@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useId, useEffect, useRef, useState } from 'react';
 import { X, Loader2, Upload, FileText, Image, File, CheckCircle2, User, Building, Hash, AlertCircle, FolderOpen, Clock, XCircle } from 'lucide-react';
+import { useAccessibleDialog } from '../../../hooks/useAccessibleDialog';
 
 const TIPOS_LABELS = {
   'pre_confirmacion': 'Pre-confirmación',
@@ -98,6 +99,8 @@ export default function DocumentosModal({ item, user, onClose }) {
   const [isDragging, setIsDragging] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
   const fileInputRef = useRef(null);
+  const titleId = useId();
+  const { dialogRef } = useAccessibleDialog({ open: true, onClose });
 
   const cargar = async () => {
     setCargando(true);
@@ -193,18 +196,24 @@ export default function DocumentosModal({ item, user, onClose }) {
   return (
     <div
       class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={onClose}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         class="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
         <div class="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
           <div class="flex items-center gap-2">
             <FolderOpen size={20} class="text-purple-600" />
             <div>
-              <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Documentos</h2>
+              <h2 id={titleId} class="text-lg font-black text-slate-800 uppercase tracking-tight">Documentos</h2>
               <p class="text-xs text-slate-400">
                 {esGrupo ? 'Grupo' : 'Reserva'} <span class="font-bold">{codigo}</span>
                 {reservationType && <span class="ml-1 font-bold">· {reservationType}</span>}
@@ -212,6 +221,7 @@ export default function DocumentosModal({ item, user, onClose }) {
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
           >
@@ -229,7 +239,7 @@ export default function DocumentosModal({ item, user, onClose }) {
             <div class="flex flex-col items-center justify-center py-16 text-slate-400">
               <AlertCircle size={32} class="text-red-400 mb-3" />
               <p class="text-sm font-medium text-red-600 text-center">{error}</p>
-              <button onClick={cargar} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+              <button type="button" onClick={cargar} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
                 Reintentar
               </button>
             </div>
