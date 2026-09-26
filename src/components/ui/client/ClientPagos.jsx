@@ -30,6 +30,22 @@ const formatMonto = (value) => {
   return `$${n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`;
 };
 
+const formatMontoCompacto = (value) => {
+  const n = Number(value);
+  if (isNaN(n)) return value;
+
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) {
+    return `$${(n / 1_000_000).toLocaleString('es-MX', { maximumFractionDigits: 1 })} M MXN`;
+  }
+
+  if (abs >= 1_000) {
+    return `$${(n / 1_000).toLocaleString('es-MX', { maximumFractionDigits: 1 })} mil MXN`;
+  }
+
+  return formatMonto(n);
+};
+
 const formatFirestoreFecha = (value) => {
   const date = value?.toDate?.();
   return date ? formatFecha(date.toISOString()) : null;
@@ -369,18 +385,36 @@ export default function ClientPagos({ user }) {
                         </div>
                       </div>
 
-                      <div class="px-6 py-4 grid grid-cols-3 gap-3">
+                      <div class="px-6 py-4 grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-3">
                         <div class="bg-emerald-50 rounded-xl p-3 text-center">
-                          <p class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Pagado</p>
-                          <p class="text-sm font-black text-emerald-700">{formatMonto(pagado)}</p>
+                          <p class="text-[9px] font-black uppercase tracking-widest leading-tight text-emerald-600">Pagado</p>
+                          <p
+                            class="text-xs sm:text-sm font-black leading-tight text-emerald-700 whitespace-nowrap"
+                            title={formatMonto(pagado)}
+                            aria-label={`Pagado: ${formatMonto(pagado)}`}
+                          >
+                            {formatMontoCompacto(pagado)}
+                          </p>
                         </div>
                         <div class="bg-slate-50 rounded-xl p-3 text-center">
-                          <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Precio Total</p>
-                          <p class="text-sm font-black text-slate-700">{formatMonto(total)}</p>
+                          <p class="text-[9px] font-black uppercase tracking-widest leading-tight text-slate-400">Precio Total</p>
+                          <p
+                            class="text-xs sm:text-sm font-black leading-tight text-slate-700 whitespace-nowrap"
+                            title={formatMonto(total)}
+                            aria-label={`Precio total: ${formatMonto(total)}`}
+                          >
+                            {formatMontoCompacto(total)}
+                          </p>
                         </div>
                         <div class={`rounded-xl p-3 text-center ${saldo > 0 ? 'bg-amber-50' : 'bg-slate-50'}`}>
-                          <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Saldo</p>
-                          <p class={`text-sm font-black ${saldo > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>{formatMonto(saldo)}</p>
+                          <p class="text-[9px] font-black uppercase tracking-widest leading-tight text-slate-400">Saldo</p>
+                          <p
+                            class={`text-xs sm:text-sm font-black leading-tight whitespace-nowrap ${saldo > 0 ? 'text-amber-700' : 'text-emerald-700'}`}
+                            title={formatMonto(saldo)}
+                            aria-label={`Saldo: ${formatMonto(saldo)}`}
+                          >
+                            {formatMontoCompacto(saldo)}
+                          </p>
                         </div>
                       </div>
 
