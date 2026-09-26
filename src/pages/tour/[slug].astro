@@ -9,6 +9,7 @@ import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
 import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
 import { fetchTourDetail } from '../../lib/catalog';
+import { sanitizeCatalogHtml, stripCatalogHtml } from '../../lib/sanitizeHtml';
 
 const { slug } = Astro.params;
 
@@ -24,6 +25,10 @@ if (catalogResult.status === 'not-found') {
 
 const catalogUnavailable = catalogResult.status === 'unavailable';
 const tour: any = catalogResult.status === 'ok' ? catalogResult.data : {};
+const tourDescriptionHtml = sanitizeCatalogHtml(tour.description);
+const tourDescriptionText = stripCatalogHtml(tour.description);
+const tourIncludesHtml = sanitizeCatalogHtml(tour.includes);
+const tourIncludesText = stripCatalogHtml(tour.includes);
 
 const amenities = tour.amenities_list || [];
 const coordinates = tour.google_maps || [];
@@ -53,7 +58,7 @@ const tourSchema = {
     '@context': 'https://schema.org',
     '@type': ['TouristAttraction', 'Event'],
     name: tour.name,
-    description: tour.description,
+    description: tourDescriptionText,
     url: `https://tudestinomx.com/tour/${slug}`,
     image: principalImage ? [principalImage] : undefined,
     location: {
@@ -85,7 +90,7 @@ const tourSchema = {
     offers: tour.price ? {
         '@type': 'Offer',
         name: tour.name,
-        description: tour.description,
+        description: tourDescriptionText,
         url: `https://tudestinomx.com/tour/${slug}`,
         priceCurrency: 'MXN',
         price: tour.price,
@@ -103,7 +108,7 @@ const tourSchema = {
         bestRating: '5',
         worstRating: '1'
     } : undefined,
-    includes: tour.includes ? tour.includes : undefined,
+    includes: tourIncludesText || undefined,
     audience: {
         '@type': 'Audience',
         audienceType: 'Turistas, Familias, Parejas'
@@ -113,7 +118,7 @@ const tourSchema = {
 
 <Layout 
   title={tour.name || "Detalle de Tour"} 
-  description={tour.description || "Detalle de Tour"}
+  description={tourDescriptionText || "Detalle de Tour"}
   image={principalImage}
   type="website"
 >
@@ -164,17 +169,17 @@ const tourSchema = {
                 <div class="bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
                     <HotelTabs
                             client:load
-                            description={tour.description}
+                            descriptionHtml={tourDescriptionHtml}
                             coordinates={coordinates}
                             address={address}
                             amenities={amenities}
                     />
                 </div>
 
-                {tour.includes && (
+                {tourIncludesHtml && (
                         <div class="bg-slate-50 border border-slate-100 p-6 rounded-2xl">
                             <h3 class="text-xl font-bold text-slate-800 mb-4">¿Qué incluye esta experiencia?</h3>
-                            <div class="prose prose-slate max-w-none text-slate-600" set:html={tour.includes}></div>
+                            <div class="prose prose-slate max-w-none text-slate-600" set:html={tourIncludesHtml}></div>
                         </div>
                 )}
             </div>

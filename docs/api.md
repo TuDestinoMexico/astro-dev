@@ -354,7 +354,7 @@ Las páginas SSR consumen el catálogo mediante `src/lib/catalog.ts`, que centra
 | `slug` | string | Identificador URL |
 | `active` | number | 1 = activo, 0 = inactivo |
 | `images` | object | `principal`, `secundaria`, `adicional` (arrays de objetos con `url`) |
-| `description` | string | Descripción HTML |
+| `description` | string | Descripción HTML; se sanea server-side con una allowlist antes de renderizar |
 | `address` | string | Dirección |
 | `amenities_list` | string[] | Lista de amenidades |
 | `google_maps` | number[] | Coordenadas `[lat, lng]` |
