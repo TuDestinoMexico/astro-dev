@@ -9,6 +9,7 @@ import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
 import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
 import { fetchHotelDetail } from '../../lib/catalog';
+import { sanitizeCatalogHtml, stripCatalogHtml } from '../../lib/sanitizeHtml';
 
 const { slug } = Astro.params;
 
@@ -24,6 +25,8 @@ if (catalogResult.status === 'not-found') {
 
 const catalogUnavailable = catalogResult.status === 'unavailable';
 const hotel: any = catalogResult.status === 'ok' ? catalogResult.data : {};
+const hotelDescriptionHtml = sanitizeCatalogHtml(hotel.description);
+const hotelDescriptionText = stripCatalogHtml(hotel.description);
 
 if (catalogResult.status === 'ok' && Number(hotel.active) === 0) {
     return Astro.redirect('/404');
@@ -56,7 +59,7 @@ const hotelSchema = {
     '@context': 'https://schema.org',
     '@type': ['LodgingBusiness', 'Hotel'],
     name: hotel.name,
-    description: hotel.description,
+    description: hotelDescriptionText,
     url: `https://tudestinomx.com/hotel/${slug}`,
     image: principalImage ? [principalImage] : undefined,
     address: {
@@ -99,7 +102,7 @@ const hotelSchema = {
     makesOffer: hotel.price ? {
         '@type': 'Offer',
         name: `${hotel.name} - Habitación Estándar`,
-        description: hotel.description,
+        description: hotelDescriptionText,
         url: `https://tudestinomx.com/hotel/${slug}`,
         priceCurrency: 'MXN',
         price: hotel.price,
@@ -114,7 +117,7 @@ const hotelSchema = {
 
 <Layout 
   title={hotel.name || "Detalle de Hotel"} 
-  description={hotel.description || "Detalle de Hotel"}
+  description={hotelDescriptionText || "Detalle de Hotel"}
   image={principalImage}
   type="website"
 >
@@ -165,7 +168,7 @@ const hotelSchema = {
                 <div class="bg-white border border-slate-100 shadow-sm rounded-2xl overflow-hidden">
                     <HotelTabs
                             client:load
-                            description={hotel.description}
+                            descriptionHtml={hotelDescriptionHtml}
                             coordinates={coordinates}
                             address={hotel.address}
                             amenities={amenities}

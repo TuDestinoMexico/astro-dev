@@ -2,13 +2,13 @@ import React, { useId, useState } from 'react';
 import { useAccessibleDialog } from '../../../hooks/useAccessibleDialog';
 
 interface Props {
-    description: string;
+    descriptionHtml: string;
     amenities: string[];
     coordinates: number[];
     address: string;
 }
 
-const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, address }) => {
+const HotelTabs: React.FC<Props> = ({ descriptionHtml, amenities, coordinates, address }) => {
     const [activeTab, setActiveTab] = useState<'desc' | 'amenities' | 'location'>('desc');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // Estado para la carga
@@ -75,7 +75,7 @@ const HotelTabs: React.FC<Props> = ({ description, amenities, coordinates, addre
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                         {activeTab === 'desc' && (
                             <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed italic">
-                                <p dangerouslySetInnerHTML={{ __html: description }} />
+                                <div dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
                             </div>
                         )}
 
