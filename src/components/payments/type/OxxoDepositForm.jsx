@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MessageCircle } from 'lucide-react';
 
 export default function OxxoDepositForm() {
     const [copied, setCopied] = useState(false);
@@ -35,7 +36,7 @@ export default function OxxoDepositForm() {
             </div>
 
             {/* Tarjeta de Depósito */}
-            <div className="bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem] flex flex-col items-center text-center transition-all hover:shadow-lg">
+            <div className="bg-gray-50 border border-brand-border p-8 rounded-panel flex flex-col items-center text-center transition-all hover:shadow-lg">
                 <img
                     src={cardInfo.logo}
                     alt={cardInfo.bank}
@@ -53,7 +54,7 @@ export default function OxxoDepositForm() {
 
                 <button
                     onClick={copyToClipboard}
-                    className={`w-full py-4 rounded-xl font-bold text-sm transition-all transform active:scale-95 shadow-lg ${
+                    className={`w-full py-4 rounded-card font-bold text-sm transition-all transform active:scale-95 shadow-lg ${
                         copied
                             ? 'bg-green-500 text-white'
                             : 'bg-slate-900 text-white hover:bg-black'
@@ -66,7 +67,7 @@ export default function OxxoDepositForm() {
             {/* Nota del Vacation Planner */}
             <div className="mt-8 p-5 bg-amber-50 border border-amber-100 rounded-2xl">
                 <div className="flex gap-3 items-start">
-                    <span className="text-lg">💬</span>
+                    <MessageCircle aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-amber-700" />
                     <p className="text-xs text-amber-900 leading-relaxed italic text-left">
                         *Recuerda consultar con tu <strong>Vacation Planner</strong> sobre los métodos alternativos para pagar y confirmar tu reservación.*
                     </p>

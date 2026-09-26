@@ -1,4 +1,6 @@
 ---
+import { Icon } from "astro-icon/components";
+
 interface Props {
     title: string;
     icon: string;
@@ -33,6 +35,6 @@ const isActive = pathname === url || pathname.replace(/\/$/, "") === url.replace
         }
         ]}
 >
-    <span class="material-icons-outlined icons text-3xl">{icon}</span>
+    <Icon name={`lucide:${icon}`} class="icons h-8 w-8" aria-hidden="true" />
     <span class="text-xs md:text-sm text-center">{title}</span>
 </a>

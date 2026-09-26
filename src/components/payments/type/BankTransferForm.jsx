@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { Camera, Link2 } from 'lucide-react';
 import { createIdempotencyKey, createOpenpayCharge } from '../../../lib/openpayClient';
 
 export default function BankTransferForm() {
@@ -56,15 +57,15 @@ export default function BankTransferForm() {
         }
     };
 
-    const inputStyle = "w-full border border-gray-300 px-4 py-2.5 rounded-xl text-gray-700 focus:ring-2 focus:ring-[#00c0a5] focus:border-transparent outline-none transition-all placeholder:text-gray-400";
+    const inputStyle = "w-full border border-brand-border px-4 py-2.5 rounded-card text-gray-700 focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none transition-all placeholder:text-gray-400";
     const labelStyle = "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1";
 
     // Vista de Éxito: Información de transferencia BBVA
     if (paymentData) {
         return (
             <div className="w-full max-w-lg mx-auto text-center animate-in fade-in zoom-in duration-300">
-                <div className="bg-[#00c0a5]/10 border-2 border-[#00c0a5]/20 p-6 rounded-3xl mb-8">
-                    <p className="text-[#00c0a5] font-bold text-xl mb-1">¡Datos de transferencia listos!</p>
+                <div className="bg-brand-primary/10 border-2 border-brand-primary/20 p-6 rounded-card-lg mb-8">
+                    <p className="text-brand-primary font-bold text-xl mb-1">¡Datos de transferencia listos!</p>
                     <p className="text-gray-600 text-sm">Realiza el pago desde tu banca móvil (BBVA).</p>
                 </div>
 
@@ -96,11 +97,12 @@ export default function BankTransferForm() {
                     <a
                         href={paymentData.url_spei}
                         target="_blank"
-                        className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95"
+                        className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-card font-bold hover:bg-black transition-all shadow-lg active:scale-95"
                     >
-                        🔗 Ver instrucciones completas
+                        <Link2 aria-hidden="true" size={18} />
+                        Ver instrucciones completas
                     </a>
-                    <p className="text-xs text-gray-400 italic">📸 No olvides tomar captura de estos datos.</p>
+                    <p className="flex items-center justify-center gap-1.5 text-xs text-gray-400 italic"><Camera aria-hidden="true" size={14} /> No olvides tomar captura de estos datos.</p>
                 </div>
             </div>
         );
@@ -145,7 +147,7 @@ export default function BankTransferForm() {
 
                 <button
                     disabled={loading}
-                    className={`w-full mt-4 py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-[#00c0a5] hover:bg-black'}`}
+                    className={`w-full mt-4 py-4 rounded-card font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-brand-primary hover:bg-brand-primary-hover'}`}
                 >
                     {loading ? (
                         <span className="flex items-center justify-center gap-2">
