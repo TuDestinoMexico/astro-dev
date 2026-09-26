@@ -14,14 +14,14 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Ruta | Propósito |
 |---|---|---|
-| `Header.astro` | `components/layout/Header.astro` | Nav principal con logo, contacto, menú sticky, submenú horizontal |
+| `Header.astro` | `components/layout/Header.astro` | Nav principal con logo, contacto, menú sticky, submenú horizontal y panel móvil responsive de una columna hasta 399px |
 | `Footer.astro` | `components/layout/Footer.astro` | Footer con SECTUR, SAT, redes sociales y términos |
 | `Content.astro` | `components/layout/Content.astro` | Wrapper simple con `<slot/>` |
 | `Banner.astro` | `components/ui/Banner.astro` | Banner promocional con imagen y enlace |
 | `Button.astro` | `components/ui/Button.astro` | Botón reutilizable |
 | `Grid.astro` | `components/ui/Grid.astro` | Grid responsive con título opcional |
 | `IconSocial.astro` | `components/ui/IconSocial.astro` | Icono de red social |
-| `MenuBar.astro` | `components/ui/MenuBar.astro` | Barra de contacto con icono, título, subtítulo |
+| `MenuBar.astro` | `components/ui/MenuBar.astro` | Barra de contacto adaptable al ancho disponible con icono, título y subtítulo |
 | `SubMenu.astro` | `components/ui/SubMenu.astro` | Item de navegación con icono Material |
 | `FooterBanner.astro` | `components/ui/FooterBanner.astro` | Banner promocional pre-footer |
 | `HeroBanner.astro` | `components/ui/single/HeroBanner.astro` | Banner de cabecera para páginas de listing |
