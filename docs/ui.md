@@ -190,4 +190,4 @@ Los componentes que consumen Firestore, Storage o APIs deben distinguir carga, e
 | `OfertasView.jsx` | Firestore `ofertas` | Carga, error con reintento, vacío y acciones de edición |
 | `ConfigView.jsx` | Firestore `config/general` + Firebase Storage | Carga, error con reintento, progreso de upload y éxito/error de guardado |
 | `MediaManager.jsx` | Firebase Storage | Debe conservar estados de carga, error, vacío y acciones de archivo por operación |
-| `BookingCalendar.tsx` | Estado local | Validación inline y envío deshabilitado hasta completar datos |
+| `BookingCalendar.tsx` | Estado local | Validación inline; edades de menores enteras entre 0 y 17; envío deshabilitado hasta completar datos válidos |
