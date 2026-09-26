@@ -91,7 +91,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `PaymentMethods.jsx` | `client:only` | Métodos de pago agrupados por tipo (pago en línea, banca y efectivo), con tarjeta como opción principal, botones nativos navegables por teclado (Enter/Espacio), diálogo dinámico con trap de foco y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
+| `PaymentMethods.jsx` | `client:only` | Métodos de pago agrupados por tipo (pago en línea, banca y efectivo), con tarjeta como opción principal, botones nativos navegables por teclado (Enter/Espacio), diálogo dinámico con trap de foco y animación GSAP; exige sesión y correo verificado solo para tarjeta, tiendas y BBVA; SPEI, ventanilla y OXXO son públicos |
 | `CreditCardDrawer.jsx` | — | Formulario tarjeta crédito/débito; envía ID token Firebase e `Idempotency-Key` al crear el cargo |
 | `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia con autenticación e idempotencia; modal de tiendas con scroll exterior responsive basado en `100dvh` |
 | `BankTransferForm.jsx` | — | Pago servicios BBVA con autenticación e idempotencia |

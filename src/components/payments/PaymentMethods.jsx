@@ -18,6 +18,7 @@ const paymentData = [
         category: "online",
         priority: "primary",
         badge: "Pago en línea",
+        requiresAuth: true,
         summary: "Usa tu tarjeta directamente desde el sitio.",
         requirement: "Requiere sesión y correo verificado.",
         info: "Completa el formulario seguro para procesar tu pago con tarjeta."
@@ -27,8 +28,9 @@ const paymentData = [
         title: "Tiendas de conveniencia",
         Icon: ShoppingCart,
         category: "cash",
+        requiresAuth: true,
         summary: "Genera una ficha y paga en efectivo.",
-        requirement: "Consulta las tiendas y comisiones disponibles.",
+        requirement: "Requiere sesión y correo verificado.",
         info: "Genera tu ficha y paga en 7-Eleven, Walmart, Farmacias del Ahorro y más."
     },
     {
@@ -36,8 +38,9 @@ const paymentData = [
         title: "Pagos de servicios (BBVA)",
         Icon: Landmark,
         category: "banking",
+        requiresAuth: true,
         summary: "Paga desde tu app BBVA o practicaja.",
-        requirement: "Necesitas la referencia generada para tu pago.",
+        requirement: "Requiere sesión y correo verificado.",
         info: "Ingresa a tu app BBVA, ve a 'Pago de Servicios' y usa nuestro convenio."
     },
     {
@@ -45,8 +48,9 @@ const paymentData = [
         title: "Transferencias Interbancarias",
         Icon: Building2,
         category: "banking",
+        requiresAuth: false,
         summary: "Realiza una transferencia vía SPEI.",
-        requirement: "Usa la referencia asociada a tu reserva.",
+        requirement: "Disponible sin iniciar sesión.",
         info: "Realiza un SPEI a nuestra cuenta CLABE con tu número de reserva."
     },
     {
@@ -54,8 +58,9 @@ const paymentData = [
         title: "Pagos en ventanilla",
         Icon: UserRound,
         category: "cash",
+        requiresAuth: false,
         summary: "Paga en ventanilla bancaria.",
-        requirement: "Lleva la ficha técnica de tu pago.",
+        requirement: "Disponible sin iniciar sesión.",
         info: "Acude a ventanilla bancaria con nuestra ficha técnica."
     },
     {
@@ -63,8 +68,9 @@ const paymentData = [
         title: "Depósitos (Oxxo)",
         Icon: Store,
         category: "cash",
+        requiresAuth: false,
         summary: "Paga en efectivo en cualquier OXXO.",
-        requirement: "Indica el número de tarjeta asignado.",
+        requirement: "Disponible sin iniciar sesión.",
         info: "Paga en efectivo en cualquier OXXO indicando el número de tarjeta asignado."
     },
 ];
@@ -106,16 +112,19 @@ export default function PaymentMethods({ baseUrl }) {
     const activeMethod = paymentData.find(m => m.id === selectedId);
 
     const handleMethodSelect = (methodId) => {
-        if (!user) {
+        const method = paymentData.find((item) => item.id === methodId);
+
+        if (method?.requiresAuth && !user) {
             window.location.href = '/cliente/login?returnTo=/pagos';
             return;
         }
 
-        if (!user.emailVerified) {
+        if (method?.requiresAuth && !user.emailVerified) {
             setAuthMessage('Verifica tu correo electrónico antes de generar un voucher de pago.');
             return;
         }
 
+        setAuthMessage('');
         setSelectedId(methodId);
     };
 
@@ -140,11 +149,16 @@ export default function PaymentMethods({ baseUrl }) {
                                         onClick={() => handleMethodSelect(method.id)}
                                         className={`payment-card group relative w-full cursor-pointer border-0 p-6 text-left text-inherit transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary ${isPrimary ? 'lg:col-span-2 min-h-[240px] bg-brand-primary hover:bg-brand-primary-hover' : 'min-h-[220px] bg-brand-surface hover:bg-white'} rounded-card shadow-card hover:shadow-card-hover`}
                                     >
-                                        {method.badge && (
-                                            <span className="absolute right-4 top-4 rounded-pill bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                                                {method.badge}
+                                        <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
+                                            {method.badge && (
+                                                <span className="rounded-pill bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                                                    {method.badge}
+                                                </span>
+                                            )}
+                                            <span className={`rounded-pill px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${isPrimary ? 'bg-white/15 text-white/85' : method.requiresAuth ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                {method.requiresAuth ? 'Inicio de sesión requerido' : 'Acceso público'}
                                             </span>
-                                        )}
+                                        </div>
                                         <MethodIcon aria-hidden="true" size={42} strokeWidth={1.8} className={isPrimary ? "mb-5 text-white" : "mb-5 text-brand-primary"} />
                                         <h3 className={`font-bold leading-tight ${isPrimary ? 'text-2xl text-white' : 'text-xl text-brand-ink'}`}>{method.title}</h3>
                                         <p className={`mt-3 text-sm ${isPrimary ? 'text-white/90' : 'text-slate-600'}`}>{method.summary}</p>
@@ -157,12 +171,12 @@ export default function PaymentMethods({ baseUrl }) {
                 ))}
             </div>
 
-             {(!user || authMessage) && (
-                 <div className="mt-8 mx-auto max-w-xl rounded-card border border-purple-100 bg-purple-50 p-5 text-center">
-                     <p className="font-bold text-purple-900">{authMessage || 'Inicia sesión para generar un voucher de pago.'}</p>
-                     <p className="mt-1 text-sm text-purple-700">Tu sesión permite proteger el cargo y consultar su historial posteriormente.</p>
-                 </div>
-             )}
+              {authMessage && (
+                  <div className="mt-8 mx-auto max-w-xl rounded-card border border-purple-100 bg-purple-50 p-5 text-center">
+                      <p className="font-bold text-purple-900">{authMessage}</p>
+                      <p className="mt-1 text-sm text-purple-700">La sesión protege el cargo y permite consultar su historial posteriormente.</p>
+                  </div>
+              )}
 
             {/* Modal Dinámico */}
             {selectedId && (
@@ -182,7 +196,7 @@ export default function PaymentMethods({ baseUrl }) {
                     >
 
                         <div className="text-center relative">
-                            <h2 id={titleId} className="sr-only">Selecciona un método de pago</h2>
+                            <h2 id={titleId} className="sr-only">{activeMethod?.title || 'Método de pago'}</h2>
                             <button
                                 type="button"
                                 onClick={() => setSelectedId(null)}
