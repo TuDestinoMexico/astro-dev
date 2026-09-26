@@ -15,7 +15,7 @@ const {title, subtitle, url, color, icon} = Astro.props;
         href={url}
         class:list={[
             color,
-            "text-white p-3.5 flex flex-col space-y-1.5 flex-1 min-w-35 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105"
+            "text-white p-3.5 flex flex-col space-y-1.5 flex-1 w-full min-w-0 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105"
         ]}
 >
     {icon && <Icon size="18" name={icon} class="shrink-0 text-white/90" />}
