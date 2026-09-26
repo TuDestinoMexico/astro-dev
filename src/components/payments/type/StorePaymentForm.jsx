@@ -181,15 +181,25 @@ export default function StorePaymentForm() {
             {/* Modal de Tiendas */}
             {showStoreInfo && (
                 <div className="fixed inset-0 z-110 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-4xl p-8 max-w-md w-full shadow-2xl relative">
-                        <button onClick={() => setShowStoreInfo(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="store-info-title"
+                        className="bg-white rounded-4xl p-8 max-w-md w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain shadow-2xl relative"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setShowStoreInfo(false)}
+                            aria-label="Cerrar tiendas disponibles"
+                            className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00c0a5] text-2xl"
+                        >
                             &times;
                         </button>
                         <div className="text-center mb-6">
-                            <h3 className="text-2xl font-bold text-slate-800">Tiendas Disponibles</h3>
+                            <h3 id="store-info-title" className="text-2xl font-bold text-slate-800">Tiendas Disponibles</h3>
                             <p className="text-sm text-gray-500 mt-1">Puedes pagar en cualquiera de estos puntos</p>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 max-h-87.5 overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid grid-cols-2 gap-3 pr-2">
                             {stores.map((store, i) => (
                                 <div key={i} className="flex flex-col items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-hover hover:border-[#00c0a5]/30">
                                     <img src={store.img} alt={store.name} className="h-8 w-auto mb-2 object-contain mix-blend-multiply" />
@@ -198,7 +208,7 @@ export default function StorePaymentForm() {
                                 </div>
                             ))}
                         </div>
-                        <button onClick={() => setShowStoreInfo(false)} className="w-full mt-6 py-4 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-colors">
+                        <button type="button" onClick={() => setShowStoreInfo(false)} className="w-full mt-6 py-4 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-colors">
                             Cerrar
                         </button>
                     </div>
