@@ -213,7 +213,7 @@ Si el deployment de producción presenta un problema, detener la promoción y vo
 
 ### Indicador de entorno del footer
 
-La insignia `Entorno: Desarrollo` en `Footer.astro` se controla con las variables de entorno de Vercel:
+La insignia `Entorno: Desarrollo` en `Footer.astro` se controla con las variables de entorno de Vercel y se renderiza dentro del flujo normal del footer, sin posición fija:
 
 - Desarrollo local (`import.meta.env.DEV`): visible.
 - Preview generado desde la rama `dev` (`VERCEL_ENV=preview` y `VERCEL_GIT_COMMIT_REF=dev`): visible.
