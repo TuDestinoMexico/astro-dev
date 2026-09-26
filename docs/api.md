@@ -74,14 +74,16 @@ Recibe notificaciones de estado de cargos desde Openpay.
 
 ### `POST /api/crm-consultar`
 
-Proxy a la API CRM de Tu Destino Mexico. Consulta una reserva por CT y correo.
+Proxy autenticado a la API CRM de Tu Destino Mexico. Consulta una reserva por CT y correo durante la vinculación, o el CT ya vinculado durante la consulta de detalle.
 
 - **Archivo:** `src/pages/api/crm-consultar.ts`
 - **Método:** POST
+- **Autenticación:** `Authorization: Bearer <Firebase ID token>` con correo verificado.
 - **Body:**
   ```json
   { "ct": "string (required)", "email": "string (email, required)" }
   ```
+- **Detalle:** `{ "ct": "string (required)", "detail": true }`. El servidor verifica que el CT pertenezca al usuario autenticado y obtiene el correo vinculado desde Firestore.
 - **Respuesta éxito:** `{ "success": true, "data": { ...datos reserva } }`
 - **Respuesta error:** `{ "success": false, "message": "..." }`
 - **URL destino:** `{API_CRM_URL}/api/reservas/consultar`
@@ -91,14 +93,16 @@ Proxy a la API CRM de Tu Destino Mexico. Consulta una reserva por CT y correo.
 
 ### `POST /api/crm-grupo-consultar`
 
-Proxy a la API CRM de Tu Destino Mexico. Consulta un grupo por GB y correo (validado contra el cliente titular del grupo).
+Proxy autenticado a la API CRM de Tu Destino Mexico. Consulta un grupo por GB y correo durante la vinculación, o el GB ya vinculado durante la consulta de detalle.
 
 - **Archivo:** `src/pages/api/crm-grupo-consultar.ts`
 - **Método:** POST
+- **Autenticación:** `Authorization: Bearer <Firebase ID token>` con correo verificado.
 - **Body:**
   ```json
   { "gb": "string (required)", "email": "string (email, required)" }
   ```
+- **Detalle:** `{ "gb": "string (required)", "detail": true }`. El servidor verifica que el GB pertenezca al usuario autenticado y obtiene el correo vinculado desde Firestore.
 - **Respuesta éxito:** `{ "success": true, "data": { ...datos grupo } }`
 - **Respuesta error:** `{ "success": false, "message": "..." }`
 - **URL destino:** `{API_CRM_URL}/api/grupos/consultar`

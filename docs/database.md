@@ -113,6 +113,8 @@ Reservas vinculadas por clientes autenticados con Google Auth.
 
 **Uso:** `ClientReservas.jsx` (lectura con `onSnapshot`, escritura con `setDoc` al consultar una reserva). El ID del documento es el código normalizado (`ct` en mayúsculas, ej. `CT-12345`), lo que hace imposible duplicados a nivel Firestore. Antes de consultar, el componente valida contra el estado local que el CT/GB no esté ya vinculado (comparación case-insensitive) y bloquea con mensaje sin llamar a la API.
 
+El documento no guarda el snapshot CRM ni la URL del PDF. El detalle completo se consulta bajo demanda mediante una API autenticada. Al cargar vínculos antiguos, `ClientReservas.jsx` elimina los campos heredados `detalles` y `pdf_url`.
+
 ---
 
 #### `users/{userId}/grupos/{grupoId}`
@@ -123,11 +125,11 @@ Grupos GB vinculados por clientes autenticados.
 |---|---|---|
 | `correo_grupo` | string | Email asociado al grupo |
 | `gb` | string | Código único del grupo |
-| `detalles` | object | Snapshot de la respuesta CRM, incluyendo `hoteles`, `cliente` y `reservation_type` |
-| `pdf_url` | string | URL del PDF del grupo, cuando existe |
 | `fechaVinculacion` | timestamp | Momento en que se vinculó |
 
 **Uso:** `ClientReservas.jsx` y `ClientPagos.jsx`. El documento se guarda con `setDoc` usando el código GB normalizado como ID para evitar duplicados.
+
+El documento solo conserva los datos necesarios para identificar el vínculo. La información CRM completa y el PDF se obtienen únicamente al solicitar el detalle con una sesión autenticada.
 
 ---
 
