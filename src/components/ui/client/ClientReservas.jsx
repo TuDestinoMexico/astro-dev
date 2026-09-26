@@ -160,6 +160,9 @@ export default function ClientReservas({ user }) {
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState('');
   const [reservas, setReservas] = useState([]);
+  const [cargandoReservas, setCargandoReservas] = useState(true);
+  const [errorReservas, setErrorReservas] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
   const [guardando, setGuardando] = useState(false);
 
   const [detalleReserva, setDetalleReserva] = useState(null);
@@ -170,6 +173,8 @@ export default function ClientReservas({ user }) {
 
   useEffect(() => {
     if (!user) return;
+    setCargandoReservas(true);
+    setErrorReservas('');
     const qReservas = query(
       collection(db, 'users', user.uid, 'reservas'),
       orderBy('fechaVinculacion', 'desc')
@@ -182,17 +187,25 @@ export default function ClientReservas({ user }) {
       cleanLegacyCrmFields(snapshot);
       const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'ct', ...doc.data() }));
       setReservas((prev) => mergeLists(lista, prev.filter((p) => p.tipo === 'gb')));
+      setCargandoReservas(false);
+    }, () => {
+      setErrorReservas('No se pudieron cargar tus reservas vinculadas.');
+      setCargandoReservas(false);
     });
     const unsubGrupos = onSnapshot(qGrupos, (snapshot) => {
       cleanLegacyCrmFields(snapshot);
       const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'gb', ...doc.data() }));
       setReservas((prev) => mergeLists(prev.filter((p) => p.tipo === 'ct'), lista));
+      setCargandoReservas(false);
+    }, () => {
+      setErrorReservas('No se pudieron cargar tus grupos vinculados.');
+      setCargandoReservas(false);
     });
     return () => {
       unsubReservas();
       unsubGrupos();
     };
-  }, [user]);
+  }, [user, retryKey]);
 
   const handleConsultar = async (e) => {
     e.preventDefault();
@@ -375,7 +388,7 @@ export default function ClientReservas({ user }) {
             </div>
 
             {error && (
-              <div class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
+              <div role="alert" aria-live="assertive" class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
                 <AlertCircle size={16} />
                 <span>{error}</span>
               </div>
@@ -387,7 +400,7 @@ export default function ClientReservas({ user }) {
               class="w-full md:w-auto flex items-center justify-center gap-2 bg-purple-800 text-white font-bold text-xs uppercase tracking-widest px-8 py-3.5 rounded-xl hover:bg-purple-900 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {consultando ? (
-                <><Loader2 size={16} class="animate-spin" /> Consultando...</>
+                <span role="status" aria-live="polite" aria-atomic="true" class="flex items-center gap-2"><Loader2 size={16} class="animate-spin" /> Consultando...</span>
               ) : (
                 <><Search size={16} /> {tipo === 'gb' ? 'Consultar Grupo' : 'Consultar Reserva'}</>
               )}
@@ -434,8 +447,20 @@ export default function ClientReservas({ user }) {
             <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Mis Reservas y Grupos Vinculados</h2>
           </div>
 
-          {reservas.length === 0 ? (
-            <div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-10 text-center">
+          {cargandoReservas ? (
+            <div role="status" aria-live="polite" aria-atomic="true" class="flex flex-col items-center justify-center py-16 text-slate-400">
+              <Loader2 size={32} class="animate-spin text-purple-500 mb-3" />
+              <span class="text-xs font-bold uppercase tracking-widest">Cargando reservas y grupos...</span>
+            </div>
+          ) : errorReservas ? (
+            <div role="alert" aria-live="assertive" class="flex flex-col items-center justify-center py-16 text-center">
+              <p class="text-sm font-medium text-red-600">{errorReservas}</p>
+              <button type="button" onClick={() => setRetryKey((key) => key + 1)} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+                Reintentar
+              </button>
+            </div>
+          ) : reservas.length === 0 ? (
+            <div role="status" aria-live="polite" class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-10 text-center">
               <Calendar size={40} class="text-slate-300 mx-auto mb-3" />
               <p class="text-slate-500 font-medium">No tienes reservas ni grupos vinculados.</p>
               <p class="text-sm text-slate-400 mt-1">Ingresa tu CT o GB y correo para consultar y vincular tu información.</p>
@@ -525,14 +550,14 @@ export default function ClientReservas({ user }) {
 
             <div class="p-6 overflow-y-auto flex-1">
               {cargandoDetalle && (
-                <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                <div role="status" aria-live="polite" aria-atomic="true" class="flex flex-col items-center justify-center py-16 text-slate-400">
                   <Loader2 size={32} class="animate-spin text-purple-500 mb-3" />
                   <span class="text-xs font-bold uppercase tracking-widest">Consultando información...</span>
                 </div>
               )}
 
               {errorDetalle && (
-                <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                <div role="alert" aria-live="assertive" class="flex flex-col items-center justify-center py-16 text-slate-400">
                   <AlertCircle size={32} class="text-red-400 mb-3" />
                   <p class="text-sm font-medium text-red-600">{errorDetalle}</p>
                   <button

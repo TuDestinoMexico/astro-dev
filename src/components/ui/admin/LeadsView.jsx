@@ -5,12 +5,17 @@ import { User, Eye } from 'lucide-react';
 
 export default function LeadsView() {
     const [leads, setLeads] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [retryKey, setRetryKey] = useState(0);
 
     useEffect(() => {
         fetchLeads();
-    }, []);
+    }, [retryKey]);
 
     const fetchLeads = async () => {
+        setLoading(true);
+        setError('');
         try {
             const q = query(collection(db, "cotizaciones"), orderBy("createdAt", "desc"), limit(5));
             const querySnapshot = await getDocs(q);
@@ -19,6 +24,9 @@ export default function LeadsView() {
             setLeads(items);
         } catch (error) {
             console.error("Error leyendo cotizaciones: ", error);
+            setError('No se pudieron cargar las cotizaciones.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -31,8 +39,19 @@ export default function LeadsView() {
 
             <div>
                 <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Últimas Solicitudes</h2>
-                {leads.length === 0 ? (
-                    <p className="text-slate-400 text-sm py-4">No hay cotizaciones registradas en Firestore aún.</p>
+                {loading ? (
+                    <div role="status" aria-live="polite" aria-atomic="true" className="flex items-center gap-2 text-slate-400 text-sm py-4">
+                        Cargando cotizaciones...
+                    </div>
+                ) : error ? (
+                    <div role="alert" aria-live="assertive" className="flex flex-col items-start gap-2 text-sm py-4">
+                        <p className="text-red-600">{error}</p>
+                        <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="text-xs font-bold text-slate-500 underline hover:text-slate-700">
+                            Reintentar
+                        </button>
+                    </div>
+                ) : leads.length === 0 ? (
+                    <p role="status" aria-live="polite" className="text-slate-400 text-sm py-4">No hay cotizaciones registradas en Firestore aún.</p>
                 ) : (
                     <div className="space-y-3">
                         {leads.map((lead) => (

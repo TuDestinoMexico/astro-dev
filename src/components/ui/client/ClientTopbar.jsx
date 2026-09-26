@@ -20,6 +20,9 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
   const dropdownRef = useRef(null);
   const mobileDropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const desktopAccountTriggerRef = useRef(null);
+  const mobileAccountTriggerRef = useRef(null);
+  const lastAccountTriggerRef = useRef(null);
 
   useEffect(() => {
     const fetchLogo = async () => {
@@ -35,6 +38,18 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
     };
     fetchLogo();
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Escape' || !dropdownOpen) return;
+
+      setDropdownOpen(false);
+      lastAccountTriggerRef.current?.focus();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [dropdownOpen]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -63,10 +78,19 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
     setMobileMenuOpen(false);
   };
 
-  const renderAccount = (ref) => (
+  const renderAccount = (ref, triggerRef, triggerId, menuId) => (
     <div class="relative flex flex-1 min-w-30 xl:min-w-32 shrink-0" ref={ref}>
       <button
-        onClick={() => setDropdownOpen(!dropdownOpen)}
+        type="button"
+        id={triggerId}
+        ref={triggerRef}
+        onClick={(event) => {
+          lastAccountTriggerRef.current = event.currentTarget;
+          setDropdownOpen((open) => !open);
+        }}
+        aria-expanded={dropdownOpen}
+        aria-controls={menuId}
+        aria-haspopup="menu"
         class="bg-purple-800 text-white p-3 flex-col items-start justify-between space-y-1.5 flex-1 min-w-30 xl:min-w-32 shrink-0 transition-all duration-300 hover:brightness-105 cursor-pointer flex rounded-xl xl:rounded-none"
       >
         {user.photoURL ? (
@@ -92,6 +116,9 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
       </button>
 
       <div
+        id={menuId}
+        role="menu"
+        aria-labelledby={triggerId}
         class={`absolute right-0 top-full mt-1 w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-2 transition-all duration-200 ease-out transform origin-top-right ${
           dropdownOpen
             ? 'opacity-100 scale-100 pointer-events-auto visible'
@@ -113,6 +140,7 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
         <div class="py-1">
           <a
             href="/"
+            role="menuitem"
             class="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 transition-all"
           >
             <Globe size={16} /> Volver al Sitio
@@ -121,7 +149,9 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
 
         <div class="border-t border-slate-100 pt-1">
           <button
+            type="button"
             onClick={handleLogout}
+            role="menuitem"
             class="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 transition-all cursor-pointer"
           >
             <LogOut size={16} /> Cerrar Sesión
@@ -164,7 +194,7 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
             </button>
           ))}
 
-          {renderAccount(dropdownRef)}
+            {renderAccount(dropdownRef, desktopAccountTriggerRef, 'desktop-account-trigger', 'desktop-account-menu')}
         </div>
 
         <div class="xl:hidden w-full p-3 mt-3 shadow-lg" ref={mobileMenuRef}>
@@ -177,7 +207,7 @@ export default function ClientTopbar({ user, activeTab, setActiveTab }) {
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            {renderAccount(mobileDropdownRef)}
+            {renderAccount(mobileDropdownRef, mobileAccountTriggerRef, 'mobile-account-trigger', 'mobile-account-menu')}
           </div>
 
           <div class={`grid grid-cols-2 gap-2 mt-3 overflow-hidden transition-all duration-300 ease-out ${mobileMenuOpen ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-2 pointer-events-none invisible h-0'}`}>
