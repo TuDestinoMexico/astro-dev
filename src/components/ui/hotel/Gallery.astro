@@ -13,8 +13,8 @@ interface Props {
 
 const { images, hotelName } = Astro.props;
 
-const hasImages = images && images.length > 0;
-const mainImage = hasImages ? images[0] : null;
+const mainImage = images?.[0];
+const hasImages = Boolean(mainImage);
 const gridImages = hasImages ? images.slice(1, 5) : [];
 const hiddenImages = hasImages ? images.slice(5) : [];
 ---
@@ -27,7 +27,7 @@ const hiddenImages = hasImages ? images.slice(5) : [];
             counter: true
         }}
 >
-    {hasImages ? (
+    {mainImage ? (
             <div class="grid grid-cols-1 xl:grid-cols-2 h-fit xl:gap-5 relative">
                 {/* Imagen Principal */}
                 <div class="rounded-xl overflow-hidden relative group cursor-pointer bg-purple-200 animate-pulse img-loader-container">
@@ -88,7 +88,7 @@ const hiddenImages = hasImages ? images.slice(5) : [];
 
 <script>
     // Función para quitar el skeleton
-    const removeLoader = (img) => {
+    const removeLoader = (img: HTMLImageElement) => {
         img.classList.remove('opacity-0');
         const container = img.closest('.img-loader-container');
         if (container) {
@@ -97,7 +97,7 @@ const hiddenImages = hasImages ? images.slice(5) : [];
     };
 
     const setupGalleryLoaders = () => {
-        const galleryImages = document.querySelectorAll('.gallery-img');
+        const galleryImages = document.querySelectorAll<HTMLImageElement>('.gallery-img');
 
         galleryImages.forEach((img) => {
             // Si la imagen ya cargó (por caché)

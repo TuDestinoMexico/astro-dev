@@ -15,7 +15,7 @@ try {
     const configDocRef = doc(db, "config", "general");
 
     // Creamos una promesa que se cancela automáticamente a los 2.5 segundos
-    const timeoutPromise = new Promise((_, reject) =>
+    const timeoutPromise: Promise<never> = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Timeout de red")), 2500)
     );
 
@@ -228,13 +228,13 @@ try {
     });
 
     mobilePanel?.addEventListener('click', (e) => {
-        if (e.target.closest('a')) {
+        if (e.target instanceof Element && e.target.closest('a')) {
             closeMobileMenu();
         }
     });
 
     document.addEventListener('mousedown', (e) => {
-        if (mobileMenuRoot && !mobileMenuRoot.contains(e.target)) {
+        if (mobileMenuRoot && e.target instanceof Node && !mobileMenuRoot.contains(e.target)) {
             closeMobileMenu();
         }
     });

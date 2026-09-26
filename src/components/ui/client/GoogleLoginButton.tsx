@@ -21,8 +21,14 @@ export default function GoogleLoginButton() {
             const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
             window.location.href = getSafeReturnTo();
-        } catch (err) {
-            if (err.code === 'auth/popup-closed-by-user') {
+        } catch (err: unknown) {
+            const isPopupClosedError =
+                typeof err === 'object' &&
+                err !== null &&
+                'code' in err &&
+                err.code === 'auth/popup-closed-by-user';
+
+            if (isPopupClosedError) {
                 setError('');
             } else {
                 setError('Error al iniciar sesión. Intenta de nuevo.');
@@ -32,21 +38,21 @@ export default function GoogleLoginButton() {
     };
 
     return (
-        <div class="space-y-4">
+        <div className="space-y-4">
             {error && (
-                <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
                     {error}
                 </div>
             )}
             <button
                 onClick={handleLogin}
                 disabled={loading}
-                class="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 text-slate-700 font-bold text-sm px-6 py-3.5 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 text-slate-700 font-bold text-sm px-6 py-3.5 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {loading ? (
-                    <svg class="animate-spin h-5 w-5 text-slate-400" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    <svg className="animate-spin h-5 w-5 text-slate-400" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
                 ) : (
                     <svg width="20" height="20" viewBox="0 0 24 24">

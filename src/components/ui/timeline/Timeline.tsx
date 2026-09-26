@@ -11,7 +11,7 @@ interface Milestone {
     fullTitle: string;
     description: string;
     image: string;
-    coords: { x: string; y: string };
+    coords: { lat: number; lng: number };
 }
 
 const milestones: Milestone[] = [
@@ -142,7 +142,9 @@ export default function TimelineWithMap() {
                         {milestones.map((item, idx) => (
                             <button
                                 key={item.id}
-                                ref={(el) => (buttonRefs.current[idx] = el)}
+                                 ref={(el) => {
+                                     buttonRefs.current[idx] = el;
+                                 }}
                                 onClick={() => changeTab(idx)}
                                 className={`shrink-0 w-37.5 md:flex-1 py-6 md:py-8 transition-all duration-500 group ${idx === activeIndex ? 'scale-105' : 'opacity-40 hover:opacity-100'}`}
                             >
