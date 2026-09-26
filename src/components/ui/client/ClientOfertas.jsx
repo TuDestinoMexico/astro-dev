@@ -32,6 +32,8 @@ const formatVigencia = (ts) => {
 export default function ClientOfertas({ user }) {
   const [ofertas, setOfertas] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
   const [whatsapp, setWhatsapp] = useState(WHATSAPP_FALLBACK);
 
   useEffect(() => {
@@ -51,17 +53,21 @@ export default function ClientOfertas({ user }) {
   }, []);
 
   useEffect(() => {
+    setCargando(true);
+    setError('');
     const q = query(collection(db, 'ofertas'), orderBy('posicion', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const lista = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       setOfertas(lista.filter((o) => o.activo !== false && !esVencida(o)));
+      setError('');
       setCargando(false);
     }, (error) => {
       console.error('Error leyendo ofertas:', error);
+      setError('No se pudieron cargar las ofertas.');
       setCargando(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [retryKey]);
 
   const reclamar = (offer) => {
     const mensaje = `¡Hola! Me interesa reclamar la oferta "${offer.titulo}"${offer.codigo ? ` con el código ${offer.codigo}` : ''} que vi en Tu Destino México.`;
@@ -79,12 +85,19 @@ export default function ClientOfertas({ user }) {
       </div>
 
       {cargando ? (
-        <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+        <div role="status" aria-live="polite" aria-atomic="true" class="flex flex-col items-center justify-center py-20 text-slate-400">
           <Loader2 size={32} class="animate-spin text-emerald-500 mb-3" />
           <span class="text-xs font-bold uppercase tracking-widest">Cargando ofertas...</span>
         </div>
+      ) : error ? (
+        <div role="alert" aria-live="assertive" class="flex flex-col items-center justify-center py-16 text-center">
+          <p class="text-sm font-medium text-red-600">{error}</p>
+          <button type="button" onClick={() => setRetryKey((key) => key + 1)} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+            Reintentar
+          </button>
+        </div>
       ) : ofertas.length === 0 ? (
-        <div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-12 text-center">
+        <div role="status" aria-live="polite" class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-12 text-center">
           <Sparkles size={40} class="text-slate-300 mx-auto mb-3" />
           <p class="text-slate-500 font-medium">No hay ofertas disponibles por el momento.</p>
           <p class="text-sm text-slate-400 mt-1">Vuelve pronto, estamos preparando promociones exclusivas para ti.</p>

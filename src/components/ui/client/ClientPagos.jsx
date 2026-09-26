@@ -69,6 +69,7 @@ function OpenpayHistory({ user }) {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -94,7 +95,7 @@ function OpenpayHistory({ user }) {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, retryKey]);
 
   return (
     <section class="bg-white rounded-2xl border border-indigo-100 shadow-sm overflow-hidden">
@@ -109,15 +110,18 @@ function OpenpayHistory({ user }) {
       </div>
 
       {loading ? (
-        <div class="flex items-center justify-center gap-2 py-8 text-slate-400 text-sm">
+        <div role="status" aria-live="polite" aria-atomic="true" class="flex items-center justify-center gap-2 py-8 text-slate-400 text-sm">
           <Loader2 size={18} class="animate-spin" /> Cargando vouchers...
         </div>
       ) : error ? (
-        <div class="flex items-center justify-center gap-2 py-8 text-red-600 text-sm">
+        <div role="alert" aria-live="assertive" class="flex flex-col items-center justify-center gap-2 py-8 text-red-600 text-sm">
           <AlertCircle size={18} /> {error}
+          <button type="button" onClick={() => setRetryKey((key) => key + 1)} class="text-xs font-bold text-slate-500 underline hover:text-slate-700">
+            Reintentar
+          </button>
         </div>
       ) : payments.length === 0 ? (
-        <div class="py-8 px-6 text-center text-sm text-slate-400">Todavía no tienes vouchers Openpay.</div>
+        <div role="status" aria-live="polite" class="py-8 px-6 text-center text-sm text-slate-400">Todavía no tienes vouchers Openpay.</div>
       ) : (
         <div class="divide-y divide-slate-100">
           {payments.map((payment) => {
@@ -202,11 +206,17 @@ export default function ClientPagos({ user }) {
   const [vinculadas, setVinculadas] = useState([]);
   const [activo, setActivo] = useState(null);
   const [pagos, setPagos] = useState(null);
+  const [loadingVinculadas, setLoadingVinculadas] = useState(true);
+  const [vinculadasError, setVinculadasError] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
+  const [paymentsRetryKey, setPaymentsRetryKey] = useState(0);
 
   useEffect(() => {
     if (!user) return;
+    setLoadingVinculadas(true);
+    setVinculadasError('');
     const qReservas = query(
       collection(db, 'users', user.uid, 'reservas'),
       orderBy('fechaVinculacion', 'desc')
@@ -218,16 +228,24 @@ export default function ClientPagos({ user }) {
     const unsubReservas = onSnapshot(qReservas, (snapshot) => {
       const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'ct', codigo: doc.data().ct, ...doc.data() }));
       setVinculadas((prev) => mergeLists(lista, prev.filter((p) => p.tipo === 'gb')));
+      setLoadingVinculadas(false);
+    }, () => {
+      setVinculadasError('No se pudieron cargar tus reservas vinculadas.');
+      setLoadingVinculadas(false);
     });
     const unsubGrupos = onSnapshot(qGrupos, (snapshot) => {
       const lista = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'gb', codigo: doc.data().gb, ...doc.data() }));
       setVinculadas((prev) => mergeLists(prev.filter((p) => p.tipo === 'ct'), lista));
+      setLoadingVinculadas(false);
+    }, () => {
+      setVinculadasError('No se pudieron cargar tus grupos vinculados.');
+      setLoadingVinculadas(false);
     });
     return () => {
       unsubReservas();
       unsubGrupos();
     };
-  }, [user]);
+  }, [user, retryKey]);
 
   useEffect(() => {
     if (vinculadas.length === 0) {
@@ -272,7 +290,7 @@ export default function ClientPagos({ user }) {
     };
     load();
     return () => { activoFlag = false; };
-  }, [activo]);
+  }, [activo, paymentsRetryKey]);
 
   return (
     <div class="space-y-6 w-full">
@@ -286,8 +304,20 @@ export default function ClientPagos({ user }) {
 
       <OpenpayHistory user={user} />
 
-      {vinculadas.length === 0 ? (
-        <div class="bg-white border border-dashed border-slate-200 rounded-2xl p-10 text-center">
+      {loadingVinculadas ? (
+        <div role="status" aria-live="polite" aria-atomic="true" class="flex flex-col items-center justify-center py-16 text-slate-400">
+          <Loader2 size={32} class="animate-spin text-amber-500 mb-3" />
+          <span class="text-xs font-bold uppercase tracking-widest">Cargando reservas y grupos...</span>
+        </div>
+      ) : vinculadasError ? (
+        <div role="alert" aria-live="assertive" class="flex flex-col items-center justify-center py-16 text-center">
+          <p class="text-sm font-medium text-red-600">{vinculadasError}</p>
+          <button type="button" onClick={() => setRetryKey((key) => key + 1)} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+            Reintentar
+          </button>
+        </div>
+      ) : vinculadas.length === 0 ? (
+        <div role="status" aria-live="polite" class="bg-white border border-dashed border-slate-200 rounded-2xl p-10 text-center">
           <Wallet size={40} class="text-slate-300 mx-auto mb-3" />
           <p class="text-slate-500 font-medium">No tienes reservas ni grupos vinculados.</p>
           <p class="text-sm text-slate-400 mt-1">Vincula una reserva o grupo desde "Mis Reservas" para ver sus pagos.</p>
@@ -324,16 +354,19 @@ export default function ClientPagos({ user }) {
           )}
 
           {error && (
-            <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+            <div role="alert" aria-live="assertive" class="flex flex-col items-center justify-center py-16 text-slate-400">
               <AlertCircle size={32} class="text-red-400 mb-3" />
               <p class="text-sm font-medium text-red-600">{error}</p>
+              <button type="button" onClick={() => setPaymentsRetryKey((key) => key + 1)} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+                Reintentar
+              </button>
             </div>
           )}
 
           {pagos && !cargando && (
             <div class="space-y-5">
               {pagos.length === 0 ? (
-                <div class="bg-white border border-dashed border-slate-200 rounded-2xl p-10 text-center">
+                <div role="status" aria-live="polite" class="bg-white border border-dashed border-slate-200 rounded-2xl p-10 text-center">
                   <Receipt size={40} class="text-slate-300 mx-auto mb-3" />
                   <p class="text-slate-500 font-medium">Sin pagos registrados para este CT.</p>
                 </div>

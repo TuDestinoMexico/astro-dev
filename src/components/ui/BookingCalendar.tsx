@@ -15,6 +15,13 @@ interface Props {
     isSingleDate?: boolean; // Opcional para no romper Hoteles
 }
 
+type BookingFormData = {
+    nombre: string;
+    adultos: number | '';
+    menores: number;
+    edadesMenores: string[];
+};
+
 const calendarClassNames = {
     months: 'flex flex-col md:flex-row gap-6 justify-center',
     month: 'space-y-4 rounded-2xl border border-slate-100 bg-white p-2 sm:p-3',
@@ -46,7 +53,8 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     const [checkOut, setCheckOut] = useState<Date | null>(null);
     const [range, setRange] = useState<DateRange | undefined>();
     const [isClosing, setIsClosing] = useState(false);
-    const [formData, setFormData] = useState({ nombre: '', adultos: 2, menores: 0, edadesMenores: [] as string[] });
+    const [formData, setFormData] = useState<BookingFormData>({ nombre: '', adultos: 2, menores: 0, edadesMenores: [] });
+    const [validationMessage, setValidationMessage] = useState('');
 
     const titleId = useId();
     const fieldPrefix = useId();
@@ -79,6 +87,13 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
             nuevasEdades.splice(num);
         }
         setFormData({ ...formData, menores: num, edadesMenores: nuevasEdades });
+    };
+
+    const normalizeAdultos = (value: string): number | '' => {
+        if (value.trim() === '') return '';
+
+        const parsed = Number(value);
+        return Number.isInteger(parsed) && parsed >= 1 ? parsed : '';
     };
 
     const closeCalendar = () => {
@@ -191,6 +206,16 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     const canGoPrevious = isAfter(currentMonth, firstMonth);
     const canGoNext = isBefore(currentMonth, lastAllowedMonth);
     const canApplyDates = isSingleDate ? Boolean(checkIn) : Boolean(checkIn && checkOut);
+    const hasValidAdults = typeof formData.adultos === 'number' && Number.isInteger(formData.adultos) && formData.adultos >= 1;
+    const hasValidChildren = Number.isInteger(formData.menores) && formData.menores >= 0;
+    const hasValidChildrenAges = formData.menores === 0 || formData.edadesMenores.every((edad) => edad.trim() !== '');
+    const canSendWhatsApp = Boolean(
+        formData.nombre.trim() &&
+        canApplyDates &&
+        hasValidAdults &&
+        hasValidChildren &&
+        hasValidChildrenAges
+    );
 
     const openCalendar = () => {
         if (checkIn) setCurrentMonth(startOfMonth(checkIn));
@@ -203,9 +228,12 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     };
 
     const sendWhatsApp = () => {
-        // Validación ajustada
-        const isDatesSelected = isSingleDate ? checkIn : (checkIn && checkOut);
-        if (!isDatesSelected || !formData.nombre) return alert("⚠️ Completa tus datos y fecha.");
+        if (!canSendWhatsApp) {
+            setValidationMessage('Completa tu nombre, las fechas, el número de adultos y las edades de los menores antes de continuar.');
+            return;
+        }
+
+        setValidationMessage('');
 
         const noches = checkOut ? differenceInDays(checkOut, checkIn!) : 0;
 
@@ -220,7 +248,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
             `──────────────────────────\n` +
             `👤 *Nombre:* ${formData.nombre}\n` +
             `${infoFechas}\n` +
-            `👥 *Pax:* ${formData.adultos} Adultos, ${formData.menores} Menores` +
+            `👥 *Pax:* ${Number(formData.adultos)} Adultos, ${formData.menores} Menores` +
             (formData.menores > 0 ? `\n👶 *Edades:* ${formData.edadesMenores.join(', ')}` : '')
         );
 
@@ -350,8 +378,8 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
                         <label htmlFor={`${fieldPrefix}-adults`} className="block text-[9px] font-black text-slate-400 uppercase">Adultos</label>
                         <input
                             id={`${fieldPrefix}-adults`}
-                            type="number" min="1" value={formData.adultos}
-                            onChange={e => setFormData({...formData, adultos: parseInt(e.target.value)})}
+                            type="number" min="1" step="1" inputMode="numeric" value={formData.adultos}
+                            onChange={e => setFormData({...formData, adultos: normalizeAdultos(e.target.value)})}
                             className="w-full text-sm font-bold outline-none bg-transparent"
                         />
                     </div>
@@ -371,9 +399,18 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
                     />
                 </div>
 
+                {validationMessage && (
+                    <p role="alert" aria-live="assertive" className="text-sm font-semibold text-red-600">
+                        {validationMessage}
+                    </p>
+                )}
+
                 <button
+                    type="button"
                     onClick={sendWhatsApp}
-                    className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl shadow-green-100 transition-all active:scale-95 group"
+                    disabled={!canSendWhatsApp}
+                    aria-disabled={!canSendWhatsApp}
+                    className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl shadow-green-100 transition-all active:scale-95 group disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     <Send size={18} className="group-hover:translate-x-1" />
                     Reservar por WhatsApp

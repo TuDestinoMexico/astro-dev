@@ -7,6 +7,7 @@ import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 const PaymentStatusModal = () => {
     const [paymentData, setPaymentData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [isOpen, setIsOpen] = useState(false);
 
     const overlayRef = useRef(null);
@@ -18,6 +19,7 @@ const PaymentStatusModal = () => {
         if (!paymentId) return undefined;
 
         setLoading(true);
+        setError('');
         setIsOpen(true);
         let requested = false;
 
@@ -36,9 +38,14 @@ const PaymentStatusModal = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await response.json();
-                if (response.ok) setPaymentData(data);
+                if (response.ok) {
+                    setPaymentData(data);
+                } else {
+                    setError(data.message || 'No se pudo verificar la transacción.');
+                }
             } catch (error) {
                 console.error('Error consultando el pago:', error);
+                setError('No se pudo verificar la transacción. Intenta nuevamente.');
             } finally {
                 setLoading(false);
             }
@@ -94,14 +101,14 @@ const PaymentStatusModal = () => {
                 <h2 id={titleId} className="sr-only">Estado del pago</h2>
 
                 {loading ? (
-                    <div className="p-20 flex flex-col items-center justify-center space-y-4">
+                    <div role="status" aria-live="polite" aria-atomic="true" className="p-20 flex flex-col items-center justify-center space-y-4">
                         <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
                         <p className="text-slate-500 font-bold animate-pulse tracking-tight">Validando transacción...</p>
                     </div>
                 ) : paymentData ? (
                     <>
                         {/* Cabecera dinámica */}
-                        <div className={`p-8 text-center ${paymentData.status === 'completed' ? 'bg-green-50' : 'bg-amber-50'}`}>
+                        <div role="status" aria-live="polite" aria-atomic="true" className={`p-8 text-center ${paymentData.status === 'completed' ? 'bg-green-50' : 'bg-amber-50'}`}>
                             <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${paymentData.status === 'completed' ? 'bg-green-500 shadow-lg shadow-green-200' : 'bg-amber-500'}`}>
                                 {paymentData.status === 'completed' ? (
                                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
@@ -190,8 +197,8 @@ const PaymentStatusModal = () => {
                         </div>
                     </>
                 ) : (
-                    <div className="p-12 text-center space-y-4">
-                        <p className="text-red-500 font-bold italic">No se pudo verificar la transacción.</p>
+                    <div role="alert" aria-live="assertive" className="p-12 text-center space-y-4">
+                        <p className="text-red-500 font-bold italic">{error || 'No se pudo verificar la transacción.'}</p>
                         <button type="button" onClick={close} className="text-indigo-600 font-bold border-b border-indigo-600 pb-1">Cerrar ventana</button>
                     </div>
                 )}

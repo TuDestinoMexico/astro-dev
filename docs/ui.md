@@ -168,9 +168,26 @@ Los tokens de marca controlan la paleta primaria, superficies, radios y sombras 
 
 ---
 
-## Pendiente de documentar
+## Estados De Datos
 
-- Props específicas de cada componente (consultar código fuente)
-- Estados de carga/error/vacío de cada componente
-- Responsive breakpoints utilizados
-- Patrón de manejo de errores en componentes React
+Los componentes que consumen Firestore, Storage o APIs deben distinguir carga, error, vacío y datos disponibles. Las operaciones de usuario agregan estados de progreso, éxito y error sin reemplazar silenciosamente el contenido existente.
+
+- `role="status"` + `aria-live="polite"` para carga, progreso, éxito y estados vacíos dinámicos.
+- `role="alert"` + `aria-live="assertive"` para errores de validación, red o permisos.
+- Toda consulta recuperable debe ofrecer `Reintentar` y no presentar un estado vacío mientras continúa cargando.
+- Los listeners `onSnapshot` deben limpiar su suscripción y volver a suscribirse cuando el usuario solicita un reintento.
+- Las acciones de documentos, pagos, reservas y administración deben deshabilitar solo el control afectado durante su progreso.
+
+| Componente | Fuente | Estados cubiertos |
+|---|---|---|
+| `ClientFavoritos.jsx` | Firestore `users/{uid}/favoritos` | Carga, error con reintento, vacío, eliminación con error |
+| `ClientOfertas.jsx` | Firestore `ofertas` + `config/general` | Carga, error con reintento, vacío |
+| `ClientPagos.jsx` | Firestore + CRM | Carga de vínculos, historial y pagos; errores con reintento; vacíos por contexto |
+| `ClientReservas.jsx` | Firestore + CRM | Carga de vínculos, consulta, detalle, error con reintento y vacío |
+| `DocumentosModal.jsx` | CRM documentos | Carga, error con reintento, vacío, subida, éxito y error |
+| `LeadsView.jsx` | Firestore `cotizaciones` | Carga, error con reintento y vacío |
+| `TeamView.jsx` | Firestore `equipo` + Firebase Storage | Carga, error con reintento, vacío y acciones de edición |
+| `OfertasView.jsx` | Firestore `ofertas` | Carga, error con reintento, vacío y acciones de edición |
+| `ConfigView.jsx` | Firestore `config/general` + Firebase Storage | Carga, error con reintento, progreso de upload y éxito/error de guardado |
+| `MediaManager.jsx` | Firebase Storage | Debe conservar estados de carga, error, vacío y acciones de archivo por operación |
+| `BookingCalendar.tsx` | Estado local | Validación inline y envío deshabilitado hasta completar datos |

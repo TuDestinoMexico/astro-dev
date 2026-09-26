@@ -97,7 +97,7 @@ export default function CreditCardDrawer({ baseUrl }) {
                     className={`w-full mt-4 py-4 rounded-card font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-brand-primary hover:bg-brand-primary-hover'}`}
                 >
                     {loading ? (
-                        <span className="flex items-center justify-center gap-2">
+                        <span role="status" aria-live="polite" aria-atomic="true" className="flex items-center justify-center gap-2">
                             <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -110,14 +110,14 @@ export default function CreditCardDrawer({ baseUrl }) {
 
             {/* Mensajes de feedback */}
             {error && (
-                <div className="mt-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm">
+                <div role="alert" aria-live="assertive" className="mt-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl text-sm">
                     <strong>Error:</strong> {error}
                 </div>
             )}
 
             {paymentUrl && (
-                <div className="mt-6 p-6 bg-indigo-50 border border-indigo-100 rounded-2xl text-center">
-                    <p className="text-indigo-900 font-bold mb-3">¡Liga de pago lista!</p>
+                <div role="status" aria-live="polite" aria-atomic="true" className="mt-6 p-6 bg-indigo-50 border border-indigo-100 rounded-2xl text-center">
+                    <p className="text-indigo-900 font-bold mb-3">{success || '¡Liga de pago lista!'}</p>
                     <a
                         href={paymentUrl}
                         target="_blank"
