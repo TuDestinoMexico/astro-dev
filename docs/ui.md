@@ -33,7 +33,7 @@ Renderizados en servidor. Sin estado cliente.
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
 | `YouTubeCTA.astro` | `components/ui/home/YouTubeCTA.astro` | CTA de YouTube |
 | `RecomendacionesBanner.astro` | `components/ui/home/RecomendacionesBanner.astro` | Banner de recomendaciones |
-| `Welcome.astro` | `components/Welcome.astro` | Composición de homepage (hero slider + grid + modales) |
+| `Welcome.astro` | `components/Welcome.astro` | Composición de homepage (hero SSR + grid + modales) |
 
 ---
 
@@ -43,7 +43,8 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `EventsHeroSlider.jsx` | `client:only` | Slider principal con GSAP, 2 slides corporativos |
+| `EventsHero.astro` | — | Shell SSR del hero principal: renderiza la primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
+| `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP; actualiza las diapositivas después de la hidratación |
 | `HotSalePromoRibbon.jsx` | (no determinada) | Cinta promocional Hot Sale |
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |

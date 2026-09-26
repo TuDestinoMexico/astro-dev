@@ -1,0 +1,73 @@
+---
+import { Icon } from 'astro-icon/components';
+import EventsHeroControls from './EventsHeroControls';
+import { HERO_SLIDES, HERO_WHATSAPP_NUMBER } from '../../../data/homeHeroSlides';
+
+const firstSlide = HERO_SLIDES[0];
+const whatsappHref = `https://wa.me/${HERO_WHATSAPP_NUMBER}?text=${encodeURIComponent(firstSlide.whatsappMsg)}`;
+---
+
+<section id="home-hero" class="w-full font-sans overflow-hidden" aria-label="Destinos y experiencias de Tu Destino México">
+    <div class="relative w-full h-[650px] md:h-[720px] bg-slate-950 group">
+        <div class="absolute inset-0 z-10">
+            <img
+                data-hero-image
+                src={firstSlide.image}
+                alt={firstSlide.title}
+                width="1600"
+                height="1067"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                class="w-full h-full object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-transparent pointer-events-none"></div>
+        </div>
+
+        <div class="relative z-20 w-full h-full flex flex-col justify-center px-6 md:px-16 lg:w-2/3 pt-4" aria-live="polite">
+            <div class="overflow-hidden mb-5">
+                <div data-hero-reveal class="inline-block">
+                    <span data-hero-badge class="bg-orange-500/20 text-orange-400 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] px-5 py-2.5 rounded-full border border-orange-500/30 shadow-lg backdrop-blur-md">
+                        {firstSlide.badge}
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-hidden mb-6">
+                <div data-hero-location class="inline-flex items-center gap-2 bg-white/10 text-white text-xs font-bold px-4 py-2 rounded-xl backdrop-blur-md border border-white/10">
+                    <Icon name="mdi:map-marker" size="17" class="shrink-0 text-orange-400" aria-hidden="true" />
+                    <span data-hero-location-text>{firstSlide.location}</span>
+                </div>
+            </div>
+
+            <div class="overflow-hidden mb-5">
+                <h1 data-hero-title class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[0.95] tracking-tighter uppercase drop-shadow-md max-w-3xl">
+                    {firstSlide.title}
+                </h1>
+            </div>
+
+            <div class="overflow-hidden mb-8">
+                <p data-hero-description class="text-white/80 text-base md:text-lg max-w-2xl font-medium leading-relaxed drop-shadow-sm">
+                    {firstSlide.description}
+                </p>
+            </div>
+
+            <div class="overflow-hidden">
+                <div data-hero-reveal>
+                    <a
+                        data-hero-cta
+                        href={whatsappHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class={`inline-flex items-center gap-2.5 text-white px-7 py-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-[0.12em] hover:scale-105 active:scale-95 transition-all shadow-2xl ${firstSlide.btnColor}`}
+                    >
+                        <Icon name="simple-icons:whatsapp" size="20" class="shrink-0" aria-hidden="true" />
+                        Cotizar Mi Viaje Ahora
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <EventsHeroControls client:load slides={HERO_SLIDES} />
+    </div>
+</section>
