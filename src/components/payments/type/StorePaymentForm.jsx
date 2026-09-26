@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { Download, X } from 'lucide-react';
 import { createIdempotencyKey, createOpenpayCharge } from '../../../lib/openpayClient';
 
 // Listado de tiendas y comisiones
@@ -59,15 +60,15 @@ export default function StorePaymentForm() {
     };
 
     // Estilos compartidos con el componente de tarjeta
-    const inputStyle = "w-full border border-gray-300 px-4 py-2.5 rounded-xl text-gray-700 focus:ring-2 focus:ring-[#00c0a5] focus:border-transparent outline-none transition-all placeholder:text-gray-400";
+    const inputStyle = "w-full border border-brand-border px-4 py-2.5 rounded-card text-gray-700 focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none transition-all placeholder:text-gray-400";
     const labelStyle = "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1";
 
     // Pantalla de éxito (Ficha generada)
     if (paymentData) {
         return (
             <div className="w-full max-w-lg mx-auto text-center animate-in fade-in zoom-in duration-300">
-                <div className="bg-[#00c0a5]/10 border-2 border-[#00c0a5]/20 p-6 rounded-3xl mb-8">
-                    <p className="text-[#00c0a5] font-bold text-xl mb-1">¡Ficha generada!</p>
+                <div className="bg-brand-primary/10 border-2 border-brand-primary/20 p-6 rounded-card-lg mb-8">
+                    <p className="text-brand-primary font-bold text-xl mb-1">¡Ficha generada!</p>
                     <p className="text-gray-600 text-sm">Tómale una captura de pantalla o descarga el PDF.</p>
                 </div>
 
@@ -85,9 +86,10 @@ export default function StorePaymentForm() {
                     <a
                         href={`https://pagos.tudestinomx.com/confirmacion?id=${paymentData.id}`}
                         target="_blank"
-                        className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95"
+                        className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-card font-bold hover:bg-black transition-all shadow-lg active:scale-95"
                     >
-                        📥 Descargar Ficha PDF
+                        <Download aria-hidden="true" size={18} />
+                        Descargar Ficha PDF
                     </a>
                 </div>
             </div>
@@ -101,7 +103,7 @@ export default function StorePaymentForm() {
                 <button
                     type="button"
                     onClick={() => setShowStoreInfo(true)}
-                    className="mt-2 text-[#00c0a5] font-bold text-sm hover:underline underline-offset-4"
+                    className="mt-2 text-brand-primary font-bold text-sm hover:text-brand-primary-hover hover:underline underline-offset-4"
                 >
                     Consultar tiendas y comisiones
                 </button>
@@ -143,7 +145,7 @@ export default function StorePaymentForm() {
                 {/* Botón de envío con Spinner */}
                 <button
                     disabled={loading}
-                    className={`w-full mt-4 py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-[#00c0a5] hover:bg-black'}`}
+                    className={`w-full mt-4 py-4 rounded-card font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-brand-primary hover:bg-brand-primary-hover'}`}
                 >
                     {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -191,9 +193,9 @@ export default function StorePaymentForm() {
                             type="button"
                             onClick={() => setShowStoreInfo(false)}
                             aria-label="Cerrar tiendas disponibles"
-                            className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00c0a5] text-2xl"
+                            className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
                         >
-                            &times;
+                            <X aria-hidden="true" size={24} />
                         </button>
                         <div className="text-center mb-6">
                             <h3 id="store-info-title" className="text-2xl font-bold text-slate-800">Tiendas Disponibles</h3>
@@ -201,14 +203,14 @@ export default function StorePaymentForm() {
                         </div>
                         <div className="grid grid-cols-2 gap-3 pr-2">
                             {stores.map((store, i) => (
-                                <div key={i} className="flex flex-col items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-hover hover:border-[#00c0a5]/30">
+                                <div key={i} className="flex flex-col items-center p-4 bg-gray-50 rounded-card border border-gray-100 transition-hover hover:border-brand-primary/30">
                                     <img src={store.img} alt={store.name} className="h-8 w-auto mb-2 object-contain mix-blend-multiply" />
                                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Comisión aprox</p>
                                     <p className="text-xs font-bold text-slate-800">{store.fee}</p>
                                 </div>
                             ))}
                         </div>
-                        <button type="button" onClick={() => setShowStoreInfo(false)} className="w-full mt-6 py-4 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-colors">
+                        <button type="button" onClick={() => setShowStoreInfo(false)} className="w-full mt-6 py-4 bg-slate-900 text-white font-bold rounded-card text-sm hover:bg-black transition-colors">
                             Cerrar
                         </button>
                     </div>

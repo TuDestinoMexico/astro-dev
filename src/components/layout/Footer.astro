@@ -14,11 +14,11 @@ const showDevelopmentBadge =
     <div class="container mx-auto flex flex-col gap-10">
 
 
-        <div class="bg-orange-500 text-white/90 rounded-[2.5rem] p-8 sm:p-10 flex flex-col gap-8 shadow-lg border border-white/20 relative">
+        <div class="bg-brand-accent text-white rounded-panel p-8 sm:p-10 flex flex-col gap-8 shadow-lg border border-white/20 relative">
 
             {/* AVISO FLOTANTE (Oculto por defecto, se activa con JS) */}
             <div id="copy-toast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
-                <Icon name="material-symbols:check-circle-outline" class="text-green-400" size={16} />
+                <Icon name="lucide:circle-check" class="text-green-300" size={16} aria-hidden="true" />
                 <span>Folio copiado. Redireccionando...</span>
             </div>
 
@@ -57,17 +57,17 @@ const showDevelopmentBadge =
                 </div>
 
                 <div class="flex gap-5">
-                    <a href="https://fb.com/tudestinomexicoo" target="_blank">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-200 transition-all cursor-pointer" name="bxl:facebook" />
+                    <a href="https://fb.com/tudestinomexicoo" target="_blank" aria-label="Facebook">
+                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:facebook" aria-hidden="true" />
                     </a>
-                    <a href="https://instagram.com/tudestinomexico" target="_blank">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-200 transition-all cursor-pointer" name="bxl:instagram" />
+                    <a href="https://instagram.com/tudestinomexico" target="_blank" aria-label="Instagram">
+                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:instagram" aria-hidden="true" />
                     </a>
-                    <a href="https://tiktok.com/@tudestinomexico" target="_blank">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-200 transition-all cursor-pointer" name="bxl:tiktok" />
+                    <a href="https://tiktok.com/@tudestinomexico" target="_blank" aria-label="TikTok">
+                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:tiktok" aria-hidden="true" />
                     </a>
-                    <a href="https://youtube.com/@tudestinomexico" target="_blank">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-200 transition-all cursor-pointer" name="bxl:youtube" />
+                    <a href="https://youtube.com/@tudestinomexico" target="_blank" aria-label="YouTube">
+                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:youtube" aria-hidden="true" />
                     </a>
                 </div>
 
@@ -88,13 +88,13 @@ const showDevelopmentBadge =
                 <div class="flex flex-col sm:flex-row gap-6 md:gap-10">
                     <a
                             href="/terminos-condiciones"
-                            class="font-semibold text-white/80 underline underline-offset-4 hover:text-white transition-all italic text-center whitespace-nowrap"
+                            class="font-semibold text-white underline underline-offset-4 hover:text-orange-100 transition-all italic text-center whitespace-nowrap"
                     >
                         Nuestros términos y condiciones.
                     </a>
                     <a
                             href="/privacidad"
-                            class="font-semibold text-white/80 underline underline-offset-4 hover:text-white transition-all italic text-center whitespace-nowrap"
+                            class="font-semibold text-white underline underline-offset-4 hover:text-orange-100 transition-all italic text-center whitespace-nowrap"
                     >
                         Aviso de privacidad
                     </a>

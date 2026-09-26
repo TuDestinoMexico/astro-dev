@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #00c0a5;
+  --color-brand-primary-hover: #00a891;
+  --color-brand-accent: #c2410c;
+  --color-brand-ink: #0f172a;
+  --color-brand-muted: #64748b;
+  --color-brand-surface: #f8fafc;
+  --color-brand-border: #e2e8f0;
+
+  --radius-card: 1rem;
+  --radius-card-lg: 1.5rem;
+  --radius-panel: 2rem;
+  --radius-pill: 9999px;
+
+  --shadow-card: 0 10px 25px -12px rgb(15 23 42 / 0.2);
+  --shadow-card-hover: 0 20px 35px -14px rgb(15 23 42 / 0.28);
+}

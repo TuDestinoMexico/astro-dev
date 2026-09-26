@@ -50,7 +50,7 @@ export default function CreditCardDrawer({ baseUrl }) {
     };
 
     // Estilo común para los inputs
-    const inputStyle = "w-full border border-gray-300 px-4 py-2.5 rounded-xl text-gray-700 focus:ring-2 focus:ring-[#00c0a5] focus:border-transparent outline-none transition-all placeholder:text-gray-400";
+    const inputStyle = "w-full border border-brand-border px-4 py-2.5 rounded-card text-gray-700 focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none transition-all placeholder:text-gray-400";
     const labelStyle = "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1";
 
     return (
@@ -94,7 +94,7 @@ export default function CreditCardDrawer({ baseUrl }) {
                 {/* Botón de envío */}
                 <button
                     disabled={loading}
-                    className={`w-full mt-4 py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-[#00c0a5] hover:bg-black'}`}
+                    className={`w-full mt-4 py-4 rounded-card font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-brand-primary hover:bg-brand-primary-hover'}`}
                 >
                     {loading ? (
                         <span className="flex items-center justify-center gap-2">

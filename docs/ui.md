@@ -91,7 +91,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `PaymentMethods.jsx` | `client:only` | Grid accesible de métodos con botones nativos navegables por teclado (Enter/Espacio), diálogo dinámico con trap de foco y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
+| `PaymentMethods.jsx` | `client:only` | Métodos de pago agrupados por tipo (pago en línea, banca y efectivo), con tarjeta como opción principal, botones nativos navegables por teclado (Enter/Espacio), diálogo dinámico con trap de foco y animación GSAP; exige sesión cliente antes de abrir un formulario Openpay |
 | `CreditCardDrawer.jsx` | — | Formulario tarjeta crédito/débito; envía ID token Firebase e `Idempotency-Key` al crear el cargo |
 | `StorePaymentForm.jsx` | — | Pago en tiendas de conveniencia con autenticación e idempotencia; modal de tiendas con scroll exterior responsive basado en `100dvh` |
 | `BankTransferForm.jsx` | — | Pago servicios BBVA con autenticación e idempotencia |
@@ -149,10 +149,12 @@ El HTML del catálogo externo se sanea server-side mediante `src/lib/sanitizeHtm
 
 - **Framework:** Tailwind CSS v4 (plugin Vite, sin archivo de configuración)
 - **Fuente:** Google Fonts Poppins (300, 400, 600, 700, 800)
-- **Iconos:** Material Icons Outlined (vía Google Fonts), Lucide React, Astro Icon con sets Iconify
-- **CSS global:** `src/assets/styles/global.css` → solo `@import "tailwindcss"`
+- **Iconos:** Lucide como biblioteca SVG canónica para controles; `lucide-react` en React y Astro Icon con el set Lucide en Astro. Iconify queda para logotipos de marcas y recursos externos.
+- **CSS global:** `src/assets/styles/global.css` → `@import "tailwindcss"` y tokens de marca mediante `@theme`
 - **CSS adicional:** Scoped `<style>` blocks en componentes `.astro`
 - **Animaciones:** GSAP (`EventsHeroSlider`, `PaymentMethods`), CSS transitions, `@keyframes` en style blocks
+
+Los tokens de marca controlan la paleta primaria, superficies, radios y sombras compartidas. Los emojis se reservan para contenido editorial; los controles y estados de interfaz usan iconos SVG con `aria-hidden` cuando son decorativos.
 
 ---
 
