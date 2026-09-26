@@ -8,7 +8,7 @@ import Content from "./layout/Content.astro";
 import WelcomeModal from "./modal/WelcomeModal";
 import RecentlyViewed from "./ui/RecentlyViewed";
 import PromoLocker from "./ui/PromoLocker";
-import EventsHeroSlider from "./ui/home/EventsHeroSlider";
+import EventsHero from "./ui/home/EventsHero.astro";
 import { fetchHotelList } from "../lib/catalog";
 
 const catalogResult = await fetchHotelList<any>();
@@ -16,7 +16,7 @@ const catalogUnavailable = catalogResult.status === 'unavailable';
 const hoteles = catalogResult.status === 'ok' ? catalogResult.data : [];
 ---
 
-<EventsHeroSlider client:only="react"  />
+<EventsHero />
 <Content>
     <WelcomeModal client:only="react" />
 
