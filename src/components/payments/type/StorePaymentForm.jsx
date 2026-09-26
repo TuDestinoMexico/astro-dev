@@ -111,11 +111,11 @@ export default function StorePaymentForm() {
                 {/* Nombres y Apellidos */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
-                        <label className={labelStyle}>Nombres</label>
+                        <label htmlFor="name" className={labelStyle}>Nombres</label>
                         <input id="name" type="text" placeholder="Ej. Juan" className={inputStyle} onChange={handleChange} required />
                     </div>
                     <div>
-                        <label className={labelStyle}>Apellidos</label>
+                        <label htmlFor="last_name" className={labelStyle}>Apellidos</label>
                         <input id="last_name" type="text" placeholder="Ej. Pérez" className={inputStyle} onChange={handleChange} required />
                     </div>
                 </div>
@@ -123,7 +123,7 @@ export default function StorePaymentForm() {
                 {/* Email y Teléfono */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
-                        <label className={labelStyle}>Teléfono</label>
+                        <label htmlFor="phone_number" className={labelStyle}>Teléfono</label>
                         <input id="phone_number" type="tel" placeholder="10 dígitos" className={inputStyle} onChange={handleChange} required />
                     </div>
                 </div>
@@ -131,11 +131,11 @@ export default function StorePaymentForm() {
                 {/* Referencia y Cantidad */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
-                        <label className={labelStyle}>Referencia / Concepto</label>
+                        <label htmlFor="description" className={labelStyle}>Referencia / Concepto</label>
                         <input id="description" type="text" placeholder="Hotel o Tour" className={inputStyle} onChange={handleChange} required />
                     </div>
                     <div>
-                        <label className={labelStyle}>Cantidad (MXN)</label>
+                        <label htmlFor="amount" className={labelStyle}>Cantidad (MXN)</label>
                         <input id="amount" type="number" placeholder="0.00" className={inputStyle} onChange={handleChange} required />
                     </div>
                 </div>
