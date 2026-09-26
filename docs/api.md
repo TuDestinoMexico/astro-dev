@@ -327,6 +327,25 @@ Las respuestas pueden venir como array directo o como `{ data: [...] }`. El proy
 const data = Array.isArray(raw) ? raw : (raw.data || []);
 ```
 
+### Manejo de errores del catálogo
+
+Las páginas SSR consumen el catálogo mediante `src/lib/catalog.ts`, que centraliza headers, timeout, validación y normalización de respuestas.
+
+- **Timeout:** 8 segundos por solicitud mediante `AbortSignal.timeout`.
+- **Headers:** `Accept: application/json` y `Authorization: Bearer {VITE_API_TOKEN}`.
+- **HTTP 404:** se interpreta como recurso inexistente. En páginas de detalle redirige a `/404`; en listados se conserva el estado vacío.
+- **Otros errores HTTP:** se consideran indisponibilidad temporal del catálogo.
+- **Timeout, error de red o JSON inválido:** se consideran indisponibilidad temporal del catálogo.
+- **Estructura inválida:** una lista debe ser un array directo o estar dentro de `data`; un detalle debe ser un objeto directo o estar dentro de `data`.
+- **Logging:** los errores se registran únicamente server-side con recurso, tipo de consulta, slug cuando aplica y código HTTP. Nunca se registran tokens, headers sensibles ni cuerpos completos de respuesta.
+
+### Fallbacks públicos
+
+- **Homepage (`/`):** si falla el listado de hoteles, se muestra el resto de la página y un mensaje informativo en la sección del catálogo.
+- **Listados (`/hoteles`, `/tours`):** muestran un mensaje de catálogo temporalmente no disponible. Las respuestas válidas sin resultados conservan el mensaje de catálogo vacío.
+- **Detalles (`/hotel/{slug}`, `/tour/{slug}`):** muestran `CatalogUnavailable.astro` para fallos temporales y mantienen `Header` y `Footer`. No se renderizan datos dependientes del producto, favoritos, calendario, historial reciente ni schema específico del producto.
+- **SEO:** los schemas `ItemList`, `Hotel` y `Tour` solo se emiten cuando existe una respuesta válida del catálogo.
+
 ### Campos detectados en hoteles
 
 | Campo | Tipo | Notas |
@@ -373,4 +392,3 @@ const data = Array.isArray(raw) ? raw : (raw.data || []);
 - Estructura de respuesta de tours
 - Rate limiting de API externa
 - Documentación Openpay (referencia externa)
-- Manejo de errores detallado de API externa
