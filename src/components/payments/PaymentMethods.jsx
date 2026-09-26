@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useId, useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { auth } from '../../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -8,6 +8,7 @@ import BankTransferForm from "./type/BankTransferForm.jsx";
 import DirectTransferForm from "./type/DirectTransferForm.jsx";
 import CounterPaymentForm from "./type/CounterPaymentForm.jsx";
 import OxxoDepositForm from "./type/OxxoDepositForm.jsx";
+import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 const paymentData = [
     { id: 1, title: "Tarjeta de débito o crédito", icon: "💳", info: "" },
     { id: 2, title: "Tiendas de conveniencia", icon: "🛒", info: "Genera tu ficha y paga en 7-Eleven, Walmart, Farmacias del Ahorro y más." },
@@ -22,6 +23,11 @@ export default function PaymentMethods({ baseUrl }) {
     const [user, setUser] = useState(null);
     const [authMessage, setAuthMessage] = useState('');
     const containerRef = useRef(null);
+    const titleId = useId();
+    const { dialogRef } = useAccessibleDialog({
+        open: Boolean(selectedId),
+        onClose: () => setSelectedId(null),
+    });
 
     useEffect(() => onAuthStateChanged(auth, setUser), []);
 
@@ -79,13 +85,27 @@ export default function PaymentMethods({ baseUrl }) {
                  </div>
              )}
 
-             {/* Modal Dinámico */}
+            {/* Modal Dinámico */}
             {selectedId && (
-                <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className={`bg-white rounded-3xl p-8 w-full shadow-2xl overflow-y-auto max-h-[90vh] ${selectedId === 1 ? 'max-w-2xl' : 'max-w-md'}`}>
+                <div
+                    className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) setSelectedId(null);
+                    }}
+                >
+                    <div
+                        ref={dialogRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby={titleId}
+                        tabIndex={-1}
+                        className={`bg-white rounded-3xl p-8 w-full shadow-2xl overflow-y-auto max-h-[90vh] ${selectedId === 1 ? 'max-w-2xl' : 'max-w-md'}`}
+                    >
 
                         <div className="text-center relative">
+                            <h2 id={titleId} className="sr-only">Selecciona un método de pago</h2>
                             <button
+                                type="button"
                                 onClick={() => setSelectedId(null)}
                                 className="absolute -top-4 -right-4 text-gray-400 hover:text-black text-3xl"
                             >

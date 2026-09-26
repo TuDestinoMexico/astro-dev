@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useId, useState, useRef } from 'react';
 import gsap from 'gsap';
 import { auth } from '../../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
 const PaymentStatusModal = () => {
     const [paymentData, setPaymentData] = useState<any>(null);
@@ -9,7 +10,6 @@ const PaymentStatusModal = () => {
     const [isOpen, setIsOpen] = useState(false);
 
     const overlayRef = useRef(null);
-    const modalRef = useRef(null);
 
     useEffect(() => {
         // Openpay appends ?id=... to the configured redirect URL.
@@ -47,34 +47,51 @@ const PaymentStatusModal = () => {
         return () => unsubscribe();
     }, []);
 
-    useEffect(() => {
-        if (isOpen && modalRef.current) {
-            gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 });
-            gsap.fromTo(modalRef.current,
-                { y: 100, opacity: 0, scale: 0.8 },
-                { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "elastic.out(1, 0.8)" }
-            );
-        }
-    }, [isOpen, loading]);
-
-    const close = () => {
+    function close() {
         gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
-        gsap.to(modalRef.current, {
+        gsap.to(dialogRef.current, {
             y: 50, opacity: 0, scale: 0.9, duration: 0.3,
             onComplete: () => {
                 setIsOpen(false);
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
-    };
+    }
+
+    const titleId = useId();
+    const { dialogRef } = useAccessibleDialog({ open: isOpen, onClose: close });
+
+    useEffect(() => {
+        if (isOpen && dialogRef.current) {
+            gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 });
+            gsap.fromTo(dialogRef.current,
+                { y: 100, opacity: 0, scale: 0.8 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "elastic.out(1, 0.8)" }
+            );
+        }
+    }, [isOpen, loading]);
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
-            <div ref={overlayRef} onClick={close} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"></div>
+            <div
+                ref={overlayRef}
+                onClick={(event) => {
+                    if (event.target === event.currentTarget) close();
+                }}
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
+            ></div>
 
-            <div ref={modalRef} className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white font-sans">
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white font-sans"
+            >
+                <h2 id={titleId} className="sr-only">Estado del pago</h2>
 
                 {loading ? (
                     <div className="p-20 flex flex-col items-center justify-center space-y-4">
@@ -164,6 +181,7 @@ const PaymentStatusModal = () => {
 
                             {/* Botón Final */}
                             <button
+                                type="button"
                                 onClick={close}
                                 className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg hover:bg-slate-900 transition-all active:scale-95 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2"
                             >
@@ -174,7 +192,7 @@ const PaymentStatusModal = () => {
                 ) : (
                     <div className="p-12 text-center space-y-4">
                         <p className="text-red-500 font-bold italic">No se pudo verificar la transacción.</p>
-                        <button onClick={close} className="text-indigo-600 font-bold border-b border-indigo-600 pb-1">Cerrar ventana</button>
+                        <button type="button" onClick={close} className="text-indigo-600 font-bold border-b border-indigo-600 pb-1">Cerrar ventana</button>
                     </div>
                 )}
             </div>
