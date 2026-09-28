@@ -40,6 +40,40 @@ Documento único para el comunicado oficial que puede mostrar el sitio público.
 
 **Uso:** `ConfigView.jsx` (gestión administrativa) y `OfficialAnnouncementModal.jsx` (lectura pública exclusiva del home). El modal aparece en cada carga o actualización del home mientras `activo` sea `true`. Las escrituras están restringidas a administradores mediante las reglas de `config`.
 
+#### `config/homeHero`
+Documento único con la configuración general del hero editorial de la portada.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `autoplayMs` | number | Intervalo del cambio automático; el admin lo limita entre 4000 y 15000 milisegundos |
+| `actualizadoEn` | timestamp | Última modificación administrativa |
+
+**Uso:** `HeroView.jsx` (configuración administrativa) y `homeHero.js` (lectura SSR pública). Si el documento no existe, se conserva el intervalo técnico de 7000 milisegundos.
+
+#### `hero_slides/{slideId}`
+Diapositivas independientes del hero editorial principal, administradas desde `HeroView.jsx`.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `posicion` | number | Orden de aparición |
+| `activo` | boolean | Publicación individual sin eliminar el contenido |
+| `eyebrow` | string | Etiqueta editorial superior |
+| `titulo` | string | Título principal |
+| `descripcion` | string | Descripción breve |
+| `imagenUrl` | string | URL pública de la imagen WebP |
+| `imagenPath` | string | Ruta de Storage para reemplazo o eliminación segura |
+| `alt` | string | Texto alternativo de la imagen |
+| `ubicacion` | string | Destino mostrado en la composición |
+| `meta` | string | Metadata editorial de la experiencia |
+| `ctaPrincipal` | string | Texto del CTA principal |
+| `mensajeWhatsapp` | string | Mensaje prellenado del CTA de WhatsApp |
+| `ctaSecundario` | string | Texto del CTA secundario |
+| `ctaSecundarioUrl` | string | Ruta interna o URL HTTPS validada |
+| `creadoEn` | timestamp | Fecha de creación |
+| `actualizadoEn` | timestamp | Última modificación |
+
+**Uso:** `HeroView.jsx` gestiona CRUD, publicación y orden; `homeHero.js` lee todos los documentos, filtra `activo !== false`, ordena por `posicion` y normaliza el contenido antes del render SSR. La lectura pública usa únicamente slides activos. Si no existen slides válidos, el hero no se renderiza. No se requiere índice compuesto porque el orden se resuelve después de la lectura.
+
 #### `equipo`
 Colección de miembros del equipo, ordenada por `posicion`.
 
@@ -86,6 +120,7 @@ Almacenamiento de archivos multimedia. Las URLs son públicas (sin token de segu
 |---|---|
 | `config/` | Logos e imágenes de configuración |
 | `config/comunicado_*.webp` | Imágenes optimizadas de comunicados oficiales |
+| `hero/{slideId}/` | Imágenes WebP optimizadas de slides del hero |
 | `equipo/` | Fotos de miembros del equipo |
 | (carpetas dinámicas) | Navegación libre desde MediaManager |
 
@@ -94,6 +129,7 @@ Almacenamiento de archivos multimedia. Las URLs son públicas (sin token de segu
 - `MediaManager.jsx` — Explorador de archivos con navegación por carpetas, subida, borrado y copia de URLs.
 - `ConfigView.jsx` — Subida de logos con selector de historial.
 - `ConfigView.jsx` — Convierte imágenes de comunicados a WebP (calidad 0.78), conserva sus proporciones y elimina de Storage la imagen asociada cuando se borra.
+- `HeroView.jsx` — Convierte imágenes del hero a WebP (calidad 0.82), limita su dimensión máxima a 2400px y conserva `imagenPath` para reemplazos o eliminaciones seguras.
 - `TeamView.jsx` — Subida de fotos con selector de galería existente.
 
 ---
@@ -216,7 +252,7 @@ Las reglas se versionan en la raíz del proyecto:
 - `storage.rules` — permite lecturas públicas para conservar las URLs actuales y limita subidas, modificaciones y eliminaciones a administradores.
 - `firebase.json` — vincula ambos archivos con Firebase CLI.
 
-`config`, `equipo` y `ofertas` son públicos en lectura porque son consumidos por el sitio. `cotizaciones` queda restringida a administradores. La encuesta conserva escritura anónima únicamente para los dos contadores existentes.
+`config`, `equipo`, `ofertas` y `hero_slides` son públicos en lectura porque son consumidos por el sitio. Las escrituras de `config/homeHero` y `hero_slides` quedan restringidas a administradores. `cotizaciones` queda restringida a administradores. La encuesta conserva escritura anónima únicamente para los dos contadores existentes.
 
 ---
 
