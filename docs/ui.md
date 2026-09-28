@@ -50,6 +50,7 @@ Renderizados en servidor. Sin estado cliente.
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |
 | `MatchPoll.jsx` | (no determinada) | Encuesta en tiempo real (Firestore onSnapshot) |
 | `WelcomeModal.tsx` | `client:only` | Modal accesible de estado de pago (check vía query param `id`) |
+| `OfficialAnnouncementModal.jsx` | `client:only` desde `Welcome.astro` | Comunicado oficial público del home, mostrado en cada carga o actualización mientras esté activo |
 | `RecentlyViewed.jsx` | `client:only` | Tarjetas de últimos visitados (localStorage) |
 | `PromoLocker.jsx` | `client:only` | Locker promocional (actualmente comentado) |
 
@@ -127,7 +128,7 @@ Renderizados en servidor. Sin estado cliente.
 | `TeamView.jsx` | — | CRUD equipo con drag & drop, paginación, búsqueda, selector de fotos |
 | `OfertasView.jsx` | — | CRUD de ofertas (Firestore `ofertas` con `onSnapshot`, tiempo real): formulario (título, descripción, descuento, código, color, vigencia opcional, activo), tabla con drag & drop + búsqueda + paginación, toggle visible/oculta y badge "Vencida" |
 | `MediaManager.jsx` | — | Explorador Firebase Storage con CRUD de archivos/carpetas |
-| `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, maintenance) |
+| `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, maintenance), comunicado oficial, conversión WebP adaptable y eliminación sincronizada de imágenes |
 
 ### Otros
 

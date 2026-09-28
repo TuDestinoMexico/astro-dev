@@ -26,6 +26,20 @@ Documento único con configuración global del sitio.
 
 **Uso:** `Header.astro` (lectura SSR con timeout 2.5s), `ConfigView.jsx` (CRUD admin), `middleware.js` (lectura con caché 30s).
 
+#### `config/comunicado`
+Documento único para el comunicado oficial que puede mostrar el sitio público.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `id` | string | Identificador o versión del comunicado; cambia cuándo debe volver a mostrarse |
+| `activo` | boolean | Activa o desactiva la publicación |
+| `titulo` | string | Título visible del comunicado |
+| `imagenUrl` | string | URL pública de la imagen WebP optimizada |
+| `imagenPath` | string | Ruta del archivo en Firebase Storage para eliminarlo de forma segura |
+| `actualizadoEn` | timestamp | Última actualización administrativa |
+
+**Uso:** `ConfigView.jsx` (gestión administrativa) y `OfficialAnnouncementModal.jsx` (lectura pública exclusiva del home). El modal aparece en cada carga o actualización del home mientras `activo` sea `true`. Las escrituras están restringidas a administradores mediante las reglas de `config`.
+
 #### `equipo`
 Colección de miembros del equipo, ordenada por `posicion`.
 
@@ -71,6 +85,7 @@ Almacenamiento de archivos multimedia. Las URLs son públicas (sin token de segu
 | Ruta | Propósito |
 |---|---|
 | `config/` | Logos e imágenes de configuración |
+| `config/comunicado_*.webp` | Imágenes optimizadas de comunicados oficiales |
 | `equipo/` | Fotos de miembros del equipo |
 | (carpetas dinámicas) | Navegación libre desde MediaManager |
 
@@ -78,6 +93,7 @@ Almacenamiento de archivos multimedia. Las URLs son públicas (sin token de segu
 
 - `MediaManager.jsx` — Explorador de archivos con navegación por carpetas, subida, borrado y copia de URLs.
 - `ConfigView.jsx` — Subida de logos con selector de historial.
+- `ConfigView.jsx` — Convierte imágenes de comunicados a WebP (calidad 0.78), conserva sus proporciones y elimina de Storage la imagen asociada cuando se borra.
 - `TeamView.jsx` — Subida de fotos con selector de galería existente.
 
 ---

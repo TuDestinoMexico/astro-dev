@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db, storage } from '../../../lib/firebase'; // Configuración intacta de Firebase
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, listAll } from 'firebase/storage';
-import { Settings, Upload, Save, Loader2, Globe, Image, ShieldAlert, Check, Eye } from 'lucide-react';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, deleteField } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL, listAll, deleteObject } from 'firebase/storage';
+import { Settings, Upload, Save, Loader2, Globe, Image, ShieldAlert, Check, X, Megaphone } from 'lucide-react';
 
 export default function ConfigView() {
     // Estado principal del formulario de configuraciones
@@ -21,15 +21,31 @@ export default function ConfigView() {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
+    const [announcementData, setAnnouncementData] = useState({
+        id: '',
+        activo: false,
+        titulo: '',
+        imagenUrl: '',
+        imagenPath: ''
+    });
+    const [isAnnouncementLoading, setIsAnnouncementLoading] = useState(true);
+    const [isAnnouncementSaving, setIsAnnouncementSaving] = useState(false);
+    const [isAnnouncementUploading, setIsAnnouncementUploading] = useState(false);
+    const [announcementUploadProgress, setAnnouncementUploadProgress] = useState(0);
+    const [announcementError, setAnnouncementError] = useState('');
+    const [announcementSuccess, setAnnouncementSuccess] = useState(false);
+
     // NUEVOS ESTADOS: Modal interno para reutilizar imágenes de la carpeta config/ o equipo/
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
     const [galleryImages, setGalleryImages] = useState([]);
     const [isLoadingGallery, setIsLoadingGallery] = useState(false);
 
     const configDocRef = doc(db, "config", "general");
+    const announcementDocRef = doc(db, "config", "comunicado");
 
     useEffect(() => {
         fetchConfig();
+        fetchAnnouncement();
     }, []);
 
     // Leer las configuraciones actuales de Firestore
@@ -56,6 +72,180 @@ export default function ConfigView() {
             setLoadError('No se pudo cargar la configuración.');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchAnnouncement = async () => {
+        setIsAnnouncementLoading(true);
+        setAnnouncementError('');
+        try {
+            const docSnap = await getDoc(announcementDocRef);
+            if (docSnap.exists()) {
+                const { mensaje, ...savedAnnouncement } = docSnap.data();
+                setAnnouncementData({
+                    id: '',
+                    activo: false,
+                    titulo: '',
+                    imagenUrl: '',
+                    imagenPath: '',
+                    ...savedAnnouncement
+                });
+            }
+        } catch (error) {
+            console.error("Error cargando el comunicado:", error);
+            setAnnouncementError('No se pudo cargar el comunicado.');
+        } finally {
+            setIsAnnouncementLoading(false);
+        }
+    };
+
+    const convertImageToWebp = (file) => new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const image = new window.Image();
+
+        image.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            const canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+            const context = canvas.getContext('2d');
+
+            if (!context) {
+                reject(new Error('No se pudo preparar la imagen.'));
+                return;
+            }
+
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    reject(new Error('No se pudo convertir la imagen.'));
+                    return;
+                }
+                resolve(blob);
+            }, 'image/webp', 0.78);
+        };
+        image.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('El archivo seleccionado no es una imagen válida.'));
+        };
+        image.src = objectUrl;
+    });
+
+    const handleAnnouncementImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {
+            setAnnouncementError('La imagen original no puede superar 10 MB.');
+            return;
+        }
+
+        setAnnouncementError('');
+        setIsAnnouncementUploading(true);
+        setAnnouncementUploadProgress(0);
+
+        try {
+            const optimizedBlob = await convertImageToWebp(file);
+            const fileRef = ref(storage, `config/comunicado_${Date.now()}.webp`);
+            const uploadTask = uploadBytesResumable(fileRef, optimizedBlob, {
+                contentType: 'image/webp',
+                cacheControl: 'public,max-age=31536000,immutable'
+            });
+
+            await new Promise((resolve, reject) => {
+                uploadTask.on(
+                    'state_changed',
+                    (snapshot) => setAnnouncementUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+                    reject,
+                    resolve
+                );
+            });
+
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            setAnnouncementData((current) => ({
+                ...current,
+                imagenUrl: downloadURL,
+                imagenPath: fileRef.fullPath
+            }));
+        } catch (error) {
+            console.error("Error optimizando o subiendo el comunicado:", error);
+            setAnnouncementError('No se pudo optimizar o subir la imagen.');
+        } finally {
+            setIsAnnouncementUploading(false);
+            setAnnouncementUploadProgress(0);
+        }
+    };
+
+    const getStoragePathFromUrl = (url) => {
+        try {
+            const pathname = new URL(url).pathname;
+            const marker = '/o/';
+            const markerIndex = pathname.indexOf(marker);
+            return markerIndex === -1 ? '' : decodeURIComponent(pathname.slice(markerIndex + marker.length));
+        } catch {
+            return '';
+        }
+    };
+
+    const handleRemoveAnnouncementImage = async () => {
+        if (!announcementData.imagenUrl) return;
+        if (!window.confirm('¿Eliminar definitivamente la imagen del comunicado?')) return;
+
+        setAnnouncementError('');
+        setIsAnnouncementUploading(true);
+        try {
+            const storagePath = announcementData.imagenPath || getStoragePathFromUrl(announcementData.imagenUrl);
+            if (storagePath) {
+                try {
+                    await deleteObject(ref(storage, storagePath));
+                } catch (error) {
+                    if (error?.code !== 'storage/object-not-found') throw error;
+                }
+            }
+
+            const clearedImage = { imagenUrl: '', imagenPath: '' };
+            await setDoc(announcementDocRef, { ...clearedImage, actualizadoEn: serverTimestamp() }, { merge: true });
+            setAnnouncementData((current) => ({ ...current, ...clearedImage }));
+        } catch (error) {
+            console.error("Error eliminando la imagen del comunicado:", error);
+            setAnnouncementError('No se pudo eliminar la imagen. Verifica que todavía exista en Storage.');
+        } finally {
+            setIsAnnouncementUploading(false);
+        }
+    };
+
+    const handleSaveAnnouncement = async (e) => {
+        e.preventDefault();
+        setAnnouncementError('');
+        setAnnouncementSuccess(false);
+
+        if (!announcementData.titulo.trim()) {
+            setAnnouncementError('El título es obligatorio.');
+            return;
+        }
+
+        setIsAnnouncementSaving(true);
+        try {
+            const announcementToSave = {
+                ...announcementData,
+                id: announcementData.id.trim() || `comunicado-${Date.now()}`,
+                titulo: announcementData.titulo.trim(),
+                mensaje: deleteField(),
+                actualizadoEn: serverTimestamp()
+            };
+            await setDoc(announcementDocRef, announcementToSave, { merge: true });
+            setAnnouncementData((current) => {
+                const { mensaje, ...withoutMessage } = current;
+                return withoutMessage;
+            });
+            setAnnouncementSuccess(true);
+            setTimeout(() => setAnnouncementSuccess(false), 3000);
+        } catch (error) {
+            console.error("Error guardando el comunicado:", error);
+            setAnnouncementError('No se pudo guardar el comunicado.');
+        } finally {
+            setIsAnnouncementSaving(false);
         }
     };
 
@@ -277,6 +467,106 @@ export default function ConfigView() {
                         </button>
                     </div>
                 </div>
+            </form>
+
+            <form onSubmit={handleSaveAnnouncement} className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-8 space-y-6">
+                <div className="flex flex-col gap-2 border-b border-slate-50 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="flex items-center gap-2 text-lg font-black uppercase tracking-tight text-slate-900">
+                            <Megaphone className="text-indigo-600" size={20} /> Comunicado oficial
+                        </h2>
+                        <p className="mt-1 text-xs font-medium text-slate-400">Se mostrará en cada carga o actualización del home mientras esté activo.</p>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                        <input
+                            type="checkbox"
+                            checked={announcementData.activo}
+                            onChange={(e) => setAnnouncementData({ ...announcementData, activo: e.target.checked })}
+                            className="h-4 w-4 rounded border-slate-300 accent-indigo-600"
+                        />
+                        Publicar comunicado
+                    </label>
+                </div>
+
+                {isAnnouncementLoading ? (
+                    <div role="status" aria-live="polite" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                        <Loader2 size={16} className="animate-spin text-indigo-500" /> Cargando comunicado...
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                            <div className="space-y-4">
+                                <div>
+                                    <label htmlFor="announcement-id" className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-400">ID o versión</label>
+                                    <input
+                                        id="announcement-id"
+                                        type="text"
+                                        value={announcementData.id}
+                                        onChange={(e) => setAnnouncementData({ ...announcementData, id: e.target.value.replace(/\s+/g, '-').toLowerCase() })}
+                                        placeholder="comunicado-septiembre-2026"
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-indigo-500 focus:outline-none"
+                                    />
+                                    <p className="mt-1 text-[10px] text-slate-400">Identificador interno del comunicado.</p>
+                                </div>
+                                <div>
+                                    <label htmlFor="announcement-title" className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-slate-400">Título</label>
+                                    <input
+                                        id="announcement-title"
+                                        type="text"
+                                        required
+                                        maxLength={120}
+                                        value={announcementData.titulo}
+                                        onChange={(e) => setAnnouncementData({ ...announcementData, titulo: e.target.value })}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 focus:border-indigo-500 focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Imagen optimizada</p>
+                                <div className="flex min-h-56 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50">
+                                    {announcementData.imagenUrl ? (
+                                        <img src={announcementData.imagenUrl} alt="Vista previa del comunicado" className="h-full max-h-64 w-full object-contain" />
+                                    ) : (
+                                        <div className="px-6 text-center text-xs font-medium text-slate-400">Sin imagen seleccionada</div>
+                                    )}
+                                </div>
+                                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-700 transition hover:bg-slate-50">
+                                    <Upload size={14} /> {isAnnouncementUploading ? 'Optimizando...' : 'Subir imagen'}
+                                    <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAnnouncementImageUpload} disabled={isAnnouncementUploading} className="hidden" />
+                                </label>
+                                {announcementData.imagenUrl && (
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveAnnouncementImage}
+                                        disabled={isAnnouncementUploading}
+                                        className="w-full rounded-xl border border-red-100 px-4 py-3 text-xs font-bold uppercase tracking-wider text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                                    >
+                                        {isAnnouncementUploading ? 'Eliminando imagen...' : 'Eliminar imagen'}
+                                    </button>
+                                )}
+                                <p className="text-[10px] leading-5 text-slate-400">Se convierte automáticamente a WebP y conserva sus proporciones. Recomendado: 1200 × 800 px y menos de 500 KB; otras dimensiones también son válidas.</p>
+                                {isAnnouncementUploading && (
+                                    <div>
+                                        <div className="mb-1 flex justify-between text-[10px] font-bold uppercase text-indigo-600"><span>Subiendo imagen</span><span>{Math.round(announcementUploadProgress)}%</span></div>
+                                        <div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full bg-indigo-600 transition-all" style={{ width: `${announcementUploadProgress}%` }} /></div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col items-start justify-between gap-3 border-t border-slate-50 pt-5 sm:flex-row sm:items-center">
+                            <div>
+                                {announcementError && <p role="alert" aria-live="assertive" className="text-xs font-bold text-red-600">{announcementError}</p>}
+                                {announcementSuccess && <p role="status" aria-live="polite" className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600"><Check size={14} /> Cambios aplicados</p>}
+                            </div>
+                            <button type="submit" disabled={isAnnouncementSaving || isAnnouncementUploading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-8 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-600/10 transition-colors hover:bg-indigo-700 disabled:opacity-50 sm:w-auto">
+                                {isAnnouncementSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                                {isAnnouncementSaving ? 'Guardando...' : 'Guardar comunicado'}
+                            </button>
+                        </div>
+                    </>
+                )}
             </form>
 
             {/* ======================================================= */}
