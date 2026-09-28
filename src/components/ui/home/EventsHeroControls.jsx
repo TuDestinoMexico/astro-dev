@@ -1,16 +1,35 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { HERO_WHATSAPP_NUMBER } from '../../../data/homeHeroSlides';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 
-const BASE_CTA_CLASSES = 'inline-flex items-center gap-2.5 text-white px-7 py-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-[0.12em] hover:scale-105 active:scale-95 transition-all shadow-2xl';
-
-const whatsappHref = (message) => (
-    `https://wa.me/${HERO_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+const whatsappHref = (number, message) => (
+    `https://wa.me/${number}?text=${encodeURIComponent(message)}`
 );
 
-export default function EventsHeroControls({ slides }) {
+export default function EventsHeroControls({ slides, whatsappNumber, autoplayMs = 7000 }) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+    const [reducedMotion, setReducedMotion] = useState(false);
     const firstRender = useRef(true);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const updateMotionPreference = () => setReducedMotion(mediaQuery.matches);
+
+        updateMotionPreference();
+        mediaQuery.addEventListener?.('change', updateMotionPreference);
+
+        return () => mediaQuery.removeEventListener?.('change', updateMotionPreference);
+    }, []);
+
+    useEffect(() => {
+        if (isPaused || reducedMotion || slides.length < 2) return undefined;
+
+        const timer = window.setTimeout(() => {
+            setCurrentIndex((previous) => (previous + 1) % slides.length);
+        }, autoplayMs);
+
+        return () => window.clearTimeout(timer);
+    }, [autoplayMs, currentIndex, isPaused, reducedMotion, slides.length]);
 
     useEffect(() => {
         let cancelled = false;
@@ -31,13 +50,18 @@ export default function EventsHeroControls({ slides }) {
             if (cancelled) return;
 
             const image = hero.querySelector('[data-hero-image]');
-            const badge = hero.querySelector('[data-hero-badge]');
+            const eyebrow = hero.querySelector('[data-hero-eyebrow]');
+            const index = hero.querySelector('[data-hero-index]');
             const location = hero.querySelector('[data-hero-location]');
             const locationText = hero.querySelector('[data-hero-location-text]');
+            const meta = hero.querySelector('[data-hero-meta]');
             const title = hero.querySelector('[data-hero-title]');
             const description = hero.querySelector('[data-hero-description]');
             const cta = hero.querySelector('[data-hero-cta]');
-            const revealElements = [badge, title, description, cta].filter(Boolean);
+            const ctaLabel = hero.querySelector('[data-hero-cta-label]');
+            const secondary = hero.querySelector('[data-hero-secondary]');
+            const secondaryLabel = hero.querySelector('[data-hero-secondary-label]');
+            const revealElements = [eyebrow, title, description, cta, secondary].filter(Boolean);
             let animationStarted = false;
 
             const reveal = () => {
@@ -45,32 +69,42 @@ export default function EventsHeroControls({ slides }) {
                 animationStarted = true;
                 timeline = gsap.timeline()
                     .fromTo(image,
-                        { scale: 1.05, opacity: 0, filter: 'brightness(0.25)' },
-                        { scale: 1, opacity: 1, filter: 'brightness(0.55)', duration: 0.9, ease: 'power2.out' }
+                        { scale: 1.08, opacity: 0, filter: 'saturate(0.7) brightness(0.55)' },
+                        { scale: 1, opacity: 1, filter: 'saturate(1) brightness(0.85)', duration: 1, ease: 'power3.out' }
                     )
                     .fromTo(revealElements,
-                        { y: 35, opacity: 0, skewY: 1 },
-                        { y: 0, opacity: 1, skewY: 0, stagger: 0.08, duration: 0.65, ease: 'expo.out' },
-                        '-=0.65'
+                        { y: 28, opacity: 0 },
+                        { y: 0, opacity: 1, stagger: 0.08, duration: 0.65, ease: 'expo.out' },
+                        '-=0.7'
                     )
-                    .fromTo(location,
-                        { scale: 0.8, opacity: 0 },
-                        { scale: 1, opacity: 1, duration: 0.45, ease: 'back.out(1.5)' },
-                        '-=0.45'
+                    .fromTo([location, meta],
+                        { y: 10, opacity: 0 },
+                        { y: 0, opacity: 1, duration: 0.45, ease: 'power2.out' },
+                        '-=0.4'
                     );
             };
 
-            gsap.killTweensOf([image, ...revealElements, location]);
-            gsap.set(revealElements, { y: 35, opacity: 0, skewY: 1 });
-            gsap.set(location, { scale: 0.8, opacity: 0 });
+            gsap.killTweensOf([image, ...revealElements, location, meta]);
+            gsap.set(revealElements, { y: 28, opacity: 0 });
+            gsap.set([location, meta], { y: 10, opacity: 0 });
 
-            badge.textContent = slide.badge;
+            eyebrow.textContent = slide.eyebrow;
+            index.textContent = String(currentIndex + 1).padStart(2, '0');
             locationText.textContent = slide.location;
+            meta.textContent = slide.meta;
             title.textContent = slide.title;
             description.textContent = slide.description;
-            cta.href = whatsappHref(slide.whatsappMsg);
-            cta.className = `${BASE_CTA_CLASSES} ${slide.btnColor}`;
-            image.alt = slide.title;
+            if (cta && ctaLabel) {
+                cta.hidden = !(whatsappNumber && slide.whatsappMsg && slide.ctaLabel);
+                cta.href = whatsappHref(whatsappNumber, slide.whatsappMsg);
+                ctaLabel.textContent = slide.ctaLabel;
+            }
+            if (secondary && secondaryLabel) {
+                secondary.hidden = !(slide.secondaryHref && slide.secondaryLabel);
+                secondary.href = slide.secondaryHref;
+                secondaryLabel.textContent = slide.secondaryLabel;
+            }
+            image.alt = slide.alt || slide.title;
             image.onload = reveal;
             image.onerror = reveal;
             image.src = slide.image;
@@ -90,20 +124,21 @@ export default function EventsHeroControls({ slides }) {
             cleanupImageEvents();
             timeline?.kill();
         };
-    }, [currentIndex, slides]);
+    }, [currentIndex, slides, whatsappNumber]);
 
     const nextSlide = () => setCurrentIndex((previous) => (previous + 1) % slides.length);
     const previousSlide = () => setCurrentIndex((previous) => (previous - 1 + slides.length) % slides.length);
+    const togglePlayback = () => setIsPaused((previous) => !previous);
 
     return (
-        <div className="absolute bottom-10 right-6 md:right-12 z-30 flex items-center gap-4">
-            <div className="flex gap-2 mr-2" role="tablist" aria-label="Diapositivas del hero">
+        <div className="absolute bottom-5 right-5 z-30 flex items-center gap-3 md:bottom-8 md:left-[18rem] md:right-auto md:gap-4">
+            <div className="mr-1 flex gap-2" role="tablist" aria-label="Diapositivas del hero">
                 {slides.map((slide, index) => (
                     <button
                         key={slide.id}
                         type="button"
                         onClick={() => setCurrentIndex(index)}
-                        className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-8 bg-orange-500' : 'w-2 bg-white/40'}`}
+                        className={`h-1.5 rounded-pill transition-all duration-300 ${index === currentIndex ? 'w-8 bg-brand-primary' : 'w-1.5 bg-white/50'}`}
                         aria-label={`Ir a la diapositiva ${index + 1}`}
                         aria-current={index === currentIndex ? 'true' : undefined}
                         role="tab"
@@ -114,19 +149,29 @@ export default function EventsHeroControls({ slides }) {
             <div className="flex gap-2">
                 <button
                     type="button"
+                    onClick={togglePlayback}
+                    aria-pressed={isPaused}
+                    aria-label={isPaused ? 'Reanudar presentación' : 'Pausar presentación'}
+                    title={isPaused ? 'Reanudar presentación' : 'Pausar presentación'}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-brand-ink/20 text-white backdrop-blur-md transition-all hover:bg-brand-primary hover:text-white active:scale-90 md:h-11 md:w-11"
+                >
+                    {isPaused ? <Play size={17} fill="currentColor" aria-hidden="true" /> : <Pause size={17} aria-hidden="true" />}
+                </button>
+                <button
+                    type="button"
                     onClick={previousSlide}
-                    className="w-11 h-11 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white flex items-center justify-center hover:bg-white hover:text-slate-950 transition-all active:scale-90 shadow-lg"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-brand-ink/20 text-white backdrop-blur-md transition-all hover:bg-brand-primary hover:text-white active:scale-90 md:h-11 md:w-11"
                     aria-label="Diapositiva anterior"
                 >
-                    <ChevronLeft size={22} />
+                    <ChevronLeft size={20} />
                 </button>
                 <button
                     type="button"
                     onClick={nextSlide}
-                    className="w-11 h-11 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white flex items-center justify-center hover:bg-white hover:text-slate-950 transition-all active:scale-90 shadow-lg"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-brand-ink/20 text-white backdrop-blur-md transition-all hover:bg-brand-primary hover:text-white active:scale-90 md:h-11 md:w-11"
                     aria-label="Siguiente diapositiva"
                 >
-                    <ChevronRight size={22} />
+                    <ChevronRight size={20} />
                 </button>
             </div>
         </div>

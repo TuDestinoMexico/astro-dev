@@ -43,8 +43,9 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `EventsHero.astro` | — | Shell SSR del hero principal: renderiza la primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
-| `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP; actualiza las diapositivas después de la hidratación |
+| `EventsHero.astro` | — | Shell SSR del hero editorial principal: composición asimétrica de panel de marca + imagen de destino, primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
+| `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP tipo cambio de página; autoplay de 7 segundos con pausa/reanudación, respeta `prefers-reduced-motion` y actualiza imagen, metadata, contenido y CTAs después de la hidratación |
+| `HeroView.jsx` | — | Módulo admin para CRUD de slides del hero, orden, publicación individual, subida WebP, CTAs, preview de imagen y configuración del autoplay |
 | `HotSalePromoRibbon.jsx` | (no determinada) | Cinta promocional Hot Sale |
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |
