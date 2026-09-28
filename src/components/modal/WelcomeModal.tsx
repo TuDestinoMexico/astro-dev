@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { auth } from '../../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -9,11 +9,10 @@ const PaymentStatusModal = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [isOpen, setIsOpen] = useState(false);
-
-    const overlayRef = useRef(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
+    const titleId = useId();
 
     useEffect(() => {
-        // Openpay appends ?id=... to the configured redirect URL.
         const params = new URLSearchParams(window.location.search);
         const paymentId = params.get('id') || params.get('paymentId');
         if (!paymentId) return undefined;
@@ -33,6 +32,7 @@ const PaymentStatusModal = () => {
                     window.location.href = `/cliente/login?returnTo=${encodeURIComponent(returnTo)}`;
                     return;
                 }
+
                 const token = await user.getIdToken();
                 const response = await fetch(`/api/openpay-check?paymentId=${encodeURIComponent(paymentId)}`, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -43,8 +43,8 @@ const PaymentStatusModal = () => {
                 } else {
                     setError(data.message || 'No se pudo verificar la transacción.');
                 }
-            } catch (error) {
-                console.error('Error consultando el pago:', error);
+            } catch (requestError) {
+                console.error('Error consultando el pago:', requestError);
                 setError('No se pudo verificar la transacción. Intenta nuevamente.');
             } finally {
                 setLoading(false);
@@ -57,37 +57,44 @@ const PaymentStatusModal = () => {
     function close() {
         gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
         gsap.to(dialogRef.current, {
-            y: 50, opacity: 0, scale: 0.9, duration: 0.3,
+            y: 50,
+            opacity: 0,
+            scale: 0.94,
+            duration: 0.3,
             onComplete: () => {
                 setIsOpen(false);
                 window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            },
         });
     }
 
-    const titleId = useId();
     const { dialogRef } = useAccessibleDialog({ open: isOpen, onClose: close });
 
     useEffect(() => {
-        if (isOpen && dialogRef.current) {
-            gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 });
-            gsap.fromTo(dialogRef.current,
-                { y: 100, opacity: 0, scale: 0.8 },
-                { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "elastic.out(1, 0.8)" }
-            );
-        }
-    }, [isOpen, loading]);
+        if (!isOpen || !dialogRef.current) return undefined;
+
+        gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.35 });
+        gsap.fromTo(
+            dialogRef.current,
+            { y: 50, opacity: 0, scale: 0.94 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.55, ease: 'power3.out' },
+        );
+
+        return undefined;
+    }, [isOpen, loading, dialogRef]);
 
     if (!isOpen) return null;
 
+    const isCompleted = paymentData?.status === 'completed';
+
     return (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 sm:p-6">
             <div
                 ref={overlayRef}
                 onClick={(event) => {
                     if (event.target === event.currentTarget) close();
                 }}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
+                className="absolute inset-0 bg-brand-ink/80 backdrop-blur-md"
             ></div>
 
             <div
@@ -96,110 +103,100 @@ const PaymentStatusModal = () => {
                 aria-modal="true"
                 aria-labelledby={titleId}
                 tabIndex={-1}
-                className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white font-sans"
+                className="relative w-full max-w-md overflow-hidden rounded-[2.5rem] border border-white/70 bg-brand-surface font-sans shadow-card-hover"
             >
                 <h2 id={titleId} className="sr-only">Estado del pago</h2>
 
                 {loading ? (
-                    <div role="status" aria-live="polite" aria-atomic="true" className="p-20 flex flex-col items-center justify-center space-y-4">
-                        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                        <p className="text-slate-500 font-bold animate-pulse tracking-tight">Validando transacción...</p>
+                    <div role="status" aria-live="polite" aria-atomic="true" className="flex min-h-[28rem] flex-col items-center justify-center gap-6 bg-brand-ink p-10 text-center text-white">
+                        <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-brand-primary/30 bg-brand-primary/10">
+                            <div className="absolute inset-2 animate-spin rounded-full border-2 border-brand-primary/20 border-t-brand-primary"></div>
+                            <svg className="h-6 w-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="m12 3 1.7 6.3L20 11l-6.3 1.7L12 19l-1.7-6.3L4 11l6.3-1.7L12 3Z" /></svg>
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-brand-primary">Tu viaje comienza aquí</p>
+                            <p className="mt-3 text-xl font-black tracking-tight">Validando tu pago...</p>
+                            <p className="mt-2 text-sm leading-6 text-white/60">Estamos confirmando cada detalle de tu transacción.</p>
+                        </div>
                     </div>
                 ) : paymentData ? (
                     <>
-                        {/* Cabecera dinámica */}
-                        <div role="status" aria-live="polite" aria-atomic="true" className={`p-8 text-center ${paymentData.status === 'completed' ? 'bg-green-50' : 'bg-amber-50'}`}>
-                            <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${paymentData.status === 'completed' ? 'bg-green-500 shadow-lg shadow-green-200' : 'bg-amber-500'}`}>
-                                {paymentData.status === 'completed' ? (
-                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                                ) : (
-                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                )}
+                        <div role="status" aria-live="polite" aria-atomic="true" className={`relative overflow-hidden px-7 pb-8 pt-7 text-white ${isCompleted ? 'bg-brand-ink' : 'bg-brand-accent'}`}>
+                            <div className={`absolute -right-16 -top-20 h-52 w-52 rounded-full blur-3xl ${isCompleted ? 'bg-brand-primary/25' : 'bg-white/20'}`} aria-hidden="true"></div>
+                            <div className="relative z-10 flex items-start justify-between gap-4">
+                                <div>
+                                    <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${isCompleted ? 'text-brand-primary' : 'text-white/85'}`}>
+                                        {isCompleted ? 'Pago confirmado' : 'Pago en validación'}
+                                    </p>
+                                    <h3 className="mt-4 max-w-[15rem] text-3xl font-black leading-[0.98] tracking-tight">
+                                        {isCompleted ? 'Tu viaje ya está en ruta.' : 'Tu reserva sigue avanzando.'}
+                                    </h3>
+                                </div>
+                                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${isCompleted ? 'border-brand-primary/30 bg-brand-primary/10 text-brand-primary' : 'border-white/30 bg-white/10 text-white'}`}>
+                                    {isCompleted ? (
+                                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="m5 12 4 4L19 6" /></svg>
+                                    ) : (
+                                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                                    )}
+                                </div>
                             </div>
-                            <h2 className="text-2xl font-black text-slate-900 leading-none">
-                                {paymentData.status === 'completed' ? '¡Pago Exitoso!' : 'Pago Pendiente'}
-                            </h2>
-                            <p className="text-slate-500 text-[10px] mt-2 font-bold uppercase tracking-widest">ID: {paymentData.id}</p>
+
+                            <div className="relative z-10 mt-8 flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.16em] text-white/70">
+                                <span className={`flex h-7 w-7 items-center justify-center rounded-full ${isCompleted ? 'bg-brand-primary text-brand-ink' : 'bg-white text-brand-accent'}`}>01</span>
+                                <span className={`h-px flex-1 ${isCompleted ? 'bg-brand-primary/60' : 'bg-white/50'}`}></span>
+                                <span className={`flex h-7 w-7 items-center justify-center rounded-full border ${isCompleted ? 'border-brand-primary text-brand-primary' : 'border-white text-white'}`}>02</span>
+                                <span className="ml-1">Pago <span className="mx-1 text-white/30">/</span> Viaje</span>
+                            </div>
                         </div>
 
-                        <div className="p-8 space-y-5">
-                            {/* Monto y Autorización */}
-                            <div className="flex justify-between items-end border-b border-slate-100 pb-4">
-                                <div>
-                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Monto Total</p>
-                                    <p className="text-3xl font-black text-slate-900">${paymentData.amount} <span className="text-sm font-medium text-slate-400">{paymentData.currency}</span></p>
+                        <div className="space-y-5 p-7 sm:p-8">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-brand-border">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-brand-muted">Importe total</p>
+                                    <p className="mt-2 text-2xl font-black tracking-tight text-brand-ink">${paymentData.amount} <span className="text-xs font-bold text-brand-muted">{paymentData.currency}</span></p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Autorización</p>
-                                    <p className="text-lg font-mono font-bold text-indigo-600">{paymentData.authorization || '------'}</p>
+                                <div className="rounded-2xl bg-brand-primary/10 p-4">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-brand-primary-hover">Autorización</p>
+                                    <p className="mt-2 truncate font-mono text-sm font-bold text-brand-ink">{paymentData.authorization || '------'}</p>
                                 </div>
                             </div>
 
-                            {/* DETALLES DE TARJETA (Solo con texto) */}
-                            {(paymentData.card || paymentData.method === 'card') && (
-                                <div className="space-y-3">
-                                    <div className="bg-slate-900 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden">
-                                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full"></div>
-                                        <div className="relative z-10 space-y-4">
-                                            <div className="flex justify-between items-center h-6">
-                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">Detalles del método</p>
-                                                {/* Nombre de la marca en texto */}
-                                                <span className="text-xs font-bold italic uppercase tracking-widest text-white/90">
-                                                    {paymentData?.card?.brand || 'Tarjeta'}
-                                                </span>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-lg font-mono tracking-[0.15em]">{paymentData?.card?.card_number || '**** **** **** ****'}</p>
-                                                <div className="flex justify-between items-end">
-                                                    <div>
-                                                        <p className="text-[8px] uppercase text-white/40 font-bold">Titular</p>
-                                                        <p className="text-xs font-bold uppercase truncate max-w-[140px]">{paymentData?.card?.holder_name}</p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-[8px] uppercase text-white/40 font-bold">Banco</p>
-                                                        <p className="text-[10px] font-bold">{paymentData?.card?.bank_name}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div className="relative overflow-hidden rounded-2xl border border-dashed border-brand-primary/40 bg-brand-primary/5 p-5">
+                                <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full border-[12px] border-brand-primary/10" aria-hidden="true"></div>
+                                <p className="relative text-[9px] font-black uppercase tracking-[0.18em] text-brand-primary-hover">Concepto de viaje</p>
+                                <p className="relative mt-2 text-sm font-bold leading-5 text-brand-ink">{paymentData.description || 'Tu próxima experiencia con Tu Destino México'}</p>
+                                <p className="relative mt-3 truncate font-mono text-[9px] font-bold uppercase tracking-wider text-brand-muted">ID {paymentData.id}</p>
+                            </div>
 
-                                    {/* AVISO DE SEGURIDAD */}
-                                    <div className="flex items-start gap-3 px-2 py-1">
-                                        <div className="mt-1 text-green-500">
-                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 4.946-2.597 9.29-6.518 11.771a1.304 1.304 0 01-1.482 0C6.097 16.29 3.5 11.947 3.5 7c0-.68.056-1.35.166-2.001a1 1 0 01.166-2.001zm7.834-1.123v1.123h1.123a1 1 0 110 2h-1.123v1.123a1 1 0 11-2 0V7H6.877a1 1 0 110-2h1.123V3.876a1 1 0 112 0z" clipRule="evenodd" /></svg>
-                                        </div>
-                                        <div className="space-y-0.5">
-                                            <p className="text-[9px] font-bold text-slate-800 uppercase tracking-tight">Seguridad Garantizada</p>
-                                            <p className="text-[9px] text-slate-500 leading-tight">
-                                                En <span className="font-bold">Tu Destino México</span> no almacenamos los datos de tu tarjeta.
-                                                Esta transacción es procesada por <span className="font-bold text-indigo-600">OpenPay México</span>.
-                                            </p>
-                                        </div>
+                            {(paymentData.card || paymentData.method === 'card') && (
+                                <div className="rounded-2xl bg-brand-ink p-5 text-white shadow-lg shadow-brand-ink/10">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-brand-primary">Método utilizado</p>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">{paymentData?.card?.brand || 'Tarjeta'}</span>
                                     </div>
+                                    <p className="mt-5 font-mono text-sm tracking-[0.18em] text-white/90">{paymentData?.card?.card_number || '**** **** **** ****'}</p>
                                 </div>
                             )}
 
-                            {/* Descripción */}
-                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1">Concepto de viaje</p>
-                                <p className="text-xs text-slate-600 font-medium leading-snug">{paymentData.description}</p>
+                            <div className="flex items-start gap-3 px-1 text-brand-muted">
+                                <svg className="mt-0.5 h-4 w-4 shrink-0 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3 5 6v5c0 4.5 2.9 8.5 7 10 4.1-1.5 7-5.5 7-10V6l-7-3Z" /></svg>
+                                <p className="text-[10px] leading-4">Procesado de forma segura por OpenPay México. No almacenamos los datos de tu tarjeta.</p>
                             </div>
 
-                            {/* Botón Final */}
-                            <button
-                                type="button"
-                                onClick={close}
-                                className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg hover:bg-slate-900 transition-all active:scale-95 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2"
-                            >
-                                Listo, ¡a viajar! ✈️
+                            <button type="button" onClick={close} className="w-full rounded-2xl bg-brand-primary px-5 py-4 text-sm font-black text-white shadow-lg shadow-brand-primary/15 transition duration-300 hover:-translate-y-0.5 hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-brand-surface active:translate-y-0">
+                                {isCompleted ? 'Continuar explorando' : 'Entendido'}
                             </button>
                         </div>
                     </>
                 ) : (
-                    <div role="alert" aria-live="assertive" className="p-12 text-center space-y-4">
-                        <p className="text-red-500 font-bold italic">{error || 'No se pudo verificar la transacción.'}</p>
-                        <button type="button" onClick={close} className="text-indigo-600 font-bold border-b border-indigo-600 pb-1">Cerrar ventana</button>
+                    <div role="alert" aria-live="assertive" className="bg-brand-accent/5 p-8 text-center sm:p-10">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-accent/10 text-brand-accent">
+                            <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v4m0 4h.01M10.3 3.8 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0Z" /></svg>
+                        </div>
+                        <p className="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-brand-accent">No pudimos confirmarlo</p>
+                        <h3 className="mt-3 text-2xl font-black tracking-tight text-brand-ink">Necesitamos revisar este pago.</h3>
+                        <p className="mt-3 text-sm leading-6 text-brand-muted">{error || 'No vuelvas a pagar todavía. Contacta a nuestro equipo para revisar tu caso.'}</p>
+                        <button type="button" onClick={close} className="mt-7 w-full rounded-2xl bg-brand-accent px-5 py-4 text-sm font-black text-white transition hover:bg-brand-accent/90 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2">Cerrar ventana</button>
                     </div>
                 )}
             </div>

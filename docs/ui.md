@@ -49,7 +49,7 @@ Renderizados en servidor. Sin estado cliente.
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |
 | `MatchPoll.jsx` | (no determinada) | Encuesta en tiempo real (Firestore onSnapshot) |
-| `WelcomeModal.tsx` | `client:only` | Modal accesible de estado de pago (check vía query param `id`) |
+| `WelcomeModal.tsx` | `client:only` | Modal accesible de estado de pago (check vía query param `id`), con estados de carga, confirmado, pendiente y error; presenta el comprobante con lenguaje visual de pase de abordar |
 | `OfficialAnnouncementModal.jsx` | `client:only` desde `Welcome.astro` | Comunicado oficial público del home, mostrado en cada carga o actualización mientras esté activo |
 | `RecentlyViewed.jsx` | `client:only` | Tarjetas de últimos visitados (localStorage) |
 | `PromoLocker.jsx` | `client:only` | Locker promocional (actualmente comentado) |
