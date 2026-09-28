@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useId, useEffect, useRef, useState } from 'react';
 import { X, Loader2, Upload, FileText, Image, File, CheckCircle2, User, Building, Hash, AlertCircle, FolderOpen, Clock, XCircle } from 'lucide-react';
+import { useAccessibleDialog } from '../../../hooks/useAccessibleDialog';
 
 const TIPOS_LABELS = {
   'pre_confirmacion': 'Pre-confirmación',
@@ -91,6 +92,7 @@ export default function DocumentosModal({ item, user, onClose }) {
   const [tipos, setTipos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const [tipoDoc, setTipoDoc] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -98,6 +100,8 @@ export default function DocumentosModal({ item, user, onClose }) {
   const [isDragging, setIsDragging] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
   const fileInputRef = useRef(null);
+  const titleId = useId();
+  const { dialogRef } = useAccessibleDialog({ open: true, onClose });
 
   const cargar = async () => {
     setCargando(true);
@@ -132,6 +136,7 @@ export default function DocumentosModal({ item, user, onClose }) {
 
   const handleFileSelect = (selectedFile) => {
     setError('');
+    setSuccess('');
     if (!MIME_TYPES.includes(selectedFile.type)) {
       setError('Tipo de archivo no permitido. Usa: JPG, PNG, PDF, DOC, DOCX');
       return;
@@ -157,6 +162,7 @@ export default function DocumentosModal({ item, user, onClose }) {
     }
     setSubiendo(true);
     setError('');
+    setSuccess('');
 
     const fd = new FormData();
     fd.append('tipo', tipo);
@@ -179,6 +185,7 @@ export default function DocumentosModal({ item, user, onClose }) {
 
       setFile(null);
       setDescripcion('');
+      setSuccess('Documento subido correctamente.');
       cargar();
     } catch (err) {
       setError(err.message || 'Error al subir el archivo.');
@@ -193,18 +200,24 @@ export default function DocumentosModal({ item, user, onClose }) {
   return (
     <div
       class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={onClose}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         class="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
         <div class="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
           <div class="flex items-center gap-2">
             <FolderOpen size={20} class="text-purple-600" />
             <div>
-              <h2 class="text-lg font-black text-slate-800 uppercase tracking-tight">Documentos</h2>
+              <h2 id={titleId} class="text-lg font-black text-slate-800 uppercase tracking-tight">Documentos</h2>
               <p class="text-xs text-slate-400">
                 {esGrupo ? 'Grupo' : 'Reserva'} <span class="font-bold">{codigo}</span>
                 {reservationType && <span class="ml-1 font-bold">· {reservationType}</span>}
@@ -212,6 +225,7 @@ export default function DocumentosModal({ item, user, onClose }) {
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
           >
@@ -221,15 +235,15 @@ export default function DocumentosModal({ item, user, onClose }) {
 
         <div class="p-6 overflow-y-auto flex-1 space-y-6">
           {cargando ? (
-            <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+            <div role="status" aria-live="polite" aria-atomic="true" class="flex flex-col items-center justify-center py-16 text-slate-400">
               <Loader2 size={32} class="animate-spin text-purple-500 mb-3" />
               <span class="text-xs font-bold uppercase tracking-widest">Cargando documentos...</span>
             </div>
           ) : error && documentos.length === 0 ? (
-            <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+            <div role="alert" aria-live="assertive" class="flex flex-col items-center justify-center py-16 text-slate-400">
               <AlertCircle size={32} class="text-red-400 mb-3" />
               <p class="text-sm font-medium text-red-600 text-center">{error}</p>
-              <button onClick={cargar} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+              <button type="button" onClick={cargar} class="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
                 Reintentar
               </button>
             </div>
@@ -273,9 +287,16 @@ export default function DocumentosModal({ item, user, onClose }) {
 
               {/* ERROR GLOBAL */}
               {error && (
-                <div class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
+                <div role="alert" aria-live="assertive" class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3">
                   <AlertCircle size={16} />
                   <span>{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div role="status" aria-live="polite" aria-atomic="true" class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl p-3">
+                  <CheckCircle2 size={16} />
+                  <span>{success}</span>
                 </div>
               )}
 
@@ -369,7 +390,7 @@ export default function DocumentosModal({ item, user, onClose }) {
                   class="mt-4 w-full flex items-center justify-center gap-2 bg-purple-800 text-white font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-purple-900 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {subiendo ? (
-                    <><Loader2 size={15} class="animate-spin" /> Subiendo...</>
+                    <span role="status" aria-live="polite" aria-atomic="true" class="flex items-center gap-2"><Loader2 size={15} class="animate-spin" /> Subiendo...</span>
                   ) : (
                     <><Upload size={15} /> Subir documento</>
                   )}

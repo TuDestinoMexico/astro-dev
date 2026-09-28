@@ -8,6 +8,9 @@ import { Plus, X, Save, Edit2, ArrowUp, Loader2, User, Trash2, Move, Eye, EyeOff
 
 export default function TeamView() {
     const [team, setTeam] = useState([]);
+    const [loadingTeam, setLoadingTeam] = useState(true);
+    const [teamError, setTeamError] = useState('');
+    const [retryKey, setRetryKey] = useState(0);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({ nombre: '', puesto: '', foto: '', posicion: 1, activo: true });
@@ -27,13 +30,15 @@ export default function TeamView() {
 
     useEffect(() => {
         fetchTeam();
-    }, []);
+    }, [retryKey]);
 
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery]);
 
     const fetchTeam = async () => {
+        setLoadingTeam(true);
+        setTeamError('');
         try {
             const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
             const querySnapshot = await getDocs(q);
@@ -49,6 +54,9 @@ export default function TeamView() {
             setTeam(items);
         } catch (error) {
             console.error("Error leyendo equipo: ", error);
+            setTeamError('No se pudo cargar el equipo.');
+        } finally {
+            setLoadingTeam(false);
         }
     };
 
@@ -367,8 +375,19 @@ export default function TeamView() {
                     </div>
                 </div>
 
-                {filteredTeam.length === 0 ? (
-                    <p className="text-slate-400 text-sm py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                {loadingTeam ? (
+                    <div role="status" aria-live="polite" aria-atomic="true" className="flex items-center justify-center gap-2 text-slate-400 text-sm py-8">
+                        <Loader2 size={18} className="animate-spin" /> Cargando equipo...
+                    </div>
+                ) : teamError ? (
+                    <div role="alert" aria-live="assertive" className="flex flex-col items-center gap-2 text-sm py-8">
+                        <p className="text-red-600">{teamError}</p>
+                        <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="text-xs font-bold text-slate-500 underline hover:text-slate-700">
+                            Reintentar
+                        </button>
+                    </div>
+                ) : filteredTeam.length === 0 ? (
+                    <p role="status" aria-live="polite" className="text-slate-400 text-sm py-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                         {team.length === 0 ? "No hay miembros registrados todavía." : "No se encontraron miembros que coincidan con la búsqueda."}
                     </p>
                 ) : (

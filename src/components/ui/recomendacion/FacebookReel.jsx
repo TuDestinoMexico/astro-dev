@@ -18,7 +18,7 @@ export default function FacebookReel({ reelId, title }) {
         <div className="relative flex flex-col items-center w-full max-w-[315px] mx-auto group">
 
             {/* Contenedor estilo "Teléfono Móvil" */}
-            <div className="relative overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] bg-slate-100 w-[315px] h-[560px] border-[6px] border-slate-900 transition-transform duration-500 group-hover:-translate-y-2 z-10">
+            <div className="relative overflow-hidden rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] bg-slate-100 w-full max-w-[315px] h-[560px] border-[6px] border-slate-900 transition-transform duration-500 group-hover:-translate-y-2 z-10">
 
                 {/* Spinner de Carga (Se muestra mientras Facebook responde) */}
                 {isLoading && (
@@ -31,14 +31,14 @@ export default function FacebookReel({ reelId, title }) {
                 {/* El Iframe de Facebook */}
                 <iframe
                     src={iframeSrc}
-                    width="315"
+                    width="100%"
                     height="560"
                     style={{ border: 'none', overflow: 'hidden' }}
                     scrolling="no"
                     frameBorder="0"
                     allowFullScreen={true}
                     allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                    className="absolute inset-0 z-10 bg-transparent"
+                    className="absolute inset-0 z-10 h-full w-full bg-transparent"
                     onLoad={() => setIsLoading(false)} // Quita el spinner cuando termina de cargar
                 ></iframe>
             </div>

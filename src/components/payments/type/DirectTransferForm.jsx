@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Check } from 'lucide-react';
 
 const bancos = [
     {
@@ -53,7 +54,7 @@ export default function DirectTransferForm() {
                 {bancos.map((banco) => (
                     <div
                         key={banco.key}
-                        className="bg-gray-50 border border-gray-100 p-5 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:shadow-md"
+                        className="bg-gray-50 border border-brand-border p-5 rounded-card-lg flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:shadow-md"
                     >
                         {/* Logo y Info */}
                         <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
@@ -67,7 +68,7 @@ export default function DirectTransferForm() {
                         {/* Botón de copiar */}
                         <button
                             onClick={() => copyToClipboard(banco.clabe, banco.key)}
-                            className={`whitespace-nowrap px-6 py-3 rounded-xl font-bold text-xs transition-all transform active:scale-95 ${
+                            className={`whitespace-nowrap px-6 py-3 rounded-card font-bold text-xs transition-all transform active:scale-95 ${
                                 copied === banco.key
                                     ? 'bg-green-500 text-white'
                                     : 'bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-200'
@@ -75,7 +76,8 @@ export default function DirectTransferForm() {
                         >
                             {copied === banco.key ? (
                                 <span className="flex items-center gap-1">
-                                    ¡Copiado! ✓
+                                    <Check aria-hidden="true" size={14} />
+                                    ¡Copiado!
                                 </span>
                             ) : 'Copiar CLABE'}
                         </button>
@@ -84,7 +86,7 @@ export default function DirectTransferForm() {
             </div>
 
             {/* Instrucción Adicional */}
-            <div className="mt-8 p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl text-center">
+            <div className="mt-8 p-4 bg-indigo-50/50 border border-indigo-100 rounded-card text-center">
                 <p className="text-xs text-indigo-900 leading-relaxed">
                     <strong>Nota importante:</strong> Una vez realizada la transferencia, favor de enviar tu comprobante de pago a nuestro WhatsApp de atención.
                 </p>

@@ -1,76 +1,114 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useId, useState, useRef } from 'react';
 import gsap from 'gsap';
+import { auth } from '../../lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
 const PaymentStatusModal = () => {
     const [paymentData, setPaymentData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [isOpen, setIsOpen] = useState(false);
 
     const overlayRef = useRef(null);
-    const modalRef = useRef(null);
 
     useEffect(() => {
-        const fetchPaymentStatus = async () => {
-            const params = new URLSearchParams(window.location.search);
-            const transactionId = params.get('id');
+        // Openpay appends ?id=... to the configured redirect URL.
+        const params = new URLSearchParams(window.location.search);
+        const paymentId = params.get('id') || params.get('paymentId');
+        if (!paymentId) return undefined;
 
-            if (transactionId) {
-                setLoading(true);
-                setIsOpen(true);
-                try {
-                    const response = await fetch(`/api/openpay-check?id=${transactionId}`);
-                    const data = await response.json();
-                    if (response.ok) {
-                        setPaymentData(data);
-                    }
-                } catch (error) {
-                    console.error("Error de red", error);
-                } finally {
-                    setLoading(false);
+        setLoading(true);
+        setError('');
+        setIsOpen(true);
+        let requested = false;
+
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (requested) return;
+            requested = true;
+
+            try {
+                if (!user) {
+                    const returnTo = `/?id=${paymentId}`;
+                    window.location.href = `/cliente/login?returnTo=${encodeURIComponent(returnTo)}`;
+                    return;
                 }
+                const token = await user.getIdToken();
+                const response = await fetch(`/api/openpay-check?paymentId=${encodeURIComponent(paymentId)}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setPaymentData(data);
+                } else {
+                    setError(data.message || 'No se pudo verificar la transacción.');
+                }
+            } catch (error) {
+                console.error('Error consultando el pago:', error);
+                setError('No se pudo verificar la transacción. Intenta nuevamente.');
+            } finally {
+                setLoading(false);
             }
-        };
-        fetchPaymentStatus();
+        });
+
+        return () => unsubscribe();
     }, []);
 
-    useEffect(() => {
-        if (isOpen && modalRef.current) {
-            gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 });
-            gsap.fromTo(modalRef.current,
-                { y: 100, opacity: 0, scale: 0.8 },
-                { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "elastic.out(1, 0.8)" }
-            );
-        }
-    }, [isOpen, loading]);
-
-    const close = () => {
+    function close() {
         gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
-        gsap.to(modalRef.current, {
+        gsap.to(dialogRef.current, {
             y: 50, opacity: 0, scale: 0.9, duration: 0.3,
             onComplete: () => {
                 setIsOpen(false);
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
-    };
+    }
+
+    const titleId = useId();
+    const { dialogRef } = useAccessibleDialog({ open: isOpen, onClose: close });
+
+    useEffect(() => {
+        if (isOpen && dialogRef.current) {
+            gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 });
+            gsap.fromTo(dialogRef.current,
+                { y: 100, opacity: 0, scale: 0.8 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "elastic.out(1, 0.8)" }
+            );
+        }
+    }, [isOpen, loading]);
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center p-4">
-            <div ref={overlayRef} onClick={close} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"></div>
+            <div
+                ref={overlayRef}
+                onClick={(event) => {
+                    if (event.target === event.currentTarget) close();
+                }}
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
+            ></div>
 
-            <div ref={modalRef} className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white font-sans">
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white font-sans"
+            >
+                <h2 id={titleId} className="sr-only">Estado del pago</h2>
 
                 {loading ? (
-                    <div className="p-20 flex flex-col items-center justify-center space-y-4">
+                    <div role="status" aria-live="polite" aria-atomic="true" className="p-20 flex flex-col items-center justify-center space-y-4">
                         <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
                         <p className="text-slate-500 font-bold animate-pulse tracking-tight">Validando transacción...</p>
                     </div>
                 ) : paymentData ? (
                     <>
                         {/* Cabecera dinámica */}
-                        <div className={`p-8 text-center ${paymentData.status === 'completed' ? 'bg-green-50' : 'bg-amber-50'}`}>
+                        <div role="status" aria-live="polite" aria-atomic="true" className={`p-8 text-center ${paymentData.status === 'completed' ? 'bg-green-50' : 'bg-amber-50'}`}>
                             <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${paymentData.status === 'completed' ? 'bg-green-500 shadow-lg shadow-green-200' : 'bg-amber-500'}`}>
                                 {paymentData.status === 'completed' ? (
                                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
@@ -150,6 +188,7 @@ const PaymentStatusModal = () => {
 
                             {/* Botón Final */}
                             <button
+                                type="button"
                                 onClick={close}
                                 className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg hover:bg-slate-900 transition-all active:scale-95 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2"
                             >
@@ -158,9 +197,9 @@ const PaymentStatusModal = () => {
                         </div>
                     </>
                 ) : (
-                    <div className="p-12 text-center space-y-4">
-                        <p className="text-red-500 font-bold italic">No se pudo verificar la transacción.</p>
-                        <button onClick={close} className="text-indigo-600 font-bold border-b border-indigo-600 pb-1">Cerrar ventana</button>
+                    <div role="alert" aria-live="assertive" className="p-12 text-center space-y-4">
+                        <p className="text-red-500 font-bold italic">{error || 'No se pudo verificar la transacción.'}</p>
+                        <button type="button" onClick={close} className="text-indigo-600 font-bold border-b border-indigo-600 pb-1">Cerrar ventana</button>
                     </div>
                 )}
             </div>

@@ -9,6 +9,9 @@ export default function MediaManager() {
     const [folders, setFolders] = useState([]);
     const [files, setFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [actionError, setActionError] = useState('');
+    const [retryKey, setRetryKey] = useState(0);
 
     // Estados para subidas de archivos
     const [isUploading, setIsUploading] = useState(false);
@@ -24,10 +27,11 @@ export default function MediaManager() {
 
     useEffect(() => {
         fetchStorageItems();
-    }, [currentPath]);
+    }, [currentPath, retryKey]);
 
     const fetchStorageItems = async () => {
         setIsLoading(true);
+        setError('');
         try {
             const pathString = getPathString(currentPath);
             const storageRef = ref(storage, pathString);
@@ -52,6 +56,7 @@ export default function MediaManager() {
             setFiles(fileList);
         } catch (error) {
             console.error("Error listando archivos de Firebase Storage:", error);
+            setError('No se pudo cargar esta carpeta.');
         } finally {
             setIsLoading(false);
         }
@@ -93,6 +98,7 @@ export default function MediaManager() {
         const uploadTask = uploadBytesResumable(fileRef, file);
 
         setIsUploading(true);
+        setActionError('');
 
         uploadTask.on('state_changed',
             (snapshot) => {
@@ -101,6 +107,7 @@ export default function MediaManager() {
             },
             (error) => {
                 console.error("Error al subir:", error);
+                setActionError('No se pudo subir la imagen.');
                 setIsUploading(false);
             },
             async () => {
@@ -122,7 +129,7 @@ export default function MediaManager() {
             await fetchStorageItems(); // Recargar vista
         } catch (error) {
             console.error("Error borrando objeto:", error);
-            alert("No se pudo borrar el archivo.");
+            setActionError("No se pudo borrar el archivo.");
         }
     };
 
@@ -199,8 +206,10 @@ export default function MediaManager() {
             </div>
 
             {/* PROGRESS BAR DE SUBIDAS */}
-            {isUploading && (
-                <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-inner">
+             {actionError && <div role="alert" aria-live="assertive" className="text-sm text-red-600">{actionError}</div>}
+
+             {isUploading && (
+                <div role="status" aria-live="polite" aria-atomic="true" className="bg-white border border-slate-100 p-4 rounded-2xl shadow-inner">
                     <div className="flex justify-between text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1.5">
                         <span>Subiendo archivo al servidor...</span>
                         <span>{Math.round(uploadProgress)}%</span>
@@ -213,15 +222,22 @@ export default function MediaManager() {
 
             {/* GRILLA EXPLORADORA DE ARCHIVOS */}
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-6 md:p-8 min-h-[350px] relative">
-                {isLoading ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-[2rem] z-10">
+                 {isLoading ? (
+                    <div role="status" aria-live="polite" aria-atomic="true" className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-[2rem] z-10">
                         <Loader2 size={32} className="text-indigo-600 animate-spin mb-2" />
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sincronizando la nube...</span>
                     </div>
-                ) : null}
+                 ) : null}
 
-                {folders.length === 0 && files.length === 0 && !isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400 text-center">
+                 {error && !isLoading ? (
+                     <div role="alert" aria-live="assertive" className="flex flex-col items-center justify-center py-16 text-center">
+                         <p className="text-sm text-red-600">{error}</p>
+                         <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+                             Reintentar
+                         </button>
+                     </div>
+                 ) : folders.length === 0 && files.length === 0 && !isLoading ? (
+                     <div role="status" aria-live="polite" className="flex flex-col items-center justify-center py-16 text-slate-400 text-center">
                         <Folder size={48} className="text-slate-200 mb-2" />
                         <p className="text-sm font-medium">Esta carpeta está vacía.</p>
                         <p className="text-[11px] text-slate-400 mt-0.5">Sube una imagen o crea una subcarpeta arriba.</p>

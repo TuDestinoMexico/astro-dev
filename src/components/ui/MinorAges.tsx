@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface MinorAgesProps {
     count: number;
@@ -7,6 +7,8 @@ interface MinorAgesProps {
 }
 
 export const MinorAges: React.FC<MinorAgesProps> = ({ count, ages, onChange }) => {
+    const fieldPrefix = useId();
+
     if (count <= 0) return null;
 
     return (
@@ -24,16 +26,20 @@ export const MinorAges: React.FC<MinorAgesProps> = ({ count, ages, onChange }) =
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {Array.from({ length: count }).map((_, index) => (
                         <div key={index} className="space-y-1">
-                            <label className="block text-[10px] font-black text-slate-500 ml-1 uppercase">
+                            <label htmlFor={`${fieldPrefix}-minor-${index}`} className="block text-[10px] font-black text-slate-500 ml-1 uppercase">
                                 Niño {index + 1}
                             </label>
                             <input
+                                id={`${fieldPrefix}-minor-${index}`}
                                 type="number"
                                 min="0"
                                 max="17"
+                                step="1"
+                                inputMode="numeric"
                                 placeholder="0"
                                 value={ages[index] || ''}
                                 onChange={(e) => onChange(index, e.target.value)}
+                                aria-invalid={Boolean(ages[index] && (!Number.isInteger(Number(ages[index])) || Number(ages[index]) < 0 || Number(ages[index]) > 17))}
                                 className="w-full h-12 px-4 bg-white border-2 border-transparent rounded-2xl text-sm font-bold transition-all outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-100 text-slate-700 shadow-sm"
                             />
                         </div>

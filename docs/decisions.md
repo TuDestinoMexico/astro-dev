@@ -40,7 +40,7 @@ En lugar de backend o cookies, se usa `localStorage` con key `tdmx_recently_view
 ## Backend
 
 ### Openpay con proxy server-side
-Los endpoint de Openpay (`/api/openpay-cargo`, `/api/openpay-check`) actúan como proxy para no exponer la llave privada (`OPENPAY_PRIVATE_KEY`) al cliente. El cliente llama a endpoints propios, que internamente hacen fetch a Openpay con Basic Auth.
+Los endpoints de Openpay (`/api/openpay-cargo`, `/api/openpay-check`) actúan como proxy para no exponer la llave privada (`OPENPAY_PRIVATE_KEY`) al cliente. El cliente llama a endpoints propios, que internamente hacen fetch a Openpay con Basic Auth. `/api/openpay-webhook` recibe eventos server-side y se autentica con un token secreto separado por entorno.
 
 ### Firestore con force long polling
 En `src/lib/firebase.js` se configura `experimentalForceLongPolling: true` y `useFetchStreams: false` para garantizar compatibilidad con el runtime Node.js de Astro (Firestore usa streams HTTP/2 que no están disponibles en Node estándar).
@@ -68,8 +68,8 @@ Firestore es schemaless. No hay migraciones, validación de esquemas ni tipado e
 ### API key de Google Maps hardcodeada
 `HotelTabs.tsx` contiene `apiKey = "AIzaSyCXKmnPdBL8H7egOAKRnfdSYDc2H0fAI5E"` directamente en el código fuente del componente. Esto expone la key en el bundle del cliente.
 
-### Sin protección server-side en rutas API
-Los endpoints `/api/openpay-cargo` y `/api/openpay-check` no tienen autenticación ni validación de origen (CORS). Cualquier cliente puede llamarlos.
+### Protección server-side en endpoints Openpay
+`/api/openpay-cargo` y `/api/openpay-check` verifican ID tokens de Firebase server-side. El historial de pagos se limita al UID autenticado y los cargos se protegen con límites e idempotencia. El webhook no tiene usuario interactivo, por lo que usa `OPENPAY_WEBHOOK_TOKEN`, busca únicamente cargos ya registrados y no crea documentos nuevos. La validación de origen CORS no sustituye la autenticación y no se usa como control principal.
 
 ---
 

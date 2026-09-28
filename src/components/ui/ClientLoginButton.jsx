@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import { auth } from '../../lib/firebase';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { X, Loader2 } from 'lucide-react';
+import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
 export default function ClientLoginButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const titleId = useId();
+  const { dialogRef } = useAccessibleDialog({
+    open: isOpen,
+    onClose: () => setIsOpen(false),
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -61,9 +67,22 @@ export default function ClientLoginButton() {
       </button>
 
       {isOpen && (
-        <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative">
+        <div
+          class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsOpen(false);
+          }}
+        >
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex={-1}
+            class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative"
+          >
             <button
+              type="button"
               onClick={() => setIsOpen(false)}
               class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 rounded-full hover:bg-slate-100 transition-colors"
             >
@@ -76,7 +95,7 @@ export default function ClientLoginButton() {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h2 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Área de Clientes</h2>
+              <h2 id={titleId} class="text-2xl font-black text-slate-900 uppercase tracking-tight">Área de Clientes</h2>
               <p class="text-sm text-slate-500 mt-1">Inicia sesión para gestionar tus reservas</p>
             </div>
 
@@ -87,6 +106,7 @@ export default function ClientLoginButton() {
             )}
 
             <button
+              type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
               class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm disabled:opacity-50"

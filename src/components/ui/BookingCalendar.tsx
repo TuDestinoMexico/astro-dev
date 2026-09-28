@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useId, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -8,11 +8,19 @@ import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/style.css';
 import { CalendarDays, User, Send, X } from 'lucide-react';
 import { MinorAges } from './MinorAges';
+import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
 interface Props {
     hotelName: string;
     isSingleDate?: boolean; // Opcional para no romper Hoteles
 }
+
+type BookingFormData = {
+    nombre: string;
+    adultos: number | '';
+    menores: number;
+    edadesMenores: string[];
+};
 
 const calendarClassNames = {
     months: 'flex flex-col md:flex-row gap-6 justify-center',
@@ -45,10 +53,12 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     const [checkOut, setCheckOut] = useState<Date | null>(null);
     const [range, setRange] = useState<DateRange | undefined>();
     const [isClosing, setIsClosing] = useState(false);
-    const [formData, setFormData] = useState({ nombre: '', adultos: 2, menores: 0, edadesMenores: [] as string[] });
+    const [formData, setFormData] = useState<BookingFormData>({ nombre: '', adultos: 2, menores: 0, edadesMenores: [] });
+    const [validationMessage, setValidationMessage] = useState('');
 
+    const titleId = useId();
+    const fieldPrefix = useId();
     const overlayRef = useRef<HTMLDivElement>(null);
-    const modalRef = useRef<HTMLDivElement>(null);
     const summaryRef = useRef<HTMLDivElement>(null);
     const calendarViewportRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
@@ -65,6 +75,13 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
         setFormData({ ...formData, edadesMenores: nuevasEdades });
     };
 
+    const isValidMinorAge = (edad: string) => {
+        if (edad.trim() === '') return false;
+
+        const parsed = Number(edad);
+        return Number.isInteger(parsed) && parsed >= 0 && parsed <= 17;
+    };
+
     const handleMenoresChange = (cantidad: number) => {
         const num = Math.max(0, cantidad);
         // Ajustamos el arreglo de edades para que coincida con la cantidad
@@ -77,6 +94,13 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
             nuevasEdades.splice(num);
         }
         setFormData({ ...formData, menores: num, edadesMenores: nuevasEdades });
+    };
+
+    const normalizeAdultos = (value: string): number | '' => {
+        if (value.trim() === '') return '';
+
+        const parsed = Number(value);
+        return Number.isInteger(parsed) && parsed >= 1 ? parsed : '';
     };
 
     const closeCalendar = () => {
@@ -93,7 +117,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
         });
 
         timeline.to(overlayRef.current, { opacity: 0, duration: 0.2 }, 0);
-        timeline.to(modalRef.current, {
+        timeline.to(dialogRef.current, {
             y: isMobile ? '100%' : 18,
             scale: isMobile ? 1 : 0.98,
             opacity: 0,
@@ -101,40 +125,26 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
         }, 0);
     };
 
-    useEffect(() => {
-        if (!isCalendarOpen) return;
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') closeCalendar();
-        };
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        document.addEventListener('keydown', handleEscape);
-
-        return () => {
-            document.body.style.overflow = previousOverflow;
-            document.removeEventListener('keydown', handleEscape);
-        };
-    }, [isCalendarOpen]);
+    const { dialogRef } = useAccessibleDialog({ open: isCalendarOpen, onClose: closeCalendar });
 
     useGSAP(() => {
-        if (!isCalendarOpen || !modalRef.current) return;
+        if (!isCalendarOpen || !dialogRef.current) return;
 
         const media = gsap.matchMedia();
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         gsap.set(overlayRef.current, { opacity: 0 });
-        gsap.set(modalRef.current, { opacity: 0 });
+        gsap.set(dialogRef.current, { opacity: 0 });
 
         if (reducedMotion) {
-            gsap.set([overlayRef.current, modalRef.current], { clearProps: 'all', opacity: 1, y: 0, scale: 1 });
+            gsap.set([overlayRef.current, dialogRef.current], { clearProps: 'all', opacity: 1, y: 0, scale: 1 });
         } else {
             gsap.to(overlayRef.current, { opacity: 1, duration: 0.3, ease: 'power2.out' });
             media.add('(max-width: 639px)', () => {
-                gsap.fromTo(modalRef.current, { y: '100%', opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power3.out' });
+                gsap.fromTo(dialogRef.current, { y: '100%', opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power3.out' });
             });
             media.add('(min-width: 640px)', () => {
-                gsap.fromTo(modalRef.current, { y: 24, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.45, ease: 'power3.out' });
+                gsap.fromTo(dialogRef.current, { y: 24, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.45, ease: 'power3.out' });
             });
             gsap.fromTo(
                 [summaryRef.current, calendarViewportRef.current, footerRef.current],
@@ -144,7 +154,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
         }
 
         return () => media.revert();
-    }, { dependencies: [isCalendarOpen], scope: modalRef });
+    }, { dependencies: [isCalendarOpen], scope: dialogRef });
 
     useGSAP(() => {
         if (!isCalendarOpen || !calendarViewportRef.current) return;
@@ -203,6 +213,25 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     const canGoPrevious = isAfter(currentMonth, firstMonth);
     const canGoNext = isBefore(currentMonth, lastAllowedMonth);
     const canApplyDates = isSingleDate ? Boolean(checkIn) : Boolean(checkIn && checkOut);
+    const hasValidAdults = typeof formData.adultos === 'number' && Number.isInteger(formData.adultos) && formData.adultos >= 1;
+    const hasValidChildren = Number.isInteger(formData.menores) && formData.menores >= 0;
+    const hasValidChildrenAges = formData.menores === 0 || (
+        formData.edadesMenores.length === formData.menores &&
+        formData.edadesMenores.every(isValidMinorAge)
+    );
+    const hasOutOfRangeMinorAge = formData.edadesMenores.some((edad) => {
+        if (edad.trim() === '') return false;
+
+        const parsed = Number(edad);
+        return !Number.isInteger(parsed) || parsed < 0 || parsed > 17;
+    });
+    const canSendWhatsApp = Boolean(
+        formData.nombre.trim() &&
+        canApplyDates &&
+        hasValidAdults &&
+        hasValidChildren &&
+        hasValidChildrenAges
+    );
 
     const openCalendar = () => {
         if (checkIn) setCurrentMonth(startOfMonth(checkIn));
@@ -215,9 +244,12 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
     };
 
     const sendWhatsApp = () => {
-        // Validación ajustada
-        const isDatesSelected = isSingleDate ? checkIn : (checkIn && checkOut);
-        if (!isDatesSelected || !formData.nombre) return alert("⚠️ Completa tus datos y fecha.");
+        if (!canSendWhatsApp) {
+            setValidationMessage('Completa tu nombre, las fechas, el número de adultos y las edades de los menores antes de continuar.');
+            return;
+        }
+
+        setValidationMessage('');
 
         const noches = checkOut ? differenceInDays(checkOut, checkIn!) : 0;
 
@@ -232,7 +264,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
             `──────────────────────────\n` +
             `👤 *Nombre:* ${formData.nombre}\n` +
             `${infoFechas}\n` +
-            `👥 *Pax:* ${formData.adultos} Adultos, ${formData.menores} Menores` +
+            `👥 *Pax:* ${Number(formData.adultos)} Adultos, ${formData.menores} Menores` +
             (formData.menores > 0 ? `\n👶 *Edades:* ${formData.edadesMenores.join(', ')}` : '')
         );
 
@@ -271,14 +303,14 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
                         if (event.target === event.currentTarget) closeCalendar();
                     }}
                 >
-                    <div ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="booking-calendar-title" className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-2xl sm:max-h-[min(860px,92vh)] sm:rounded-[2.25rem]">
+                    <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-2xl sm:max-h-[min(860px,92vh)] sm:rounded-[2.25rem]">
                         <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-slate-50/90 px-5 py-5 sm:px-8 sm:py-6">
                             <div className="flex items-start gap-3">
                                 <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
                                     <CalendarDays size={19} />
                                 </div>
                                 <div>
-                                    <h2 id="booking-calendar-title" className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
+                                    <h2 id={titleId} className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
                                         {isSingleDate ? 'Selecciona la fecha' : 'Selecciona tu estancia'}
                                     </h2>
                                     <p className="mt-1 text-xs font-medium text-slate-500 sm:text-sm">
@@ -348,7 +380,9 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
             <div className="space-y-3">
                 <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                    <label htmlFor={`${fieldPrefix}-name`} className="sr-only">Nombre completo</label>
                     <input
+                        id={`${fieldPrefix}-name`}
                         type="text" placeholder="Nombre completo"
                         className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-50 rounded-2xl text-sm font-bold focus:border-indigo-500 outline-none transition-all shadow-sm"
                         onChange={e => setFormData({...formData, nombre: e.target.value})}
@@ -357,16 +391,18 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
 
                 <div className="grid grid-cols-2 gap-3">
                     <div className="relative bg-white border-2 border-slate-50 rounded-2xl p-3 shadow-sm">
-                        <p className="text-[9px] font-black text-slate-400 uppercase">Adultos</p>
+                        <label htmlFor={`${fieldPrefix}-adults`} className="block text-[9px] font-black text-slate-400 uppercase">Adultos</label>
                         <input
-                            type="number" min="1" value={formData.adultos}
-                            onChange={e => setFormData({...formData, adultos: parseInt(e.target.value)})}
+                            id={`${fieldPrefix}-adults`}
+                            type="number" min="1" step="1" inputMode="numeric" value={formData.adultos}
+                            onChange={e => setFormData({...formData, adultos: normalizeAdultos(e.target.value)})}
                             className="w-full text-sm font-bold outline-none bg-transparent"
                         />
                     </div>
                     <div className="relative bg-white border-2 border-slate-50 rounded-2xl p-3 shadow-sm">
-                        <p className="text-[9px] font-black text-slate-400 uppercase">Menores</p>
+                        <label htmlFor={`${fieldPrefix}-children`} className="block text-[9px] font-black text-slate-400 uppercase">Menores</label>
                         <input
+                            id={`${fieldPrefix}-children`}
                             type="number" min="0" value={formData.menores}
                             onChange={e => handleMenoresChange(parseInt(e.target.value) || 0)}
                             className="w-full text-sm font-bold outline-none bg-transparent"
@@ -379,9 +415,24 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
                     />
                 </div>
 
+                {hasOutOfRangeMinorAge && (
+                    <p role="alert" aria-live="assertive" className="text-sm font-semibold text-red-600">
+                        Las edades de los menores deben estar entre 0 y 17 años.
+                    </p>
+                )}
+
+                {validationMessage && (
+                    <p role="alert" aria-live="assertive" className="text-sm font-semibold text-red-600">
+                        {validationMessage}
+                    </p>
+                )}
+
                 <button
+                    type="button"
                     onClick={sendWhatsApp}
-                    className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl shadow-green-100 transition-all active:scale-95 group"
+                    disabled={!canSendWhatsApp}
+                    aria-disabled={!canSendWhatsApp}
+                    className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl shadow-green-100 transition-all active:scale-95 group disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     <Send size={18} className="group-hover:translate-x-1" />
                     Reservar por WhatsApp

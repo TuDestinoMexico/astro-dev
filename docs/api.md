@@ -4,7 +4,7 @@
 
 ## Resumen
 
-El proyecto expone cinco endpoints API server-side (proxy a Openpay y proxys a CRM de reservas y grupos) y consume una API REST externa para el catálogo de productos. También genera un robots.txt dinámico.
+El proyecto expone endpoints API server-side (proxy y webhook de Openpay, además de proxys a CRM de reservas y grupos) y consume una API REST externa para el catálogo de productos. También genera un robots.txt dinámico.
 
 ---
 
@@ -16,12 +16,31 @@ Crea un cargo en Openpay.
 
 - **Archivo:** `src/pages/api/openpay-cargo.ts`
 - **Método:** POST
-- **Body:** JSON — cualquier payload válido para Openpay charges API
-- **Respuesta:** JSON con la respuesta de Openpay (status code espejeado)
-- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`
-- **URL destino:** `https://api.openpay.mx/v1/{merchantId}/charges`
-- **Auth:** Basic Auth con `OPENPAY_PRIVATE_KEY`
-- **Error:** Retorna `{ error: 'Error interno del servidor' }` con status 500
+- **Autenticación:** Bearer ID token de Firebase; requiere email verificado.
+- **Protección:** rate limit distribuido por UID/IP e `Idempotency-Key` obligatorio.
+- **Body permitido:**
+  ```json
+  {
+    "method": "card|store|bank_account",
+    "amount": "number con máximo dos decimales",
+    "description": "string",
+    "customer": {
+      "name": "string",
+      "last_name": "string",
+      "phone_number": "string"
+    }
+  }
+  ```
+- **Validaciones server-side:** método permitido, importe entre `OPENPAY_MIN_AMOUNT` y `OPENPAY_MAX_AMOUNT`, datos básicos del cliente, body JSON y tamaño máximo.
+- **Campos controlados por servidor:** email desde el token Firebase, `confirm`, `send_email` y `redirect_url`.
+- **Respuesta éxito:** `{ success: true, id, status, payment_method }` con solo los campos necesarios del voucher Openpay.
+- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`, `OPENPAY_API_BASE_URL`, `OPENPAY_MIN_AMOUNT`, `OPENPAY_MAX_AMOUNT`, `SITE_URL` y credenciales `FIREBASE_ADMIN_*`.
+- **URL destino:** `{OPENPAY_API_BASE_URL}/v1/{merchantId}/charges`
+- **Auth externa:** Basic Auth con `OPENPAY_PRIVATE_KEY`; nunca se expone al cliente.
+- **Errores:** `400` payload inválido, `401` sesión ausente o inválida, `403` email no verificado, `409` idempotencia en proceso, `413` body demasiado grande, `415` content type incorrecto, `429` rate limit, `502` respuesta Openpay inválida, `503` protección no disponible y `500` configuración/error interno.
+- **Headers requeridos:** `Authorization: Bearer <id-token>` e `Idempotency-Key` de 8 a 128 caracteres seguros.
+
+Los formularios de pago adjuntan el Bearer token y una `Idempotency-Key` generada en cliente. La clave se conserva durante reintentos y se limpia después de una respuesta exitosa. Los cargos exitosos se guardan server-side en `users/{uid}/pagos/{paymentId}`.
 
 ### `GET /api/openpay-check`
 
@@ -29,24 +48,42 @@ Verifica el estado de una transacción Openpay.
 
 - **Archivo:** `src/pages/api/openpay-check.ts`
 - **Método:** GET
-- **Query params:** `id` (string, requerido) — Transaction ID
-- **Respuesta:** JSON con la respuesta de Openpay
-- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`
-- **URL destino:** `https://api.openpay.mx/v1/{merchantId}/charges/{transactionId}`
-- **Auth:** Basic Auth con `OPENPAY_PRIVATE_KEY`
-- **Error 400:** `{ error: 'Falta el transactionId' }`
-- **Error 500:** `{ error: 'Error interno del servidor' }`
+- **Autenticación:** Bearer ID token de Firebase; requiere email verificado.
+- **Query params:** `paymentId` (string, requerido) — ID del documento en `users/{uid}/pagos`.
+- **Respuesta:** respuesta normalizada del cargo, limitada a los campos necesarios para mostrar su estado.
+- **Variables de entorno:** `OPENPAY_MERCHANT_ID`, `OPENPAY_PRIVATE_KEY`, `OPENPAY_API_BASE_URL` y credenciales `FIREBASE_ADMIN_*`.
+- **Flujo:** primero verifica que el `paymentId` pertenezca al usuario autenticado; después obtiene el `openpayChargeId` guardado y consulta Openpay.
+- **Actualización:** sincroniza el estado del documento de historial.
+- **Redirect Openpay:** Openpay puede regresar a `SITE_URL?id={openpayChargeId}`. `WelcomeModal` acepta ese parámetro, lo usa como `paymentId` y conserva el retorno al login sin permitir URLs externas.
+- **Errores:** `400` paymentId inválido, `401` sesión ausente o inválida, `403` email no verificado, `404` pago no encontrado, `502` error de Openpay y `500` error interno.
+
+### `POST /api/openpay-webhook`
+
+Recibe notificaciones de estado de cargos desde Openpay.
+
+- **Archivo:** `src/pages/api/openpay-webhook.ts`
+- **Método:** POST
+- **Autenticación:** token secreto server-side mediante `X-Openpay-Webhook-Token` o el query param `token` configurado en la URL del webhook.
+- **Body:** JSON de Openpay; acepta el cargo en `transaction`, `charge` o `data`.
+- **Eventos:** creación, éxito/completado, rechazo, fallo, cancelación, expiración y reembolso.
+- **Flujo:** extrae el ID del cargo, busca `users/{uid}/pagos` por `openpayChargeId` mediante `collectionGroup` y actualiza únicamente el documento encontrado.
+- **Idempotencia:** las notificaciones repetidas actualizan el mismo documento y no crean pagos nuevos. Los cargos desconocidos se confirman sin exponer información.
+- **Variables de entorno:** `OPENPAY_WEBHOOK_TOKEN` y credenciales `FIREBASE_ADMIN_*`.
+- **Configuración Openpay:** registrar `https://tu-dominio/api/openpay-webhook?token=OPENPAY_WEBHOOK_TOKEN` en Sandbox y Production. No usar el mismo token entre entornos.
+- **Errores:** `400` payload inválido, `401` token ausente/incorrecto, `413` body demasiado grande, `415` content type incorrecto y `500` error interno.
 
 ### `POST /api/crm-consultar`
 
-Proxy a la API CRM de Tu Destino Mexico. Consulta una reserva por CT y correo.
+Proxy autenticado a la API CRM de Tu Destino Mexico. Consulta una reserva por CT y correo durante la vinculación, o el CT ya vinculado durante la consulta de detalle.
 
 - **Archivo:** `src/pages/api/crm-consultar.ts`
 - **Método:** POST
+- **Autenticación:** `Authorization: Bearer <Firebase ID token>` con correo verificado.
 - **Body:**
   ```json
   { "ct": "string (required)", "email": "string (email, required)" }
   ```
+- **Detalle:** `{ "ct": "string (required)", "detail": true }`. El servidor verifica que el CT pertenezca al usuario autenticado y obtiene el correo vinculado desde Firestore.
 - **Respuesta éxito:** `{ "success": true, "data": { ...datos reserva } }`
 - **Respuesta error:** `{ "success": false, "message": "..." }`
 - **URL destino:** `{API_CRM_URL}/api/reservas/consultar`
@@ -56,14 +93,16 @@ Proxy a la API CRM de Tu Destino Mexico. Consulta una reserva por CT y correo.
 
 ### `POST /api/crm-grupo-consultar`
 
-Proxy a la API CRM de Tu Destino Mexico. Consulta un grupo por GB y correo (validado contra el cliente titular del grupo).
+Proxy autenticado a la API CRM de Tu Destino Mexico. Consulta un grupo por GB y correo durante la vinculación, o el GB ya vinculado durante la consulta de detalle.
 
 - **Archivo:** `src/pages/api/crm-grupo-consultar.ts`
 - **Método:** POST
+- **Autenticación:** `Authorization: Bearer <Firebase ID token>` con correo verificado.
 - **Body:**
   ```json
   { "gb": "string (required)", "email": "string (email, required)" }
   ```
+- **Detalle:** `{ "gb": "string (required)", "detail": true }`. El servidor verifica que el GB pertenezca al usuario autenticado y obtiene el correo vinculado desde Firestore.
 - **Respuesta éxito:** `{ "success": true, "data": { ...datos grupo } }`
 - **Respuesta error:** `{ "success": false, "message": "..." }`
 - **URL destino:** `{API_CRM_URL}/api/grupos/consultar`
@@ -292,6 +331,25 @@ Las respuestas pueden venir como array directo o como `{ data: [...] }`. El proy
 const data = Array.isArray(raw) ? raw : (raw.data || []);
 ```
 
+### Manejo de errores del catálogo
+
+Las páginas SSR consumen el catálogo mediante `src/lib/catalog.ts`, que centraliza headers, timeout, validación y normalización de respuestas.
+
+- **Timeout:** 8 segundos por solicitud mediante `AbortSignal.timeout`.
+- **Headers:** `Accept: application/json` y `Authorization: Bearer {VITE_API_TOKEN}`.
+- **HTTP 404:** se interpreta como recurso inexistente. En páginas de detalle redirige a `/404`; en listados se conserva el estado vacío.
+- **Otros errores HTTP:** se consideran indisponibilidad temporal del catálogo.
+- **Timeout, error de red o JSON inválido:** se consideran indisponibilidad temporal del catálogo.
+- **Estructura inválida:** una lista debe ser un array directo o estar dentro de `data`; un detalle debe ser un objeto directo o estar dentro de `data`.
+- **Logging:** los errores se registran únicamente server-side con recurso, tipo de consulta, slug cuando aplica y código HTTP. Nunca se registran tokens, headers sensibles ni cuerpos completos de respuesta.
+
+### Fallbacks públicos
+
+- **Homepage (`/`):** si falla el listado de hoteles, se muestra el resto de la página y un mensaje informativo en la sección del catálogo.
+- **Listados (`/hoteles`, `/tours`):** muestran un mensaje de catálogo temporalmente no disponible. Las respuestas válidas sin resultados conservan el mensaje de catálogo vacío.
+- **Detalles (`/hotel/{slug}`, `/tour/{slug}`):** muestran `CatalogUnavailable.astro` para fallos temporales y mantienen `Header` y `Footer`. No se renderizan datos dependientes del producto, favoritos, calendario, historial reciente ni schema específico del producto.
+- **SEO:** los schemas `ItemList`, `Hotel` y `Tour` solo se emiten cuando existe una respuesta válida del catálogo.
+
 ### Campos detectados en hoteles
 
 | Campo | Tipo | Notas |
@@ -300,7 +358,7 @@ const data = Array.isArray(raw) ? raw : (raw.data || []);
 | `slug` | string | Identificador URL |
 | `active` | number | 1 = activo, 0 = inactivo |
 | `images` | object | `principal`, `secundaria`, `adicional` (arrays de objetos con `url`) |
-| `description` | string | Descripción HTML |
+| `description` | string | Descripción HTML; se sanea server-side con una allowlist antes de renderizar |
 | `address` | string | Dirección |
 | `amenities_list` | string[] | Lista de amenidades |
 | `google_maps` | number[] | Coordenadas `[lat, lng]` |
@@ -338,4 +396,3 @@ const data = Array.isArray(raw) ? raw : (raw.data || []);
 - Estructura de respuesta de tours
 - Rate limiting de API externa
 - Documentación Openpay (referencia externa)
-- Manejo de errores detallado de API externa
