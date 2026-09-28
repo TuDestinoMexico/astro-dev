@@ -31,7 +31,7 @@ Renderizados en servidor. Sin estado cliente.
 | `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta de miembro del equipo |
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
-| `YouTubeCTA.astro` | `components/ui/home/YouTubeCTA.astro` | CTA de YouTube |
+| `TikTokCTA.astro` | `components/ui/home/TikTokCTA.astro` | CTA visual para promocionar `@tudestinomexico` en TikTok con tarjeta vertical tipo video corto |
 | `RecomendacionesBanner.astro` | `components/ui/home/RecomendacionesBanner.astro` | Banner de recomendaciones |
 | `Welcome.astro` | `components/Welcome.astro` | Composición de homepage (hero SSR + grid + modales) |
 
@@ -43,13 +43,15 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `EventsHero.astro` | — | Shell SSR del hero principal: renderiza la primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
-| `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP; actualiza las diapositivas después de la hidratación |
+| `EventsHero.astro` | — | Shell SSR del hero editorial principal: composición asimétrica de panel de marca + imagen de destino, primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
+| `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP tipo cambio de página; autoplay de 7 segundos con pausa/reanudación, respeta `prefers-reduced-motion` y actualiza imagen, metadata, contenido y CTAs después de la hidratación |
+| `HeroView.jsx` | — | Módulo admin para CRUD de slides del hero, orden, publicación individual, subida WebP, CTAs, preview de imagen y configuración del autoplay |
 | `HotSalePromoRibbon.jsx` | (no determinada) | Cinta promocional Hot Sale |
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |
 | `MatchPoll.jsx` | (no determinada) | Encuesta en tiempo real (Firestore onSnapshot) |
-| `WelcomeModal.tsx` | `client:only` | Modal accesible de estado de pago (check vía query param `id`) |
+| `WelcomeModal.tsx` | `client:only` | Modal accesible de estado de pago (check vía query param `id`), con estados de carga, confirmado, pendiente y error; presenta el comprobante con lenguaje visual de pase de abordar |
+| `OfficialAnnouncementModal.jsx` | `client:only` desde `Welcome.astro` | Comunicado oficial público del home, mostrado en cada carga o actualización mientras esté activo |
 | `RecentlyViewed.jsx` | `client:only` | Tarjetas de últimos visitados (localStorage) |
 | `PromoLocker.jsx` | `client:only` | Locker promocional (actualmente comentado) |
 
@@ -127,7 +129,7 @@ Renderizados en servidor. Sin estado cliente.
 | `TeamView.jsx` | — | CRUD equipo con drag & drop, paginación, búsqueda, selector de fotos |
 | `OfertasView.jsx` | — | CRUD de ofertas (Firestore `ofertas` con `onSnapshot`, tiempo real): formulario (título, descripción, descuento, código, color, vigencia opcional, activo), tabla con drag & drop + búsqueda + paginación, toggle visible/oculta y badge "Vencida" |
 | `MediaManager.jsx` | — | Explorador Firebase Storage con CRUD de archivos/carpetas |
-| `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, maintenance) |
+| `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, maintenance), comunicado oficial, conversión WebP adaptable y eliminación sincronizada de imágenes |
 
 ### Otros
 

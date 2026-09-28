@@ -1,6 +1,6 @@
 import React from 'react';
 // Añadimos el ícono Settings para la nueva pestaña de Configuración
-import { LayoutDashboard, Users, LogOut, X, User, Globe, Image, Settings, Tag } from 'lucide-react';
+import { LayoutDashboard, Users, LogOut, X, User, Globe, Image, Settings, Tag, Presentation } from 'lucide-react';
 
 export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, isOpen, setIsOpen }) {
 
@@ -86,6 +86,13 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, i
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'ofertas' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
                         >
                             <Tag size={16} /> Ofertas
+                        </button>
+
+                        <button
+                            onClick={() => handleNavClick('hero')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'hero' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+                        >
+                            <Presentation size={16} /> Hero Principal
                         </button>
 
                         {/* NUEVO - PESTAÑA: CONFIGURACIÓN */}
