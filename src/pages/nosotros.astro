@@ -10,13 +10,22 @@ import Footer from "../components/layout/Footer.astro";
 import MemberCard from "../components/ui/team/MemberCard.astro";
 import MemberSkeleton from "../components/ui/team/MemberSkeleton.astro";
 
+interface TeamMember {
+    id: string;
+    activo?: boolean;
+    posicion?: number;
+    foto?: string;
+    nombre?: string;
+    puesto?: string;
+}
+
 // Consulta a la colección 'equipo' ordenada por 'posicion'
 const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
 const querySnapshot = await getDocs(q);
 
 // Filtrado de miembros activos
-const team = querySnapshot.docs
-    .map(doc => ({ id: doc.id, ...doc.data() }))
+const team: TeamMember[] = querySnapshot.docs
+    .map(doc => ({ id: doc.id, ...(doc.data() as Omit<TeamMember, "id">) }))
     .filter(member => member.activo !== false);
 ---
 

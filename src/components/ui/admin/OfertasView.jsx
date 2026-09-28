@@ -42,6 +42,8 @@ const timestampToDateInput = (ts) => {
 export default function OfertasView() {
     const [ofertas, setOfertas] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const [error, setError] = useState('');
+    const [retryKey, setRetryKey] = useState(0);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
@@ -54,6 +56,8 @@ export default function OfertasView() {
     const [draggedIndex, setDraggedIndex] = useState(null);
 
     useEffect(() => {
+        setCargando(true);
+        setError('');
         const q = query(collection(db, 'ofertas'), orderBy('posicion', 'asc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -61,10 +65,11 @@ export default function OfertasView() {
             setCargando(false);
         }, (error) => {
             console.error('Error leyendo ofertas:', error);
+            setError('No se pudieron cargar las ofertas.');
             setCargando(false);
         });
         return () => unsubscribe();
-    }, []);
+    }, [retryKey]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -311,12 +316,19 @@ export default function OfertasView() {
                 </div>
 
                 {cargando ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                    <div role="status" aria-live="polite" aria-atomic="true" className="flex flex-col items-center justify-center py-16 text-slate-400">
                         <Loader2 size={32} className="animate-spin text-emerald-500 mb-3" />
                         <span className="text-xs font-bold uppercase tracking-widest">Cargando ofertas...</span>
                     </div>
+                ) : error ? (
+                    <div role="alert" aria-live="assertive" className="flex flex-col items-center justify-center py-16 text-center">
+                        <p className="text-sm font-medium text-red-600">{error}</p>
+                        <button type="button" onClick={() => setRetryKey((key) => key + 1)} className="mt-4 text-xs font-bold text-slate-500 underline hover:text-slate-700">
+                            Reintentar
+                        </button>
+                    </div>
                 ) : filteredOfertas.length === 0 ? (
-                    <div className="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                    <div role="status" aria-live="polite" className="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                         <Tag size={40} className="mx-auto text-slate-200 mb-3" />
                         <p className="text-slate-400 text-sm font-medium">
                             {ofertas.length === 0 ? 'No hay ofertas registradas todavía.' : 'No se encontraron ofertas que coincidan con la búsqueda.'}

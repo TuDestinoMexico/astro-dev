@@ -14,6 +14,8 @@ export default function ConfigView() {
     });
 
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const [actionError, setActionError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -32,6 +34,8 @@ export default function ConfigView() {
 
     // Leer las configuraciones actuales de Firestore
     const fetchConfig = async () => {
+        setIsLoading(true);
+        setLoadError('');
         try {
             const docSnap = await getDoc(configDocRef);
             if (docSnap.exists()) {
@@ -49,6 +53,7 @@ export default function ConfigView() {
             }
         } catch (error) {
             console.error("Error cargando configuraciones:", error);
+            setLoadError('No se pudo cargar la configuración.');
         } finally {
             setIsLoading(false);
         }
@@ -72,7 +77,7 @@ export default function ConfigView() {
             },
             (error) => {
                 console.error("Error al subir el logo:", error);
-                alert("Ocurrió un error al subir el archivo.");
+                setActionError("Ocurrió un error al subir el archivo.");
                 setIsUploading(false);
             },
             async () => {
@@ -108,13 +113,14 @@ export default function ConfigView() {
         e.preventDefault();
         setIsSaving(true);
         setSaveSuccess(false);
+        setActionError('');
         try {
             await updateDoc(configDocRef, configData);
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000); // Desvanecer aviso de guardado
         } catch (error) {
             console.error("Error guardando ajustes en Firestore:", error);
-            alert("No se pudieron guardar los cambios.");
+            setActionError("No se pudieron guardar los cambios.");
         } finally {
             setIsSaving(false);
         }
@@ -122,9 +128,20 @@ export default function ConfigView() {
 
     if (isLoading) {
         return (
-            <div className="w-full h-64 flex flex-col items-center justify-center text-slate-400 gap-2">
+            <div role="status" aria-live="polite" aria-atomic="true" className="w-full h-64 flex flex-col items-center justify-center text-slate-400 gap-2">
                 <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
                 <span className="text-xs font-bold uppercase tracking-widest">Sincronizando Ajustes...</span>
+            </div>
+        );
+    }
+
+    if (loadError) {
+        return (
+            <div role="alert" aria-live="assertive" className="w-full h-64 flex flex-col items-center justify-center gap-3 text-center">
+                <p className="text-sm font-medium text-red-600">{loadError}</p>
+                <button type="button" onClick={fetchConfig} className="text-xs font-bold text-slate-500 underline hover:text-slate-700">
+                    Reintentar
+                </button>
             </div>
         );
     }
@@ -242,8 +259,9 @@ export default function ConfigView() {
                     {/* BOTÓN GUARDAR GENERAL */}
                     <div className="pt-6 border-t border-slate-50 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
+                            {actionError && <p role="alert" aria-live="assertive" className="mb-2 text-xs font-bold text-red-600">{actionError}</p>}
                             {saveSuccess && (
-                                <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold uppercase tracking-wider animate-fade-in">
+                                <div role="status" aria-live="polite" aria-atomic="true" className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold uppercase tracking-wider animate-fade-in">
                                     <Check size={14} className="bg-emerald-100 text-emerald-700 p-0.5 rounded-full" /> Cambios aplicados con éxito
                                 </div>
                             )}

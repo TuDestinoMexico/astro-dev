@@ -113,6 +113,8 @@ Reservas vinculadas por clientes autenticados con Google Auth.
 
 **Uso:** `ClientReservas.jsx` (lectura con `onSnapshot`, escritura con `setDoc` al consultar una reserva). El ID del documento es el código normalizado (`ct` en mayúsculas, ej. `CT-12345`), lo que hace imposible duplicados a nivel Firestore. Antes de consultar, el componente valida contra el estado local que el CT/GB no esté ya vinculado (comparación case-insensitive) y bloquea con mensaje sin llamar a la API.
 
+El documento no guarda el snapshot CRM ni la URL del PDF. El detalle completo se consulta bajo demanda mediante una API autenticada. Al cargar vínculos antiguos, `ClientReservas.jsx` elimina los campos heredados `detalles` y `pdf_url`.
+
 ---
 
 #### `users/{userId}/grupos/{grupoId}`
@@ -123,11 +125,11 @@ Grupos GB vinculados por clientes autenticados.
 |---|---|---|
 | `correo_grupo` | string | Email asociado al grupo |
 | `gb` | string | Código único del grupo |
-| `detalles` | object | Snapshot de la respuesta CRM, incluyendo `hoteles`, `cliente` y `reservation_type` |
-| `pdf_url` | string | URL del PDF del grupo, cuando existe |
 | `fechaVinculacion` | timestamp | Momento en que se vinculó |
 
 **Uso:** `ClientReservas.jsx` y `ClientPagos.jsx`. El documento se guarda con `setDoc` usando el código GB normalizado como ID para evitar duplicados.
+
+El documento solo conserva los datos necesarios para identificar el vínculo. La información CRM completa y el PDF se obtienen únicamente al solicitar el detalle con una sesión autenticada.
 
 ---
 
@@ -168,11 +170,33 @@ Hoteles y tours del catálogo API guardados por clientes desde el sitio público
 
 ---
 
+#### `users/{userId}/pagos/{paymentId}`
+
+Historial de cargos Openpay generados por el usuario autenticado. No depende de una reserva CT/GB en la primera fase; la asociación a reservas se podrá agregar posteriormente.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `openpayChargeId` | string | ID del cargo creado en Openpay |
+| `amount` | number | Importe validado por el servidor |
+| `currency` | string | Moneda del cargo, normalmente `MXN` |
+| `method` | string | Método Openpay permitido |
+| `description` | string | Concepto validado del cargo |
+| `status` | string | Estado interno del cargo |
+| `voucher` | object | Datos normalizados para mostrar URL, referencia o datos bancarios |
+| `createdAt` | timestamp | Fecha de creación del registro |
+| `updatedAt` | timestamp | Fecha de última actualización |
+| `lastWebhookEventType` | string | Último tipo de evento Openpay procesado, si existe |
+| `lastWebhookEventId` | string | Último ID de evento Openpay procesado, si existe |
+
+**Seguridad:** el cliente autenticado solo puede leer sus documentos. La creación, modificación y eliminación quedan bloqueadas en las reglas y serán realizadas por el endpoint server-side mediante Firebase Admin SDK. No se deben guardar números de tarjeta, CVV ni respuestas completas innecesarias de Openpay.
+
+---
+
 ## Reglas de seguridad
 
 Las reglas se versionan en la raíz del proyecto:
 
-- `firestore.rules` — deniega por defecto, permite escrituras administrativas solo con el custom claim `admin: true` y limita `users/{uid}` al propietario.
+- `firestore.rules` — deniega por defecto, permite escrituras administrativas solo con el custom claim `admin: true`, conserva las escrituras del propietario para reservas/grupos/favoritos y deja el historial `users/{uid}/pagos` en lectura exclusiva del propietario.
 - `storage.rules` — permite lecturas públicas para conservar las URLs actuales y limita subidas, modificaciones y eliminaciones a administradores.
 - `firebase.json` — vincula ambos archivos con Firebase CLI.
 

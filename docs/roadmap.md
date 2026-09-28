@@ -28,6 +28,7 @@ Funcionalidades identificadas en el código fuente actual. No incluye planificac
 - [x] 6 métodos de pago: tarjeta, tiendas, BBVA, SPEI, ventanilla, OXXO
 - [x] Proxy server-side para Openpay (cargo + check)
 - [x] Modal de verificación de pago en homepage
+- [x] Webhook server-side para sincronización de estados Openpay
 
 ### Panel Administrativo
 - [x] Login con Firebase Auth (Google para clientes, email/contraseña para admin)

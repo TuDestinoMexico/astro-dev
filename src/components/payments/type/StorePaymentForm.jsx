@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { Download, X } from 'lucide-react';
+import { createIdempotencyKey, createOpenpayCharge } from '../../../lib/openpayClient';
 
 // Listado de tiendas y comisiones
 const stores = [
@@ -17,17 +19,18 @@ export default function StorePaymentForm() {
         method: 'store',
         amount: '',
         description: '',
-        customer: { name: '', last_name: '', phone_number: '', email: '' }
+        customer: { name: '', last_name: '', phone_number: '' }
     });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [paymentData, setPaymentData] = useState(null);
     const [showStoreInfo, setShowStoreInfo] = useState(false);
+    const idempotencyKeyRef = useRef(null);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
-        if (['name', 'last_name', 'phone_number', 'email'].includes(id)) {
+        if (['name', 'last_name', 'phone_number'].includes(id)) {
             setForm(prev => ({ ...prev, customer: { ...prev.customer, [id]: value } }));
         } else {
             setForm(prev => ({ ...prev, [id]: value }));
@@ -39,38 +42,33 @@ export default function StorePaymentForm() {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('/api/openpay-cargo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form)
-            });
-            const data = await res.json();
-            if (res.ok) {
+            if (!idempotencyKeyRef.current) idempotencyKeyRef.current = createIdempotencyKey();
+            const data = await createOpenpayCharge(form, idempotencyKeyRef.current);
+            if (data.success) {
                 setPaymentData({
                     id: data.id,
                     barcode_url: data.payment_method.barcode_url,
                     reference: data.payment_method.reference
                 });
-            } else {
-                setError(data.description || 'Error al generar la ficha');
+                idempotencyKeyRef.current = null;
             }
         } catch (err) {
-            setError('Error de conexión');
+            setError(err.message || 'Error de conexión');
         } finally {
             setLoading(false);
         }
     };
 
     // Estilos compartidos con el componente de tarjeta
-    const inputStyle = "w-full border border-gray-300 px-4 py-2.5 rounded-xl text-gray-700 focus:ring-2 focus:ring-[#00c0a5] focus:border-transparent outline-none transition-all placeholder:text-gray-400";
+    const inputStyle = "w-full border border-brand-border px-4 py-2.5 rounded-card text-gray-700 focus:ring-2 focus:ring-brand-primary focus:border-transparent outline-none transition-all placeholder:text-gray-400";
     const labelStyle = "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1";
 
     // Pantalla de éxito (Ficha generada)
     if (paymentData) {
         return (
             <div className="w-full max-w-lg mx-auto text-center animate-in fade-in zoom-in duration-300">
-                <div className="bg-[#00c0a5]/10 border-2 border-[#00c0a5]/20 p-6 rounded-3xl mb-8">
-                    <p className="text-[#00c0a5] font-bold text-xl mb-1">¡Ficha generada!</p>
+                <div className="bg-brand-primary/10 border-2 border-brand-primary/20 p-6 rounded-card-lg mb-8">
+                    <p className="text-brand-primary font-bold text-xl mb-1">¡Ficha generada!</p>
                     <p className="text-gray-600 text-sm">Tómale una captura de pantalla o descarga el PDF.</p>
                 </div>
 
@@ -88,9 +86,10 @@ export default function StorePaymentForm() {
                     <a
                         href={`https://pagos.tudestinomx.com/confirmacion?id=${paymentData.id}`}
                         target="_blank"
-                        className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95"
+                        className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-4 rounded-card font-bold hover:bg-black transition-all shadow-lg active:scale-95"
                     >
-                        📥 Descargar Ficha PDF
+                        <Download aria-hidden="true" size={18} />
+                        Descargar Ficha PDF
                     </a>
                 </div>
             </div>
@@ -104,7 +103,7 @@ export default function StorePaymentForm() {
                 <button
                     type="button"
                     onClick={() => setShowStoreInfo(true)}
-                    className="mt-2 text-[#00c0a5] font-bold text-sm hover:underline underline-offset-4"
+                    className="mt-2 text-brand-primary font-bold text-sm hover:text-brand-primary-hover hover:underline underline-offset-4"
                 >
                     Consultar tiendas y comisiones
                 </button>
@@ -114,11 +113,11 @@ export default function StorePaymentForm() {
                 {/* Nombres y Apellidos */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
-                        <label className={labelStyle}>Nombres</label>
+                        <label htmlFor="name" className={labelStyle}>Nombres</label>
                         <input id="name" type="text" placeholder="Ej. Juan" className={inputStyle} onChange={handleChange} required />
                     </div>
                     <div>
-                        <label className={labelStyle}>Apellidos</label>
+                        <label htmlFor="last_name" className={labelStyle}>Apellidos</label>
                         <input id="last_name" type="text" placeholder="Ej. Pérez" className={inputStyle} onChange={handleChange} required />
                     </div>
                 </div>
@@ -126,11 +125,7 @@ export default function StorePaymentForm() {
                 {/* Email y Teléfono */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
-                        <label className={labelStyle}>Correo Electrónico</label>
-                        <input id="email" type="email" placeholder="correo@ejemplo.com" className={inputStyle} onChange={handleChange} required />
-                    </div>
-                    <div>
-                        <label className={labelStyle}>Teléfono</label>
+                        <label htmlFor="phone_number" className={labelStyle}>Teléfono</label>
                         <input id="phone_number" type="tel" placeholder="10 dígitos" className={inputStyle} onChange={handleChange} required />
                     </div>
                 </div>
@@ -138,11 +133,11 @@ export default function StorePaymentForm() {
                 {/* Referencia y Cantidad */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                     <div>
-                        <label className={labelStyle}>Referencia / Concepto</label>
+                        <label htmlFor="description" className={labelStyle}>Referencia / Concepto</label>
                         <input id="description" type="text" placeholder="Hotel o Tour" className={inputStyle} onChange={handleChange} required />
                     </div>
                     <div>
-                        <label className={labelStyle}>Cantidad (MXN)</label>
+                        <label htmlFor="amount" className={labelStyle}>Cantidad (MXN)</label>
                         <input id="amount" type="number" placeholder="0.00" className={inputStyle} onChange={handleChange} required />
                     </div>
                 </div>
@@ -150,7 +145,7 @@ export default function StorePaymentForm() {
                 {/* Botón de envío con Spinner */}
                 <button
                     disabled={loading}
-                    className={`w-full mt-4 py-4 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-[#00c0a5] hover:bg-black'}`}
+                    className={`w-full mt-4 py-4 rounded-card font-bold text-white shadow-lg transition-all transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-brand-primary hover:bg-brand-primary-hover'}`}
                 >
                     {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -188,24 +183,34 @@ export default function StorePaymentForm() {
             {/* Modal de Tiendas */}
             {showStoreInfo && (
                 <div className="fixed inset-0 z-110 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-4xl p-8 max-w-md w-full shadow-2xl relative">
-                        <button onClick={() => setShowStoreInfo(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl">
-                            &times;
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="store-info-title"
+                        className="bg-white rounded-4xl p-8 max-w-md w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain shadow-2xl relative"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setShowStoreInfo(false)}
+                            aria-label="Cerrar tiendas disponibles"
+                            className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+                        >
+                            <X aria-hidden="true" size={24} />
                         </button>
                         <div className="text-center mb-6">
-                            <h3 className="text-2xl font-bold text-slate-800">Tiendas Disponibles</h3>
+                            <h3 id="store-info-title" className="text-2xl font-bold text-slate-800">Tiendas Disponibles</h3>
                             <p className="text-sm text-gray-500 mt-1">Puedes pagar en cualquiera de estos puntos</p>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 max-h-87.5 overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid grid-cols-2 gap-3 pr-2">
                             {stores.map((store, i) => (
-                                <div key={i} className="flex flex-col items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-hover hover:border-[#00c0a5]/30">
+                                <div key={i} className="flex flex-col items-center p-4 bg-gray-50 rounded-card border border-gray-100 transition-hover hover:border-brand-primary/30">
                                     <img src={store.img} alt={store.name} className="h-8 w-auto mb-2 object-contain mix-blend-multiply" />
                                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Comisión aprox</p>
                                     <p className="text-xs font-bold text-slate-800">{store.fee}</p>
                                 </div>
                             ))}
                         </div>
-                        <button onClick={() => setShowStoreInfo(false)} className="w-full mt-6 py-4 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-colors">
+                        <button type="button" onClick={() => setShowStoreInfo(false)} className="w-full mt-6 py-4 bg-slate-900 text-white font-bold rounded-card text-sm hover:bg-black transition-colors">
                             Cerrar
                         </button>
                     </div>

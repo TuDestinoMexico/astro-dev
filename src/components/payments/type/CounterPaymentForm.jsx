@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Lightbulb } from 'lucide-react';
 
 const bancosVentanilla = [
     {
@@ -47,7 +48,7 @@ export default function CounterPaymentForm() {
                 {bancosVentanilla.map((banco) => (
                     <div
                         key={banco.key}
-                        className="bg-gray-50 border border-gray-100 p-6 rounded-3xl flex flex-col items-center text-center transition-all hover:shadow-md"
+                        className="bg-gray-50 border border-brand-border p-6 rounded-card-lg flex flex-col items-center text-center transition-all hover:shadow-md"
                     >
                         <div className="h-12 flex items-center justify-center mb-4">
                             <img src={banco.logo} alt={banco.alt} className="max-h-full object-contain opacity-90" />
@@ -64,7 +65,7 @@ export default function CounterPaymentForm() {
 
                         <button
                             onClick={() => copyToClipboard(banco.cuenta, banco.key)}
-                            className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all transform active:scale-95 ${
+                            className={`w-full py-2.5 rounded-card font-bold text-xs transition-all transform active:scale-95 ${
                                 copied === banco.key
                                     ? 'bg-green-500 text-white'
                                     : 'bg-slate-900 text-white hover:bg-black shadow-md'
@@ -77,9 +78,9 @@ export default function CounterPaymentForm() {
             </div>
 
             {/* Nota Informativa */}
-            <div className="mt-8 p-5 bg-[#00c0a5]/5 border border-[#00c0a5]/20 rounded-2xl">
+            <div className="mt-8 p-5 bg-brand-primary/5 border border-brand-primary/20 rounded-card">
                 <div className="flex gap-3 items-start">
-                    <span className="text-lg">💡</span>
+                    <Lightbulb aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-brand-primary" />
                     <p className="text-[11px] text-slate-600 leading-relaxed text-left">
                         Al realizar tu pago en ventanilla o practicaja, asegúrate de que el cajero imprima tu comprobante. <strong>Tómale una foto clara</strong> y envíala a nuestro equipo de reservaciones.
                     </p>
