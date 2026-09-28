@@ -31,7 +31,7 @@ Renderizados en servidor. Sin estado cliente.
 | `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta de miembro del equipo |
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
-| `YouTubeCTA.astro` | `components/ui/home/YouTubeCTA.astro` | CTA de YouTube |
+| `TikTokCTA.astro` | `components/ui/home/TikTokCTA.astro` | CTA visual para promocionar `@tudestinomexico` en TikTok con tarjeta vertical tipo video corto |
 | `RecomendacionesBanner.astro` | `components/ui/home/RecomendacionesBanner.astro` | Banner de recomendaciones |
 | `Welcome.astro` | `components/Welcome.astro` | Composición de homepage (hero SSR + grid + modales) |
 

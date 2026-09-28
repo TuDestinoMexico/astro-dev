@@ -2,7 +2,7 @@
 import Banner from "./ui/Banner.astro";
 import Grid from "./ui/Grid.astro";
 import AppDownload from "./ui/home/AppDownload.astro";
-import YouTubeCTA from "./ui/home/YouTubeCTA.astro";
+import TikTokCTA from "./ui/home/TikTokCTA.astro";
 import Card from "./ui/single/Card.astro";
 import Content from "./layout/Content.astro";
 import WelcomeModal from "./modal/WelcomeModal";
@@ -24,7 +24,7 @@ const hoteles = catalogResult.status === 'ok' ? catalogResult.data : [];
 
     <RecentlyViewed client:only="react" />
 
-    <YouTubeCTA />
+    <TikTokCTA />
 
     {catalogUnavailable ? (
         <div class="text-center py-12 px-4">
