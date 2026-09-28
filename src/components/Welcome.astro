@@ -6,6 +6,7 @@ import YouTubeCTA from "./ui/home/YouTubeCTA.astro";
 import Card from "./ui/single/Card.astro";
 import Content from "./layout/Content.astro";
 import WelcomeModal from "./modal/WelcomeModal";
+import OfficialAnnouncementModal from "./ui/OfficialAnnouncementModal.jsx";
 import RecentlyViewed from "./ui/RecentlyViewed";
 import PromoLocker from "./ui/PromoLocker";
 import EventsHero from "./ui/home/EventsHero.astro";
@@ -19,6 +20,7 @@ const hoteles = catalogResult.status === 'ok' ? catalogResult.data : [];
 <EventsHero />
 <Content>
     <WelcomeModal client:only="react" />
+    <OfficialAnnouncementModal client:only="react" />
 
     <RecentlyViewed client:only="react" />
 
