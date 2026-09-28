@@ -194,18 +194,40 @@ git branch -D experimental/ALCANCE
 - Firestore y Storage conservan los permisos esperados.
 - No hay errores relevantes en los logs del deployment o del navegador.
 
-7. Promover a producción únicamente después de aprobar el Preview:
+7. Crear un backup local del `master` productivo antes de promover. El nombre debe incluir la fecha de la promoción; si ya existe uno para ese día, agregar hora o un sufijo incremental. El backup debe apuntar al commit actualmente desplegado, antes del merge:
+
+```bash
+BACKUP="backup/master-before-promotion-$(date +%Y%m%d)"
+git branch "$BACKUP" master
+git rev-parse master
+git rev-parse "$BACKUP"
+```
+
+Los dos últimos comandos deben devolver el mismo commit. El backup es local, no se publica como rama de Vercel ni se sobrescribe durante la promoción. Debe conservarse hasta validar producción y completar la ventana acordada de rollback.
+
+8. Promover a producción únicamente después de aprobar el Preview y confirmar que existe el backup:
 
 ```bash
 git switch master
 git pull --ff-only origin master
+BACKUP="backup/master-before-promotion-$(date +%Y%m%d)"
+git show-ref --verify "refs/heads/$BACKUP"
 git merge --no-ff dev -m "release: promover dev a produccion"
 git push origin master
 ```
 
+9. Validar el deployment de producción. Si todo está estable, conservar el backup como referencia histórica hasta cerrar la ventana de rollback. Para eliminarlo posteriormente, verificar primero su nombre y usar una acción explícita:
+
+```bash
+git branch --list 'backup/master-before-promotion-*'
+git branch -D backup/master-before-promotion-YYYYMMDD
+```
+
+No eliminar backups automáticamente ni usar el mismo nombre para otra promoción. Si producción falla, el backup identifica el último commit estable; preferir el rollback de Vercel o un `git revert`, sin hacer `reset --hard` ni reescribir `master`.
+
 ### Rollback
 
-Si el deployment de producción presenta un problema, detener la promoción y volver a desplegar el último commit estable desde Vercel. Para corregir el historial de ramas, crear una corrección nueva o revertir el merge con `git revert`; no reescribir historial compartido.
+Si el deployment de producción presenta un problema, detener la promoción y volver a desplegar el commit identificado por `backup/master-before-promotion-YYYYMMDD` desde Vercel. Para corregir el historial de ramas, crear una corrección nueva o revertir el merge con `git revert`; no reescribir historial compartido.
 
 ### Archivos locales de Firebase
 

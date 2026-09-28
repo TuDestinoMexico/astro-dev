@@ -89,6 +89,8 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 - Después de integrar correctamente y publicar `dev`, eliminar la rama experimental local con `git branch -d experimental/<alcance>`.
 - Si una rama experimental se abandona antes de integrarse, eliminarla con `git branch -D experimental/<alcance>`.
 - Validar el Preview antes de promover cambios a `master`, rama productiva actual de Vercel.
+- Antes de cada promoción y `push` a `master`, crear un backup local `backup/master-before-promotion-YYYYMMDD` apuntando al `master` productivo actual; verificarlo y conservarlo durante la ventana de validación/rollback.
+- No sobrescribir ni eliminar el backup de una promoción durante el despliegue. Si se requiere eliminarlo después, hacerlo solo con confirmación y tras verificar que la producción quedó estable.
 - No hacer push directo a `master` ni promover a producción sin aprobación explícita.
 - Antes de cambiar de rama, revisar `git status`, la rama actual y cualquier cambio existente.
 - Los archivos locales `firestore.rules`, `storage.rules` y `firebase.json` están ignorados y no deben agregarse al repositorio.
