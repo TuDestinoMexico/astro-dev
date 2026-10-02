@@ -42,6 +42,7 @@ Cliente (Browser)
 - **React islands:** componentes con directivas `client:only`, `client:load`, `client:visible` para interactividad. `BookingCalendar` usa `client:only="react"` porque depende de GSAP, `createPortal` y APIs del navegador.
 - **No hay SSG** (no se prerenderizan páginas estáticamente).
 - **Sitemap de catálogo:** `/sitemap-catalog.xml` consulta hoteles y tours en SSR y se declara en el índice de sitemap estático.
+- **Destinos:** `/destinos/[slug]/` funciona como hub editorial y comercial; `/destinos/[slug]/hoteles/` y `/destinos/[slug]/tours/` solo son indexables cuando el catálogo contiene productos activos para esa combinación.
 
 ---
 

@@ -1,0 +1,42 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/layout/Header.astro';
+import Footer from '../../../components/layout/Footer.astro';
+import Content from '../../../components/layout/Content.astro';
+import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro';
+import DestinationCatalogSection from '../../../components/ui/destinations/DestinationCatalogSection.astro';
+import { destinations } from '../../../data/destinations';
+import { fetchDestinationCatalog } from '../../../lib/destinations';
+
+const destination = destinations.find((item) => item.slug === Astro.params.slug);
+if (!destination) return Astro.redirect('/404', 404);
+
+const catalog = await fetchDestinationCatalog(destination);
+if (catalog.unavailable) Astro.response.headers.set('Retry-After', '3600');
+const shouldNoindex = catalog.unavailable || catalog.tours.length === 0;
+if (!catalog.unavailable && catalog.tours.length === 0) Astro.response.status = 404;
+const title = `Tours en ${destination.name} | Tu Destino MX`;
+const description = `Descubre tours, excursiones y experiencias en ${destination.name}. Solicita recomendaciones según tu viaje y fechas.`;
+---
+
+<Layout title={title} description={description} image={destination.image} noindex={shouldNoindex}>
+    <Header />
+    <Content>
+        <main class="space-y-10 pb-16 pt-6 md:pt-10">
+            <Breadcrumbs items={[
+                { label: 'Inicio', href: '/' },
+                { label: 'Destinos', href: '/destinos' },
+                { label: destination.name, href: `/destinos/${destination.slug}/` },
+                { label: 'Tours' }
+            ]} />
+            <header class="max-w-3xl">
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">Experiencias en {destination.country}</p>
+                <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-900 md:text-5xl">Tours en {destination.name}</h1>
+                <p class="mt-5 text-lg leading-8 text-slate-600">Encuentra actividades y excursiones para conocer {destination.name}. Podemos ayudarte a combinar experiencias con tu hospedaje.</p>
+            </header>
+            <DestinationCatalogSection destination={destination} type="tour" items={catalog.tours} />
+            <a href={`/destinos/${destination.slug}/`} class="font-bold text-indigo-700 hover:underline">Volver a la guía de {destination.name}</a>
+        </main>
+    </Content>
+    <Footer />
+</Layout>

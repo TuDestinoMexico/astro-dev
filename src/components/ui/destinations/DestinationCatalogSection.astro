@@ -1,0 +1,46 @@
+---
+import Card from '../single/Card.astro';
+import type { DestinationContent } from '../../../data/destinations';
+
+interface Props {
+    destination: DestinationContent;
+    type: 'hotel' | 'tour';
+    items: any[];
+}
+
+const { destination, type, items } = Astro.props;
+const isHotel = type === 'hotel';
+const title = isHotel ? `Hoteles en ${destination.name}` : `Tours en ${destination.name}`;
+const description = isHotel
+    ? `Conoce opciones de hospedaje para tu viaje a ${destination.name}.`
+    : `Descubre experiencias y actividades para disfrutar ${destination.name}.`;
+---
+
+<section id={isHotel ? 'hoteles' : 'tours'} class="scroll-mt-28" aria-labelledby={`${type}-heading`}>
+    <div class="mb-7 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-600">{isHotel ? 'Hospedaje' : 'Experiencias'}</p>
+            <h2 id={`${type}-heading`} class="mt-2 text-3xl font-black tracking-tight text-slate-900">{title}</h2>
+        </div>
+        <p class="max-w-md text-sm leading-6 text-slate-500">{description}</p>
+    </div>
+
+    {items.length > 0 ? (
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {items.slice(0, 6).map((item) => (
+                <Card
+                    title={item.name || item.title}
+                    slug={item.slug}
+                    type={type}
+                    destino={item.destino}
+                    photo={item.images || item.imagenes}
+                />
+            ))}
+        </div>
+    ) : (
+        <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+            <p class="font-bold text-slate-700">Estamos preparando opciones para {destination.name}.</p>
+            <p class="mt-2 text-sm text-slate-500">Solicita una recomendación personalizada para tus fechas.</p>
+        </div>
+    )}
+</section>
