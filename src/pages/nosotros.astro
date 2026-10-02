@@ -52,52 +52,6 @@ const whatsappHref = whatsappNumber
         <Header />
 
         <main class="space-y-20 pb-16 pt-6 md:space-y-28 md:pt-10">
-            <section class="relative isolate overflow-hidden rounded-[2rem] bg-brand-ink text-white shadow-2xl md:min-h-[34rem] md:rounded-[3rem]">
-                <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_78%_15%,rgba(248,142,42,0.28),transparent_30%),linear-gradient(120deg,#111827_0%,#172554_58%,#0f172a_100%)]"></div>
-                <div class="absolute -right-24 -top-24 -z-10 h-72 w-72 rounded-full border border-white/10 md:h-96 md:w-96"></div>
-                <div class="grid min-h-[34rem] items-end md:grid-cols-[0.9fr_1.1fr] md:items-stretch">
-                    <div class="flex flex-col justify-center px-6 pb-10 pt-12 md:px-14 md:py-16 lg:px-20">
-                        <div class="mb-6 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.24em] text-brand-primary">
-                            <span class="h-px w-8 bg-brand-primary"></span>
-                            Tu Destino México · Vacation Planners
-                        </div>
-                        <h1 class="max-w-xl text-4xl font-black uppercase leading-[0.93] tracking-[-0.06em] sm:text-6xl md:text-7xl">
-                            El viaje comienza mucho antes de llegar.
-                        </h1>
-                        <p class="mt-6 max-w-lg text-base leading-7 text-white/70 md:text-lg">
-                            Escuchamos lo que imaginas, cuidamos lo que importa y convertimos tus próximas vacaciones en una experiencia que se siente verdaderamente tuya.
-                        </p>
-                        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <a href="#equipo" class="inline-flex items-center justify-center gap-2 rounded-card bg-brand-primary px-5 py-3.5 text-xs font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-brand-primary/20 transition hover:-translate-y-0.5 hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-brand-ink">
-                                Conoce al equipo
-                                <Icon name="lucide:arrow-down-right" size="16" aria-hidden="true" />
-                            </a>
-                            {whatsappHref && (
-                                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-2 py-3 text-xs font-black uppercase tracking-[0.12em] text-white/70 transition hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary">
-                                    Habla con un planner
-                                    <Icon name="lucide:arrow-up-right" size="16" aria-hidden="true" />
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                    <div class="relative min-h-[19rem] overflow-hidden md:min-h-0">
-                        <img
-                            src="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
-                            alt="Resort en el Caribe mexicano"
-                            class="absolute inset-0 h-full w-full object-cover"
-                            width="1200"
-                            height="900"
-                            loading="eager"
-                        />
-                        <div class="absolute inset-0 bg-gradient-to-t from-brand-ink via-brand-ink/10 to-transparent md:bg-gradient-to-r md:from-brand-ink/80 md:via-transparent md:to-transparent"></div>
-                        <div class="absolute bottom-5 left-5 flex items-center gap-3 rounded-pill border border-white/20 bg-brand-ink/30 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md md:bottom-10 md:left-10">
-                            <span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span>
-                            Viajes con intención
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <section class="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-start md:gap-20">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.24em] text-brand-primary">Nuestra manera de viajar</p>
