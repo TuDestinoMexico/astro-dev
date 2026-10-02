@@ -15,12 +15,11 @@ const { member } = Astro.props;
             loading="lazy"
         />
         <div class="absolute inset-0 bg-gradient-to-t from-brand-ink/70 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-60"></div>
-        <span class="absolute left-4 top-4 rounded-pill border border-white/25 bg-brand-ink/25 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">Vacation Planner</span>
+        <span class="absolute left-4 top-4 max-w-[85%] truncate rounded-pill border border-white/25 bg-brand-ink/25 px-3 py-1.5 text-center text-[9px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">{member.puesto || "Vacation Planner"}</span>
     </div>
     <div class="relative flex min-h-28 flex-col justify-center gap-2 overflow-hidden px-4 py-5">
         <Icon name="lucide:plane" size="68" class="pointer-events-none absolute -bottom-4 -right-3 text-brand-primary/10 transition-transform duration-700 group-hover:-translate-x-2 group-hover:scale-110" aria-hidden="true" />
         <h3 class="relative z-10 truncate text-base font-black uppercase tracking-tight text-brand-ink">{member.nombre || "Vacation Planner"}</h3>
-        <p class="relative z-10 text-[10px] font-black uppercase tracking-[0.16em] text-brand-primary">{member.puesto || "Vacation Planner"}</p>
         <div class="relative z-10 mt-1 flex items-center gap-2 text-[10px] font-medium text-brand-muted">
             <span class="h-px w-5 bg-brand-primary/60"></span>
             <span>Diseñamos tu escapada</span>
