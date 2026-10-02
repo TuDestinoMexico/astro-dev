@@ -28,7 +28,7 @@ Renderizados en servidor. Sin estado cliente.
 | `HeroBannerOutBounds.astro` | `components/ui/single/HeroBannerOutBounds.astro` | Hero banner extendido |
 | `Card.astro` | `components/ui/single/Card.astro` | Tarjeta reutilizable para hoteles/tours (incluye botón favorito `FavoriteButton.jsx` en zona de imagen) |
 | `Gallery.astro` | `components/ui/hotel/Gallery.astro` | Galería de imágenes con LightGallery |
-| `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta de miembro del equipo |
+| `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta editorial de miembro del equipo con foto, rol y tratamiento de Vacation Planner |
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
 | `TikTokCTA.astro` | `components/ui/home/TikTokCTA.astro` | CTA visual para promocionar `@tudestinomexico` en TikTok con tarjeta vertical tipo video corto |

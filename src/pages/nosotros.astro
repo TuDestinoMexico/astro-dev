@@ -1,14 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Content from "../components/layout/Content.astro";
-import Grid from "../components/ui/Grid.astro";
-
 import { db } from "../lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, orderBy } from "firebase/firestore";
+import { Icon } from "astro-icon/components";
 import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import MemberCard from "../components/ui/team/MemberCard.astro";
-import MemberSkeleton from "../components/ui/team/MemberSkeleton.astro";
 
 interface TeamMember {
     id: string;
@@ -19,52 +17,110 @@ interface TeamMember {
     puesto?: string;
 }
 
-// Consulta a la colección 'equipo' ordenada por 'posicion'
-const q = query(collection(db, "equipo"), orderBy("posicion", "asc"));
-const querySnapshot = await getDocs(q);
+let team: TeamMember[] = [];
+let teamLoadFailed = false;
+let whatsappNumber = "";
 
-// Filtrado de miembros activos
-const team: TeamMember[] = querySnapshot.docs
-    .map(doc => ({ id: doc.id, ...(doc.data() as Omit<TeamMember, "id">) }))
-    .filter(member => member.activo !== false);
+try {
+    const [teamSnapshot, generalSnapshot] = await Promise.all([
+        getDocs(query(collection(db, "equipo"), orderBy("posicion", "asc"))),
+        getDoc(doc(db, "config", "general")),
+    ]);
+
+    team = teamSnapshot.docs
+        .map((memberDoc) => ({ id: memberDoc.id, ...(memberDoc.data() as Omit<TeamMember, "id">) }))
+        .filter((member) => member.activo !== false);
+
+    const configuredWhatsapp = generalSnapshot.data()?.whatsappGlobal;
+    whatsappNumber = typeof configuredWhatsapp === "string" ? configuredWhatsapp.trim() : "";
+} catch (error) {
+    console.warn("[nosotros] No se pudo cargar el contenido dinámico.", error);
+    teamLoadFailed = true;
+}
+
+const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hola, quiero planear mis próximas vacaciones con Tu Destino México.")}`
+    : "";
 ---
 
-<Layout title="Vacation Planners | Tu Destino México">
+<Layout
+    title="Conoce a nuestros Vacation Planners | Tu Destino México"
+    description="Conoce al equipo de Vacation Planners que convierte tus ideas de viaje en experiencias memorables."
+    image="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
+>
     <Content>
-        <Header/>
+        <Header />
 
-        {/* CONTENEDOR PRINCIPAL INSTITUCIONAL DE VACATION PLANNERS */}
-        <section class="py-16 px-4 md:px-12 bg-slate-900 rounded-[2.5rem] mt-8 mb-16 shadow-xl border border-slate-800 relative overflow-hidden">
+        <main class="space-y-20 pb-16 pt-6 md:space-y-28 md:pt-10">
+            <section class="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-start md:gap-20">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.24em] text-brand-primary">Nuestra manera de viajar</p>
+                    <h2 class="mt-4 max-w-md text-3xl font-black uppercase leading-tight tracking-[-0.04em] text-brand-ink md:text-5xl">
+                        No reservamos habitaciones. Diseñamos momentos.
+                    </h2>
+                </div>
+                <div class="max-w-2xl space-y-5 text-base leading-7 text-brand-muted md:text-lg">
+                    <p>Creemos que cada viajero tiene una forma distinta de desconectarse, celebrar y descubrir. Por eso empezamos con una conversación, no con un catálogo.</p>
+                    <p>Tu Vacation Planner está para ayudarte a elegir con claridad, anticipar los detalles y acompañarte hasta que el viaje deje de ser una idea y se convierta en una historia que quieras contar.</p>
+                </div>
+            </section>
 
-            {/* ENCABEZADO OPTIMIZADO PARA VENTAS Y SERVICIO */}
-            <div class="text-center mb-12 relative z-10 max-w-2xl mx-auto">
-                <span class="inline-block py-1 px-4 rounded-full bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest mb-3 shadow-md">
-                    Tu Destino MX • Vacation Planners
-                </span>
-                <h2 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">
-                    Diseñamos Tus Mejores Vacaciones
-                </h2>
-                <p class="text-slate-300 font-medium mt-4 text-sm md:text-base leading-relaxed">
-                    Conoce a nuestros <strong class="text-orange-400">Vacation Planners</strong>: un equipo de expertos dedicados a encontrar las mejores tarifas, destinos y experiencias a tu medida. ¡Déjanos planear el viaje de tus sueños!
-                </p>
-            </div>
+            <section class="grid gap-4 md:grid-cols-3">
+                <article class="rounded-card border border-brand-line bg-brand-surface p-6 md:p-8">
+                    <span class="text-3xl font-black text-brand-primary">01</span>
+                    <h2 class="mt-8 text-lg font-black uppercase tracking-tight text-brand-ink">Te escuchamos</h2>
+                    <p class="mt-3 text-sm leading-6 text-brand-muted">Entendemos qué buscas antes de recomendarte dónde vivirlo.</p>
+                </article>
+                <article class="rounded-card border border-brand-line bg-brand-surface p-6 md:p-8">
+                    <span class="text-3xl font-black text-brand-primary">02</span>
+                    <h2 class="mt-8 text-lg font-black uppercase tracking-tight text-brand-ink">Diseñamos contigo</h2>
+                    <p class="mt-3 text-sm leading-6 text-brand-muted">Combinamos destinos, hoteles y experiencias según tu manera de viajar.</p>
+                </article>
+                <article class="rounded-card border border-brand-line bg-brand-surface p-6 md:p-8">
+                    <span class="text-3xl font-black text-brand-primary">03</span>
+                    <h2 class="mt-8 text-lg font-black uppercase tracking-tight text-brand-ink">Te acompañamos</h2>
+                    <p class="mt-3 text-sm leading-6 text-brand-muted">Seguimos cerca para que disfrutes el camino con más tranquilidad.</p>
+                </article>
+            </section>
 
-            {/* GRILLA DE MIEMBROS DEL EQUIPO */}
-            <div class="relative z-10">
-                <Grid grid={4}>
-                    {team.length > 0 ? (
-                        team.map((member) => <MemberCard member={member} />)
-                    ) : (
-                            <>
-                                <MemberSkeleton />
-                                <MemberSkeleton />
-                                <MemberSkeleton />
-                                <MemberSkeleton />
-                            </>
+            <section id="equipo" class="scroll-mt-24">
+                <div class="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.24em] text-brand-primary">Las personas detrás del viaje</p>
+                        <h2 class="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-brand-ink md:text-5xl">Conoce a tus planners</h2>
+                    </div>
+                    <p class="max-w-sm text-sm leading-6 text-brand-muted md:text-right">Personas reales, recomendaciones honestas y una obsesión saludable por los detalles.</p>
+                </div>
+
+                {team.length > 0 ? (
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                        {team.map((member) => <MemberCard member={member} />)}
+                    </div>
+                ) : (
+                    <div class="rounded-card border border-dashed border-brand-line bg-brand-surface px-6 py-12 text-center">
+                        <Icon name="lucide:users-round" size="32" class="mx-auto text-brand-primary" aria-hidden="true" />
+                        <p class="mt-4 text-sm font-bold text-brand-ink">{teamLoadFailed ? "Nuestro equipo estará disponible en un momento." : "Estamos preparando a nuestro equipo."}</p>
+                        <p class="mt-2 text-xs text-brand-muted">Mientras tanto, podemos ayudarte a imaginar tu próximo destino.</p>
+                    </div>
+                )}
+            </section>
+
+            <section class="relative overflow-hidden rounded-[2rem] bg-brand-primary px-6 py-12 text-white md:rounded-[3rem] md:px-14 md:py-16">
+                <div class="absolute -right-8 -top-16 h-56 w-56 rounded-full border border-white/20"></div>
+                <div class="relative z-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
+                    <div class="max-w-2xl">
+                        <p class="text-[10px] font-black uppercase tracking-[0.24em] text-white/70">Tu próximo capítulo</p>
+                        <h2 class="mt-4 text-3xl font-black uppercase leading-tight tracking-[-0.04em] md:text-5xl">Cuéntanos qué viaje estás imaginando.</h2>
+                    </div>
+                    {whatsappHref && (
+                        <a href={whatsappHref} target="_blank" rel="noopener noreferrer" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-card bg-white px-5 py-4 text-xs font-black uppercase tracking-[0.12em] text-brand-primary transition hover:-translate-y-0.5 hover:bg-brand-ink hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-primary">
+                            Hablar por WhatsApp
+                            <Icon name="simple-icons:whatsapp" size="17" aria-hidden="true" />
+                        </a>
                     )}
-                </Grid>
-            </div>
-        </section>
+                </div>
+            </section>
+        </main>
     </Content>
     <Footer />
 </Layout>
