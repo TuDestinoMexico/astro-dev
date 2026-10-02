@@ -4,13 +4,26 @@ import EventsHeroControls from './EventsHeroControls';
 import { fetchHomeHero } from '../../../lib/homeHero';
 
 const heroData = await fetchHomeHero();
-const firstSlide = heroData.slides[0];
-const whatsappHref = firstSlide && heroData.whatsappNumber && firstSlide.whatsappMsg
-    ? `https://wa.me/${heroData.whatsappNumber}?text=${encodeURIComponent(firstSlide.whatsappMsg)}`
+const fallbackSlide = {
+    title: 'Viajes, hoteles y tours en México',
+    description: 'Planea tus próximas vacaciones con asesoría personalizada.',
+    image: 'https://storage.googleapis.com/tudestinomx_bucket/assets/og-default.jpg',
+    alt: 'Viajes y experiencias con Tu Destino México',
+    whatsappMsg: 'Hola, quiero asesoría para planear mis vacaciones.',
+    location: 'México',
+    meta: 'Asesoría personalizada',
+    eyebrow: 'Tu próximo viaje',
+    ctaLabel: 'Habla con un asesor',
+    secondaryLabel: 'Explora hoteles',
+    secondaryHref: '/hoteles'
+};
+const firstSlide = heroData.slides[0] || fallbackSlide;
+const whatsappNumber = heroData.whatsappNumber || '529987141365';
+const whatsappHref = whatsappNumber && firstSlide.whatsappMsg
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(firstSlide.whatsappMsg)}`
     : '';
 ---
 
-{firstSlide && (
 <section id="home-hero" class="w-full overflow-hidden font-sans" aria-label="Destinos y experiencias de Tu Destino México">
     <div class="hero-shell relative h-[650px] w-full bg-brand-surface md:h-[720px]">
         <div class="hero-visual absolute inset-x-0 top-0 h-[43%] overflow-hidden md:inset-y-0 md:left-auto md:right-0 md:h-full md:w-[64%]">
@@ -90,7 +103,6 @@ const whatsappHref = firstSlide && heroData.whatsappNumber && firstSlide.whatsap
         {heroData.slides.length > 1 && <EventsHeroControls client:load slides={heroData.slides} whatsappNumber={heroData.whatsappNumber} autoplayMs={heroData.autoplayMs} />}
     </div>
 </section>
-)}
 
 <style>
     .hero-visual {

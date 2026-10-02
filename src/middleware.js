@@ -30,6 +30,10 @@ export async function onRequest({ url, redirect }, next) {
         return next();
     }
 
+    if (url.pathname === '/robots.txt' || url.pathname.startsWith('/sitemap')) {
+        return next();
+    }
+
     // 2. Lógica para la ruta /mantenimiento
     if (url.pathname === '/mantenimiento') {
         // A. Si está desactivado: Redirigir a HOME (en lugar de 404)

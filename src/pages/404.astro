@@ -4,9 +4,11 @@ import Content from "../components/layout/Content.astro";
 import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import { Icon } from "astro-icon/components";
+Astro.response.status = 404;
+Astro.response.headers.set('X-Robots-Tag', 'noindex, follow');
 ---
 
-<Layout title="404 - Ruta Desconocida | Tu Destino México">
+<Layout title="404 - Ruta Desconocida | Tu Destino México" noindex={true}>
     <Content>
         <Header />
 

@@ -8,6 +8,7 @@ interface Props {
 }
 
 const {title, description} = Astro.props
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
 <!doctype html>
 <html lang="es">
@@ -24,6 +25,8 @@ const {title, description} = Astro.props
     <SEO
             title={title}
             description={description}
+            noindex={true}
+            nofollow={true}
     />
 </head>
 <body>

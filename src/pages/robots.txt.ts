@@ -7,6 +7,7 @@ Disallow: /admin/
 Disallow: /cliente/
 Disallow: /api/
 Disallow: /404
+Disallow: /xolo-ruta
 Disallow: /mantenimiento
 
 Sitemap: ${sitemapURL.href}

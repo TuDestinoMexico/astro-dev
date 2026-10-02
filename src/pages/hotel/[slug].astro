@@ -8,6 +8,7 @@ import Gallery from '../../components/ui/hotel/Gallery.astro';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
 import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import { fetchHotelDetail } from '../../lib/catalog';
 import { sanitizeCatalogHtml, stripCatalogHtml } from '../../lib/sanitizeHtml';
 
@@ -24,6 +25,11 @@ if (catalogResult.status === 'not-found') {
 }
 
 const catalogUnavailable = catalogResult.status === 'unavailable';
+if (catalogUnavailable) {
+    Astro.response.status = 503;
+    Astro.response.headers.set('Retry-After', '3600');
+    Astro.response.headers.set('Cache-Control', 'no-store');
+}
 const hotel: any = catalogResult.status === 'ok' ? catalogResult.data : {};
 const hotelDescriptionHtml = sanitizeCatalogHtml(hotel.description);
 const hotelDescriptionText = stripCatalogHtml(hotel.description);
@@ -65,9 +71,7 @@ const hotelSchema = {
     address: {
         '@type': 'PostalAddress',
         streetAddress: hotel.address,
-        addressLocality: hotel.destino || 'Cancún',
-        addressRegion: 'Quintana Roo',
-        addressCountry: 'MX'
+        addressLocality: hotel.destino || undefined
     },
     geo: coordinates.length >= 2 ? {
         '@type': 'GeoCoordinates',
@@ -119,7 +123,8 @@ const hotelSchema = {
   title={hotel.name || "Detalle de Hotel"} 
   description={hotelDescriptionText || "Detalle de Hotel"}
   image={principalImage}
-  type="website"
+  type="article"
+  noindex={catalogUnavailable}
 >
     <Header/>
 
@@ -133,6 +138,11 @@ const hotelSchema = {
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
 
         <div class="space-y-4">
+            <Breadcrumbs items={[
+                { label: 'Inicio', href: '/' },
+                { label: 'Hoteles', href: '/hoteles' },
+                { label: hotel.name }
+            ]} />
             <div class="flex items-center justify-between gap-4 flex-wrap">
                 <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
                     {hotel.name}

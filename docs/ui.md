@@ -28,7 +28,7 @@ Renderizados en servidor. Sin estado cliente.
 | `HeroBannerOutBounds.astro` | `components/ui/single/HeroBannerOutBounds.astro` | Hero banner extendido |
 | `Card.astro` | `components/ui/single/Card.astro` | Tarjeta reutilizable para hoteles/tours (incluye botón favorito `FavoriteButton.jsx` en zona de imagen) |
 | `Gallery.astro` | `components/ui/hotel/Gallery.astro` | Galería de imágenes con LightGallery |
-| `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta de miembro del equipo |
+| `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta editorial de miembro del equipo con foto, rol y tratamiento de Vacation Planner |
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
 | `TikTokCTA.astro` | `components/ui/home/TikTokCTA.astro` | CTA visual para promocionar `@tudestinomexico` en TikTok con tarjeta vertical tipo video corto |
@@ -74,16 +74,6 @@ Renderizados en servidor. Sin estado cliente.
 | Componente | Directiva | Propósito |
 |---|---|---|
 | `BookingCalendar.tsx` | `client:only="react"` | Mismo modal accesible en modo fecha única (`isSingleDate=true`) para tours; `client:only` evita cargar GSAP durante SSR en Vercel |
-
-### Timeline / Mapas
-
-| Componente | Directiva | Propósito |
-|---|---|---|
-| `Timeline.tsx` | `client:only="react"` | Controlador de Xolo Ruta: hito activo, resumen, transición GSAP, navegación y sincronización con mapa |
-| `TimelineItem.tsx` | — | Card editorial del hito activo con ciudad, fecha, contenido, imagen y navegación anterior/siguiente |
-| `TimelineNavigation.tsx` | — | Cronología accesible agrupada por año, con navegación por teclado y scroll horizontal móvil |
-| `RouteSummary.tsx` | — | Resumen visual de paradas y periodo de Xolo Ruta |
-| `MexicoMap.tsx` | — | Mapa de México interactivo con marcadores, carga, error recuperable y fallback de ciudades |
 
 ### Recomendaciones
 

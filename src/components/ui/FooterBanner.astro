@@ -17,8 +17,10 @@ const {
     <div class="absolute inset-0 rounded-[2.5rem] overflow-hidden z-0">
         <img
                 src={bgImage}
-                alt="Fondo Xolo Banner"
+                alt=""
                 class="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
         />
         {/* Sombrado para legibilidad del texto */}
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/50 to-slate-950/20"></div>
@@ -28,8 +30,10 @@ const {
     <div class="absolute inset-0 flex w-full h-full pointer-events-none select-none z-10 items-end justify-center">
         <img
                 src="https://storage.googleapis.com/tudestinomx_bucket/assets/test/xolo_lego_transparente.png"
-                alt="Xolo Tu Destino Mexico"
+                alt=""
                 class="absolute bottom-0 w-auto h-[125%] md:h-[135%] object-contain object-bottom drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]"
+                loading="lazy"
+                decoding="async"
         />
     </div>
 
@@ -43,26 +47,31 @@ const {
 </div>
 
 <script>
-    import { gsap } from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-    gsap.registerPlugin(ScrollTrigger);
-
     const banner = document.getElementById('xolo-banner');
 
-    if (banner) {
-        gsap.to(banner, {
-            width: "100%",
-            maxWidth: "100%",
-            borderRadius: "0px",
+    if (banner && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(async ([entry]) => {
+            if (!entry.isIntersecting) return;
 
-            scrollTrigger: {
-                trigger: banner,
-                start: "top 95%",
-                end: "bottom bottom",
-                scrub: 1,
-                invalidateOnRefresh: true
-            }
-        });
+            const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+                import('gsap'),
+                import('gsap/ScrollTrigger')
+            ]);
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.to(banner, {
+                width: '100%',
+                maxWidth: '100%',
+                borderRadius: '0px',
+                scrollTrigger: {
+                    trigger: banner,
+                    start: 'top 95%',
+                    end: 'bottom bottom',
+                    scrub: 1,
+                    invalidateOnRefresh: true
+                }
+            });
+            observer.disconnect();
+        }, { rootMargin: '200px' });
+        observer.observe(banner);
     }
 </script>

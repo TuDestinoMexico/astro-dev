@@ -20,15 +20,19 @@ export default defineConfig({
   integrations: [
     icon(), 
     react(), 
-    sitemap({
-      filter: (page) => {
-        const excludedPaths = ['/admin/', '/cliente/', '/api/', '/404', '/mantenimiento'];
+     sitemap({
+        customSitemaps: [
+          'https://tudestinomx.com/sitemap-catalog.xml',
+          'https://tudestinomx.com/sitemap-destinations.xml',
+          'https://tudestinomx.com/sitemap-guides.xml'
+        ],
+       filter: (page) => {
+        const excludedPaths = ['/admin/', '/cliente/', '/api/', '/404', '/mantenimiento', '/xolo-ruta'];
         return !excludedPaths.some(path => page.includes(path));
       },
       changefreq: 'weekly',
       priority: 0.7,
-      lastmod: new Date(),
-      serialize: (item) => {
+       serialize: (item) => {
         const url = item.url;
         let priority = 0.6;
         if (url === 'https://tudestinomx.com/') priority = 1.0;
@@ -36,11 +40,10 @@ export default defineConfig({
         else if (url.includes('/hoteles') || url.includes('/tours') || url.includes('/destinos')) priority = 0.8;
         else if (url.includes('/nosotros') || url.includes('/recomendaciones') || url.includes('/convenios')) priority = 0.7;
         
-        return {
-          ...item,
-          priority,
-          lastmod: new Date().toISOString()
-        };
+         return {
+            ...item,
+			priority
+         };
       }
     })
   ],

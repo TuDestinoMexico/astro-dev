@@ -1,0 +1,42 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/layout/Header.astro';
+import Footer from '../../../components/layout/Footer.astro';
+import Content from '../../../components/layout/Content.astro';
+import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro';
+import DestinationCatalogSection from '../../../components/ui/destinations/DestinationCatalogSection.astro';
+import { destinations } from '../../../data/destinations';
+import { fetchDestinationCatalog } from '../../../lib/destinations';
+
+const destination = destinations.find((item) => item.slug === Astro.params.slug);
+if (!destination) return Astro.redirect('/404', 404);
+
+const catalog = await fetchDestinationCatalog(destination);
+if (catalog.unavailable) Astro.response.headers.set('Retry-After', '3600');
+const shouldNoindex = catalog.unavailable || catalog.hotels.length === 0;
+if (!catalog.unavailable && catalog.hotels.length === 0) Astro.response.status = 404;
+const title = `Hoteles en ${destination.name} | Tu Destino MX`;
+const description = `Encuentra hoteles para tus vacaciones en ${destination.name}. Compara opciones de hospedaje y solicita asesoría personalizada.`;
+---
+
+<Layout title={title} description={description} image={destination.image} noindex={shouldNoindex}>
+    <Header />
+    <Content>
+        <main class="space-y-10 pb-16 pt-6 md:pt-10">
+            <Breadcrumbs items={[
+                { label: 'Inicio', href: '/' },
+                { label: 'Destinos', href: '/destinos' },
+                { label: destination.name, href: `/destinos/${destination.slug}/` },
+                { label: 'Hoteles' }
+            ]} />
+            <header class="max-w-3xl">
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-600">Hospedaje en {destination.country}</p>
+                <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-900 md:text-5xl">Hoteles en {destination.name}</h1>
+                <p class="mt-5 text-lg leading-8 text-slate-600">Explora opciones de hospedaje para tu viaje a {destination.name}. Te ayudamos a elegir de acuerdo con fechas, presupuesto y tipo de experiencia.</p>
+            </header>
+            <DestinationCatalogSection destination={destination} type="hotel" items={catalog.hotels} />
+            <a href={`/destinos/${destination.slug}/`} class="font-bold text-indigo-700 hover:underline">Volver a la guía de {destination.name}</a>
+        </main>
+    </Content>
+    <Footer />
+</Layout>

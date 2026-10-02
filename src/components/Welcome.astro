@@ -11,6 +11,7 @@ import RecentlyViewed from "./ui/RecentlyViewed";
 import PromoLocker from "./ui/PromoLocker";
 import EventsHero from "./ui/home/EventsHero.astro";
 import { fetchHotelList } from "../lib/catalog";
+import { destinations } from "../data/destinations";
 
 const catalogResult = await fetchHotelList<any>();
 const catalogUnavailable = catalogResult.status === 'unavailable';
@@ -26,38 +27,68 @@ const hoteles = catalogResult.status === 'ok' ? catalogResult.data : [];
 
     <TikTokCTA />
 
-    {catalogUnavailable ? (
-        <div class="text-center py-12 px-4">
-            <p class="text-gray-700 font-semibold">El catálogo de hoteles no está disponible temporalmente.</p>
-            <p class="text-gray-500 mt-2">Puedes continuar explorando el sitio o contactarnos para recibir asesoría.</p>
+    <section class="space-y-6" aria-labelledby="featured-hotels-heading">
+        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-600">Hospedaje para tu viaje</p>
+                <h2 id="featured-hotels-heading" class="mt-2 text-3xl font-black tracking-tight text-slate-900">Hoteles destacados</h2>
+            </div>
+            <a href="/hoteles" class="font-bold text-indigo-700 hover:underline">Ver todos los hoteles</a>
         </div>
-    ) : hoteles.length > 0 ? (
-        <Grid grid={5}>
-            {hoteles.slice(0, 5).map(
-                (
-                    hotel: { name: string | undefined;
-                        slug: string | undefined;
-                        images: {
-                            principal?: { url: string }[];
-                            secundaria?: { url: string }[];
-                            adicional?: { url: string }[];
-                        } | undefined;
-                        destino: string | undefined;
-                    }) => (
+
+        {catalogUnavailable ? (
+            <div class="text-center py-12 px-4">
+                <p class="text-gray-700 font-semibold">El catálogo de hoteles no está disponible temporalmente.</p>
+                <p class="text-gray-500 mt-2">Puedes continuar explorando el sitio o contactarnos para recibir asesoría.</p>
+            </div>
+        ) : hoteles.length > 0 ? (
+            <Grid grid={5}>
+                {hoteles.slice(0, 5).map(
+                    (hotel: { name: string | undefined; slug: string | undefined; images: any; destino: string | undefined }) => (
                         <Card
-                                title={hotel.name}
-                                slug={hotel.slug}
-                                photo={hotel.images}
-                                type="hotel"
-                                destino={hotel.destino}
+                            title={hotel.name}
+                            slug={hotel.slug}
+                            photo={hotel.images}
+                            type="hotel"
+                            destino={hotel.destino}
                         />
-                ))}
-        </Grid>
-    ) : (
-        <div class="text-center py-12 px-4">
-            <p class="text-gray-500 italic">No se encontraron hoteles disponibles en este momento.</p>
+                    ))}
+            </Grid>
+        ) : (
+            <div class="text-center py-12 px-4">
+                <p class="text-gray-500 italic">No se encontraron hoteles disponibles en este momento.</p>
+            </div>
+        )}
+    </section>
+
+    <section class="space-y-6 py-8" aria-labelledby="featured-destinations-heading">
+        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">Inspírate para viajar</p>
+                <h2 id="featured-destinations-heading" class="mt-2 text-3xl font-black tracking-tight text-slate-900">Explora destinos</h2>
+            </div>
+            <a href="/destinos" class="font-bold text-emerald-700 hover:underline">Ver todos los destinos</a>
         </div>
-    )}
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {destinations.slice(0, 8).map((destination) => (
+                <a href={`/destinos/${destination.slug}/`} class="rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-1 hover:shadow-lg">
+                    <span class="text-sm font-black text-slate-900">{destination.name}</span>
+                    <span class="mt-1 block text-xs text-slate-500">Hoteles y tours</span>
+                </a>
+            ))}
+        </div>
+    </section>
+
+    <section class="space-y-6 py-8" aria-labelledby="featured-tours-heading">
+        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-purple-600">Actividades y excursiones</p>
+                <h2 id="featured-tours-heading" class="mt-2 text-3xl font-black tracking-tight text-slate-900">Tours para complementar tu viaje</h2>
+            </div>
+            <a href="/tours" class="font-bold text-purple-700 hover:underline">Ver todos los tours</a>
+        </div>
+        <p class="max-w-3xl leading-7 text-slate-600">Descubre experiencias acuáticas, culturales y de aventura. Consulta disponibilidad y combina tus actividades con el hospedaje que prefieras.</p>
+    </section>
 
     <!--<PromoLocker client:only="react">-->
     <!--    <Grid-->
