@@ -67,7 +67,7 @@ Funcionalidades identificadas en el código fuente actual. No incluye planificac
 - [x] Quiénes somos / equipo
 - [x] Convenios corporativos
 - [x] Recomendaciones
-- [x] XoloRuta
+- [x] XoloRuta (retirada; `/xolo-ruta` redirige a `/404`)
 
 ---
 
