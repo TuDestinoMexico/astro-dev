@@ -121,6 +121,8 @@ Antes de desplegar, verificar en el proyecto de prueba que una cuenta con `admin
 ## Sitemap y SEO
 
 - `@astrojs/sitemap` genera `sitemap-index.xml` automáticamente
+- `sitemap-catalog.xml` se genera en SSR desde la API de hoteles y tours; el índice lo referencia mediante `customSitemaps`
+- Si el catálogo falla, `sitemap-catalog.xml` sirve su última versión disponible en memoria o responde `503` con `Retry-After`; nunca publica un sitemap vacío como resultado de una caída temporal
 - `site: 'https://tudestinomx.com'` configurado en `astro.config.mjs`
 - `robots.txt` dinámico via endpoint server
 

@@ -41,6 +41,7 @@ Cliente (Browser)
 - **SSR (`output: 'server'`):** todas las páginas se renderizan en el servidor.
 - **React islands:** componentes con directivas `client:only`, `client:load`, `client:visible` para interactividad. `BookingCalendar` usa `client:only="react"` porque depende de GSAP, `createPortal` y APIs del navegador.
 - **No hay SSG** (no se prerenderizan páginas estáticamente).
+- **Sitemap de catálogo:** `/sitemap-catalog.xml` consulta hoteles y tours en SSR y se declara en el índice de sitemap estático.
 
 ---
 

@@ -1,2 +1,16 @@
 ---
-return Astro.redirect('/404', 301);
+Astro.response.status = 410;
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+---
+<!doctype html>
+<html lang="es-MX">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="robots" content="noindex, nofollow" />
+        <title>Contenido retirado | Tu Destino México</title>
+    </head>
+    <body>
+        <p>Este contenido ya no está disponible.</p>
+    </body>
+</html>

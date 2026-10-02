@@ -18,7 +18,7 @@ const tourListSchema = {
         '@type': 'ListItem',
         position: index + 1,
         item: {
-            '@type': ['TouristAttraction', 'Event'],
+            '@type': 'TouristAttraction',
             name: tour.name,
             url: `https://tudestinomx.com/tour/${tour.slug}`,
             image: tour.images?.principal?.[0]?.url || tour.imagenes,
@@ -26,9 +26,7 @@ const tourListSchema = {
                 '@type': 'Place',
                 address: {
                     '@type': 'PostalAddress',
-                    addressLocality: tour.destino,
-                    addressRegion: 'Quintana Roo',
-                    addressCountry: 'MX'
+                    addressLocality: tour.destino || undefined
                 }
             },
             aggregateRating: tour.reviews && tour.reviews_count ? {

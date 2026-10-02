@@ -8,6 +8,7 @@ import Gallery from '../../components/ui/hotel/Gallery.astro';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
 import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import { fetchTourDetail } from '../../lib/catalog';
 import { sanitizeCatalogHtml, stripCatalogHtml } from '../../lib/sanitizeHtml';
 
@@ -24,6 +25,11 @@ if (catalogResult.status === 'not-found') {
 }
 
 const catalogUnavailable = catalogResult.status === 'unavailable';
+if (catalogUnavailable) {
+    Astro.response.status = 503;
+    Astro.response.headers.set('Retry-After', '3600');
+    Astro.response.headers.set('Cache-Control', 'no-store');
+}
 const tour: any = catalogResult.status === 'ok' ? catalogResult.data : {};
 const tourDescriptionHtml = sanitizeCatalogHtml(tour.description);
 const tourDescriptionText = stripCatalogHtml(tour.description);
@@ -56,7 +62,7 @@ const recentlyViewedData = {
 
 const tourSchema = {
     '@context': 'https://schema.org',
-    '@type': ['TouristAttraction', 'Event'],
+    '@type': 'TouristAttraction',
     name: tour.name,
     description: tourDescriptionText,
     url: `https://tudestinomx.com/tour/${slug}`,
@@ -67,9 +73,7 @@ const tourSchema = {
         address: {
             '@type': 'PostalAddress',
             streetAddress: address,
-            addressLocality: tour.destino || 'Cancún',
-            addressRegion: 'Quintana Roo',
-            addressCountry: 'MX'
+            addressLocality: tour.destino || undefined
         },
         geo: coordinates.length >= 2 ? {
             '@type': 'GeoCoordinates',
@@ -83,10 +87,6 @@ const tourSchema = {
         url: 'https://tudestinomx.com',
         telephone: '+52-998-980-6611'
     },
-    eventStatus: 'https://schema.org/EventScheduled',
-    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-    startDate: tour.start_date || new Date().toISOString(),
-    endDate: tour.end_date || new Date(Date.now() + 86400000).toISOString(),
     offers: tour.price ? {
         '@type': 'Offer',
         name: tour.name,
@@ -95,7 +95,6 @@ const tourSchema = {
         priceCurrency: 'MXN',
         price: tour.price,
         availability: 'https://schema.org/InStock',
-        validFrom: new Date().toISOString(),
         seller: {
             '@type': 'Organization',
             name: 'Tu Destino México'
@@ -120,7 +119,8 @@ const tourSchema = {
   title={tour.name || "Detalle de Tour"} 
   description={tourDescriptionText || "Detalle de Tour"}
   image={principalImage}
-  type="website"
+  type="article"
+  noindex={catalogUnavailable}
 >
     <Header/>
 
@@ -134,6 +134,11 @@ const tourSchema = {
     <main class="container mx-auto my-8 space-y-8 px-5 xl:px-0">
 
         <div class="space-y-4">
+            <Breadcrumbs items={[
+                { label: 'Inicio', href: '/' },
+                { label: 'Tours', href: '/tours' },
+                { label: tour.name }
+            ]} />
             <div class="flex items-center justify-between gap-4 flex-wrap">
                 <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
                     {tour.name}

@@ -39,7 +39,8 @@ const hiddenImages = hasImages ? images.slice(5) : [];
                         <img
                                 src={mainImage.url}
                                 alt={mainImage.alt || hotelName}
-                                loading="lazy"
+                                loading="eager"
+                                fetchpriority="high"
                                 class="gallery-img w-full h-102 object-cover transition-all duration-500 opacity-0 group-hover:scale-105"
                         />
 

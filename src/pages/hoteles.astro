@@ -30,9 +30,7 @@ const hotelListSchema = {
             image: hotel.images?.principal?.[0]?.url || hotel.imagenes,
             address: {
                 '@type': 'PostalAddress',
-                addressLocality: hotel.destino,
-                addressRegion: 'Quintana Roo',
-                addressCountry: 'MX'
+                addressLocality: hotel.destino || undefined
             },
             aggregateRating: hotel.reviews && hotel.reviews_count ? {
                 '@type': 'AggregateRating',

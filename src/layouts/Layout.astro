@@ -9,9 +9,11 @@ interface Props {
 	description?: string
 	image?: string
 	type?: 'website' | 'article'
+	noindex?: boolean
+	nofollow?: boolean
 }
 
-const { title, description, image, type = 'website' } = Astro.props
+const { title, description, image, type = 'website', noindex = false, nofollow = false } = Astro.props
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).href
 const ogImage = image || 'https://storage.googleapis.com/tudestinomx_bucket/assets/og-default.jpg'
 const ogTitle = title || 'Tu Destino México | Agencia de Viajes en Cancún'
@@ -20,7 +22,7 @@ const twitterHandle = '@tudestinomexico'
 
 const organizationSchema = {
 	'@context': 'https://schema.org',
-	'@type': 'Organization',
+	'@type': ['Organization', 'TravelAgency'],
 	name: 'Tu Destino México',
 	url: 'https://tudestinomx.com',
 	logo: 'https://storage.googleapis.com/tudestinomx_bucket/assets/test/tdmx_logo_mundial.png',
@@ -50,14 +52,6 @@ const websiteSchema = {
 	'@type': 'WebSite',
 	name: 'Tu Destino México',
 	url: 'https://tudestinomx.com',
-	potentialAction: {
-		'@type': 'SearchAction',
-		target: {
-			'@type': 'EntryPoint',
-			urlTemplate: 'https://tudestinomx.com/buscar?q={search_term_string}'
-		},
-		'query-input': 'required name=search_term_string'
-	},
 	publisher: organizationSchema
 }
 ---
@@ -73,11 +67,12 @@ const websiteSchema = {
 		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 		<meta name="generator" content={Astro.generator} />
 		<link rel="sitemap" href="/sitemap-index.xml" />
-		<link rel="canonical" href={canonicalURL} />
 		<SEO
 			title={title}
 			description={description}
 			canonical={canonicalURL}
+			noindex={noindex}
+			nofollow={nofollow}
 			openGraph={{
 				basic: {
 					title: ogTitle,
@@ -89,6 +84,10 @@ const websiteSchema = {
 					description,
 					locale: 'es_MX',
 					siteName: 'Tu Destino México'
+				},
+				image: {
+					url: ogImage,
+					alt: ogTitle
 				}
 			}}
 			twitter={{
@@ -97,7 +96,8 @@ const websiteSchema = {
 				creator: twitterHandle,
 				title: ogTitle,
 				description,
-				image: ogImage
+				image: ogImage,
+				imageAlt: ogTitle
 			}}
 		/>
 		<script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
