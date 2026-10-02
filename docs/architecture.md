@@ -61,7 +61,6 @@ src/
 │       ├── recomendacion/     # FacebookReel.jsx
 │       ├── single/            # Card.astro, HeroBanner.astro
 │       ├── team/              # MemberCard.astro, MemberSkeleton.astro
-│       ├── timeline/          # Timeline, navegación, resumen, items y MexicoMap de Xolo Ruta
 │       ├── Banner.astro, BookingCalendar.tsx, Button.astro, etc.
 ├── layouts/
 │   ├── Layout.astro           # Layout público (Poppins, Analytics, SEO)
@@ -98,7 +97,6 @@ src/
     ├── nosotros.astro         # Quiénes somos / equipo
     ├── pagos.astro            # Métodos de pago Openpay
     ├── recomendaciones.astro  # Recomendaciones
-    ├── xolo-ruta.astro        # XoloRuta
     ├── mantenimiento.astro    # Página 503 mantenimiento
     ├── terminos-condiciones.astro
     ├── privacidad.astro
