@@ -43,6 +43,7 @@ Cliente (Browser)
 - **No hay SSG** (no se prerenderizan páginas estáticamente).
 - **Sitemap de catálogo:** `/sitemap-catalog.xml` consulta hoteles y tours en SSR y se declara en el índice de sitemap estático.
 - **Destinos:** `/destinos/[slug]/` funciona como hub editorial y comercial; `/destinos/[slug]/hoteles/` y `/destinos/[slug]/tours/` solo son indexables cuando el catálogo contiene productos activos para esa combinación.
+- **Guías:** `/guias/` lista contenido editorial y `/guias/[slug]/` entrega artículos con `Article`, breadcrumbs y enlaces comerciales relacionados.
 
 ---
 

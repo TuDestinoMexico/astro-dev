@@ -23,7 +23,8 @@ export default defineConfig({
      sitemap({
         customSitemaps: [
           'https://tudestinomx.com/sitemap-catalog.xml',
-          'https://tudestinomx.com/sitemap-destinations.xml'
+          'https://tudestinomx.com/sitemap-destinations.xml',
+          'https://tudestinomx.com/sitemap-guides.xml'
         ],
        filter: (page) => {
         const excludedPaths = ['/admin/', '/cliente/', '/api/', '/404', '/mantenimiento', '/xolo-ruta'];
