@@ -4,48 +4,47 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import Content from "../components/layout/Content.astro";
 import HeroBanner from "../components/ui/single/HeroBanner.astro";
+import { destinations } from "../data/destinations";
 
 // 1. Organizamos tus datos en un arreglo limpio
-const promos = [
-    { nombre: "Cancún", url: "https://link.tudestinomx.com/PromoCancun", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/cancun.png" },
-    { nombre: "Cozumel", url: "https://link.tudestinomx.com/PromoCozumel", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/cozumel.png" },
-    { nombre: "Huatulco", url: "https://link.tudestinomx.com/PromoHuatulco", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/huatulco.png" },
-    { nombre: "Riviera Maya", url: "https://link.tudestinomx.com/PromoRivieraMaya", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/riviera-maya.png" },
-    { nombre: "Puerto Vallarta", url: "https://link.tudestinomx.com/PromoPuertoVallarta", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/puerto-vallarta.png" },
-    { nombre: "Punta Cana", url: "https://link.tudestinomx.com/PromoPuntaCana", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/punta-cana.png" },
-    { nombre: "Colombia", url: "https://link.tudestinomx.com/PromoColombia", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/colombia.png" },
-    { nombre: "Los Cabos", url: "https://link.tudestinomx.com/PromoLosCabos", img: "https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/los-cabos.png" }
-];
 ---
 
-<Layout title="Nuestros Destinos | Tu Destino México">
+<Layout title="Destinos para Vacacionar en México y el Caribe | Tu Destino MX" description="Explora destinos de playa, cultura y aventura. Descubre hoteles, tours y experiencias, y recibe asesoría para planear tus próximas vacaciones." type="website">
     <Header/>
 
     <Content>
         <HeroBanner
-                title="Destinos"
+                title="Destinos para tus próximas vacaciones"
                 imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
                 altText="Explora nuestros destinos"
         />
 
         <div class="max-w-7xl mx-auto px-4 py-12">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {promos.map((promo) => (
+            <div class="mb-10 max-w-3xl">
+                <p class="text-lg leading-8 text-slate-600">Encuentra ideas para viajar por México y otros destinos de playa. Explora cada guía para conocer opciones de hoteles, tours y la forma de solicitar una cotización personalizada.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {destinations.map((destination) => (
                         <a
-                                href={promo.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href={`/destinos/${destination.slug}/`}
                                 class="group block overflow-hidden rounded-xl shadow-md hover:shadow-2xl transition-all duration-300"
                         >
                             <div class="relative overflow-hidden">
                                 <img
-                                        src={promo.img}
-                                        alt={`Promoción ${promo.nombre}`}
+                                        src={destination.image}
+                                        alt={destination.alt}
+                                        width="900"
+                                        height="650"
                                         class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                                         loading="lazy"
                                 />
                                 <div class="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors"></div>
+                            </div>
+                            <div class="bg-white p-4">
+                                <h2 class="text-lg font-black text-slate-900">{destination.name}</h2>
+                                <p class="mt-1 text-sm text-slate-500">Hoteles, tours y asesoría</p>
                             </div>
                         </a>
                 ))}
@@ -57,6 +56,7 @@ const promos = [
                 <a
                         href="https://wa.me/529989806611"
                         target="_blank"
+                        rel="noopener noreferrer"
                         class="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-3 rounded-full font-bold hover:bg-green-600 transition-colors"
                 >
                     Hablar con un asesor
