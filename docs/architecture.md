@@ -39,6 +39,7 @@ Cliente (Browser)
 ## Patrón de renderizado
 
 - **SSR (`output: 'server'`):** todas las páginas se renderizan en el servidor.
+- **Home crítico:** el hero se renderiza en SSR y usa su fallback si Firestore supera 1.5 segundos; el catálogo destacado usa una server island con fallback para que su API externa no retrase el HTML inicial. La configuración general de header y hero se consulta mediante una caché compartida de 60 segundos por instancia.
 - **React islands:** componentes con directivas `client:only`, `client:load`, `client:visible` para interactividad. `BookingCalendar` usa `client:only="react"` porque depende de GSAP, `createPortal` y APIs del navegador.
 - **No hay SSG** (no se prerenderizan páginas estáticamente).
 - **Sitemap de catálogo:** `/sitemap-catalog.xml` consulta hoteles y tours en SSR y se declara en el índice de sitemap estático.

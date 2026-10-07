@@ -50,6 +50,9 @@ export default function EventsHeroControls({ slides, whatsappNumber, autoplayMs 
             if (cancelled) return;
 
             const image = hero.querySelector('[data-hero-image]');
+            const imageMobile = hero.querySelector('[data-hero-image-mobile]');
+            const imageTablet = hero.querySelector('[data-hero-image-tablet]');
+            const imageDesktop = hero.querySelector('[data-hero-image-desktop]');
             const eyebrow = hero.querySelector('[data-hero-eyebrow]');
             const index = hero.querySelector('[data-hero-index]');
             const location = hero.querySelector('[data-hero-location]');
@@ -105,6 +108,9 @@ export default function EventsHeroControls({ slides, whatsappNumber, autoplayMs 
                 secondaryLabel.textContent = slide.secondaryLabel;
             }
             image.alt = slide.alt || slide.title;
+            if (imageMobile) imageMobile.srcset = `${slide.imageMobile || slide.image} 960w`;
+            if (imageTablet) imageTablet.srcset = `${slide.imageTablet || slide.image} 1280w`;
+            if (imageDesktop) imageDesktop.srcset = `${slide.image} 1600w`;
             image.onload = reveal;
             image.onerror = reveal;
             image.src = slide.image;
