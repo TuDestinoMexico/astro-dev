@@ -32,8 +32,9 @@ Renderizados en servidor. Sin estado cliente.
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
 | `TikTokCTA.astro` | `components/ui/home/TikTokCTA.astro` | CTA visual para promocionar `@tudestinomexico` en TikTok con tarjeta vertical tipo video corto |
+| `FeaturedHotels.astro` | `components/ui/home/FeaturedHotels.astro` | Server island del catálogo destacado; carga tras el HTML crítico con fallback SSR estable |
 | `RecomendacionesBanner.astro` | `components/ui/home/RecomendacionesBanner.astro` | Banner de recomendaciones |
-| `Welcome.astro` | `components/Welcome.astro` | Composición de homepage (hero SSR + grid + modales) |
+| `Welcome.astro` | `components/Welcome.astro` | Composición de homepage (hero SSR, server island de hoteles y modales) |
 
 ---
 
@@ -45,7 +46,7 @@ Renderizados en servidor. Sin estado cliente.
 |---|---|---|
 | `EventsHero.astro` | — | Shell SSR del hero editorial principal: composición asimétrica de panel de marca + imagen de destino, primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
 | `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP tipo cambio de página; autoplay de 7 segundos con pausa/reanudación, respeta `prefers-reduced-motion` y actualiza imagen, metadata, contenido y CTAs después de la hidratación |
-| `HeroView.jsx` | — | Módulo admin para CRUD de slides del hero, orden, publicación individual, subida WebP, CTAs, preview de imagen y configuración del autoplay |
+| `HeroView.jsx` | — | Módulo admin para CRUD de slides del hero, orden, publicación individual, generación WebP responsive, CTAs, preview de imagen y configuración del autoplay |
 | `HotSalePromoRibbon.jsx` | (no determinada) | Cinta promocional Hot Sale |
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |

@@ -37,6 +37,10 @@ const EMPTY_FORM = {
     descripcion: '',
     imagenUrl: '',
     imagenPath: '',
+    imagenMobileUrl: '',
+    imagenMobilePath: '',
+    imagenTabletUrl: '',
+    imagenTabletPath: '',
     alt: '',
     ubicacion: '',
     meta: '',
@@ -48,6 +52,11 @@ const EMPTY_FORM = {
 };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const IMAGE_VARIANTS = [
+    { key: 'mobile', maxWidth: 960 },
+    { key: 'tablet', maxWidth: 1280 },
+    { key: 'desktop', maxWidth: 1600 },
+];
 
 const inputClass = 'mt-2 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20';
 const labelClass = 'text-[10px] font-black uppercase tracking-[0.14em] text-slate-500';
@@ -57,14 +66,13 @@ const normalizeSlide = (snapshot) => ({
     ...snapshot.data(),
 });
 
-const convertImageToWebp = (file) => new Promise((resolve, reject) => {
+const convertImageToWebp = (file, maxWidth) => new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
     const image = new window.Image();
 
     image.onload = () => {
         URL.revokeObjectURL(objectUrl);
-        const maxDimension = 2400;
-        const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+        const scale = Math.min(1, maxWidth / image.naturalWidth);
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
         canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -92,10 +100,30 @@ const convertImageToWebp = (file) => new Promise((resolve, reject) => {
     image.src = objectUrl;
 });
 
+const uploadImage = (fileRef, blob, onProgress) => new Promise((resolve, reject) => {
+    const uploadTask = uploadBytesResumable(fileRef, blob, {
+        contentType: 'image/webp',
+        cacheControl: 'public,max-age=31536000,immutable',
+    });
+
+    uploadTask.on(
+        'state_changed',
+        (snapshot) => onProgress(snapshot.bytesTransferred),
+        reject,
+        async () => {
+            try {
+                resolve(await getDownloadURL(uploadTask.snapshot.ref));
+            } catch (error) {
+                reject(error);
+            }
+        },
+    );
+});
+
 export default function HeroView() {
     const [slides, setSlides] = useState([]);
     const [form, setForm] = useState(EMPTY_FORM);
-    const [previousImagePath, setPreviousImagePath] = useState('');
+    const [previousImagePaths, setPreviousImagePaths] = useState([]);
     const [autoplayMs, setAutoplayMs] = useState(7000);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -142,13 +170,17 @@ export default function HeroView() {
     const startNewSlide = () => {
         setError('');
         setForm({ ...EMPTY_FORM, posicion: slides.length });
-        setPreviousImagePath('');
+        setPreviousImagePaths([]);
     };
 
     const selectSlide = (slide) => {
         setError('');
         setForm({ ...EMPTY_FORM, ...slide });
-        setPreviousImagePath(slide.imagenPath || '');
+        setPreviousImagePaths([
+            slide.imagenPath,
+            slide.imagenMobilePath,
+            slide.imagenTabletPath,
+        ].filter(Boolean));
     };
 
     const updateField = (field, value) => setForm((current) => ({ ...current, [field]: value }));
@@ -165,29 +197,43 @@ export default function HeroView() {
         setError('');
         setIsUploading(true);
         setUploadProgress(0);
+        const uploadedPaths = [];
 
         try {
-            const optimizedBlob = await convertImageToWebp(file);
+            const variants = await Promise.all(IMAGE_VARIANTS.map(async (variant) => ({
+                ...variant,
+                blob: await convertImageToWebp(file, variant.maxWidth),
+            })));
+            const totalBytes = variants.reduce((total, variant) => total + variant.blob.size, 0);
+            const transferredBytes = {};
             const draftId = form.id || `draft-${Date.now()}`;
-            const fileRef = ref(storage, `hero/${draftId}/hero_${Date.now()}.webp`);
-            const uploadTask = uploadBytesResumable(fileRef, optimizedBlob, {
-                contentType: 'image/webp',
-                cacheControl: 'public,max-age=31536000,immutable',
-            });
+            const timestamp = Date.now();
+            const uploadedVariants = [];
+            for (const variant of variants) {
+                const fileRef = ref(storage, `hero/${draftId}/${variant.key}_${timestamp}.webp`);
+                const imageUrl = await uploadImage(fileRef, variant.blob, (bytesTransferred) => {
+                    transferredBytes[variant.key] = bytesTransferred;
+                    const uploadedBytes = Object.values(transferredBytes).reduce((total, value) => total + value, 0);
+                    setUploadProgress((uploadedBytes / totalBytes) * 100);
+                });
 
-            await new Promise((resolve, reject) => {
-                uploadTask.on(
-                    'state_changed',
-                    (snapshot) => setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
-                    reject,
-                    resolve,
-                );
-            });
+                uploadedPaths.push(fileRef.fullPath);
+                uploadedVariants.push({ key: variant.key, imageUrl, imagePath: fileRef.fullPath });
+            }
+            const images = Object.fromEntries(uploadedVariants.map((variant) => [variant.key, variant]));
 
-            const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            setForm((current) => ({ ...current, imagenUrl: imageUrl, imagenPath: fileRef.fullPath }));
+            setForm((current) => ({
+                ...current,
+                imagenUrl: images.desktop.imageUrl,
+                imagenPath: images.desktop.imagePath,
+                imagenMobileUrl: images.mobile.imageUrl,
+                imagenMobilePath: images.mobile.imagePath,
+                imagenTabletUrl: images.tablet.imageUrl,
+                imagenTabletPath: images.tablet.imagePath,
+            }));
         } catch (uploadError) {
             console.error('Error subiendo imagen del hero:', uploadError);
+            await Promise.all(uploadedPaths.map((imagePath) => deleteObject(ref(storage, imagePath)).catch(() => undefined)));
             setError('No se pudo optimizar o subir la imagen.');
         } finally {
             setIsUploading(false);
@@ -225,6 +271,10 @@ export default function HeroView() {
             descripcion: form.descripcion.trim(),
             imagenUrl: form.imagenUrl.trim(),
             imagenPath: form.imagenPath.trim(),
+            imagenMobileUrl: form.imagenMobileUrl.trim(),
+            imagenMobilePath: form.imagenMobilePath.trim(),
+            imagenTabletUrl: form.imagenTabletUrl.trim(),
+            imagenTabletPath: form.imagenTabletPath.trim(),
             alt: form.alt.trim(),
             ubicacion: form.ubicacion.trim(),
             meta: form.meta.trim(),
@@ -243,16 +293,23 @@ export default function HeroView() {
                 await setDoc(slideRef, { ...payload, creadoEn: serverTimestamp() });
             }
 
-            if (previousImagePath && previousImagePath !== payload.imagenPath) {
-                try {
-                    await deleteObject(ref(storage, previousImagePath));
-                } catch (storageError) {
-                    if (storageError?.code !== 'storage/object-not-found') throw storageError;
-                }
-            }
+            const currentImagePaths = new Set([
+                payload.imagenPath,
+                payload.imagenMobilePath,
+                payload.imagenTabletPath,
+            ].filter(Boolean));
+            await Promise.all(previousImagePaths
+                .filter((imagePath) => !currentImagePaths.has(imagePath))
+                .map(async (imagePath) => {
+                    try {
+                        await deleteObject(ref(storage, imagePath));
+                    } catch (storageError) {
+                        if (storageError?.code !== 'storage/object-not-found') throw storageError;
+                    }
+                }));
 
             setForm((current) => ({ ...current, id: slideRef.id }));
-            setPreviousImagePath(payload.imagenPath);
+            setPreviousImagePaths([...currentImagePaths]);
             showSuccess('Diapositiva guardada correctamente.');
         } catch (saveError) {
             console.error('Error guardando slide del hero:', saveError);
@@ -268,13 +325,17 @@ export default function HeroView() {
         setIsSaving(true);
         try {
             await deleteDoc(doc(db, 'hero_slides', form.id));
-            if (form.imagenPath) {
+            await Promise.all([
+                form.imagenPath,
+                form.imagenMobilePath,
+                form.imagenTabletPath,
+            ].filter(Boolean).map(async (imagePath) => {
                 try {
-                    await deleteObject(ref(storage, form.imagenPath));
+                    await deleteObject(ref(storage, imagePath));
                 } catch (storageError) {
                     if (storageError?.code !== 'storage/object-not-found') throw storageError;
                 }
-            }
+            }));
             startNewSlide();
             showSuccess('Diapositiva eliminada.');
         } catch (deleteError) {
@@ -388,7 +449,7 @@ export default function HeroView() {
                         </div>
 
                         <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-24 w-36 shrink-0 overflow-hidden rounded-lg bg-slate-200">{form.imagenUrl ? <img src={form.imagenUrl} alt={form.alt || ''} className="h-full w-full object-cover" /> : <div className="flex h-full flex-col items-center justify-center gap-1 text-slate-400"><ImagePlus size={22} /><span className="text-[9px] font-bold uppercase">Sin imagen</span></div>}</div><div><p className={labelClass}>Imagen principal *</p><p className="mt-1 text-xs leading-5 text-slate-500">WebP optimizado, máximo 10 MB originales. Ideal: imagen horizontal con sujeto o destino reconocible.</p><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white transition hover:bg-brand-primary"><Upload size={14} /> {isUploading ? `Subiendo ${Math.round(uploadProgress)}%` : 'Subir imagen'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} disabled={isUploading} className="sr-only" /></label></div></div>
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><div className="h-24 w-36 shrink-0 overflow-hidden rounded-lg bg-slate-200">{form.imagenUrl ? <img src={form.imagenUrl} alt={form.alt || ''} className="h-full w-full object-cover" /> : <div className="flex h-full flex-col items-center justify-center gap-1 text-slate-400"><ImagePlus size={22} /><span className="text-[9px] font-bold uppercase">Sin imagen</span></div>}</div><div><p className={labelClass}>Imagen responsive *</p><p className="mt-1 text-xs leading-5 text-slate-500">Genera WebP de 960 px para móvil, 1280 px para tablet y 1600 px para escritorio. Máximo 10 MB originales.</p><label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white transition hover:bg-brand-primary"><Upload size={14} /> {isUploading ? `Subiendo ${Math.round(uploadProgress)}%` : 'Subir imagen'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} disabled={isUploading} className="sr-only" /></label></div></div>
                             <label className="mt-4 block"><span className={labelClass}>Texto alternativo *</span><input value={form.alt} onChange={(event) => updateField('alt', event.target.value)} maxLength={140} placeholder="Bahía tropical vista desde el aire" className={inputClass} /></label>
                         </div>
 

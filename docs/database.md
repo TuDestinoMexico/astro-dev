@@ -62,6 +62,10 @@ Diapositivas independientes del hero editorial principal, administradas desde `H
 | `descripcion` | string | Descripción breve |
 | `imagenUrl` | string | URL pública de la imagen WebP |
 | `imagenPath` | string | Ruta de Storage para reemplazo o eliminación segura |
+| `imagenMobileUrl` | string | URL pública WebP de 960 px para viewport menor de 768 px |
+| `imagenMobilePath` | string | Ruta Storage de la variante móvil |
+| `imagenTabletUrl` | string | URL pública WebP de 1280 px para viewport entre 768 y 1199 px |
+| `imagenTabletPath` | string | Ruta Storage de la variante tablet |
 | `alt` | string | Texto alternativo de la imagen |
 | `ubicacion` | string | Destino mostrado en la composición |
 | `meta` | string | Metadata editorial de la experiencia |
@@ -72,7 +76,7 @@ Diapositivas independientes del hero editorial principal, administradas desde `H
 | `creadoEn` | timestamp | Fecha de creación |
 | `actualizadoEn` | timestamp | Última modificación |
 
-**Uso:** `HeroView.jsx` gestiona CRUD, publicación y orden; `homeHero.js` lee todos los documentos, filtra `activo !== false`, ordena por `posicion` y normaliza el contenido antes del render SSR. La lectura pública usa únicamente slides activos. Si no existen slides válidos, el hero no se renderiza. No se requiere índice compuesto porque el orden se resuelve después de la lectura.
+**Uso:** `HeroView.jsx` genera variantes WebP móvil (960 px), tablet (1280 px) y desktop (1600 px), y gestiona CRUD, publicación y orden. `homeHero.js` lee todos los documentos, filtra `activo !== false`, ordena por `posicion` y normaliza el contenido antes del render SSR. La lectura pública usa únicamente slides activos. Los slides existentes sin variantes conservan `imagenUrl` como fallback. Si no existen slides válidos, el hero no se renderiza. No se requiere índice compuesto porque el orden se resuelve después de la lectura.
 
 #### `equipo`
 Colección de miembros del equipo, ordenada por `posicion`.

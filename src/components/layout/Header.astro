@@ -4,41 +4,9 @@ import SubMenu from "../ui/SubMenu.astro";
 import ClientLoginButton from "../ui/ClientLoginButton.jsx";
 import { Icon } from "astro-icon/components";
 
-// IMPORTACIÓN DE FIREBASE: Ajusta la ruta de importación de tu db si es necesario
-import { db } from "../../lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { getGeneralConfig } from "../../lib/generalConfig";
 
-// 1. backup por si falla firebase
-let logoUrl = "https://storage.googleapis.com/tudestinomx_bucket/assets/test/tdmx_logo_mundial.png";
-let whatsappGlobal = "529987141365";
-
-try {
-    const configDocRef = doc(db, "config", "general");
-
-    // Creamos una promesa que se cancela automáticamente a los 2.5 segundos
-    const timeoutPromise: Promise<never> = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout de red")), 2500)
-    );
-
-    // Corremos una carrera: lo que pase primero (leer Firebase o llegar a 2.5s)
-    const docSnap = await Promise.race([
-        getDoc(configDocRef),
-        timeoutPromise
-    ]);
-
-    if (docSnap && docSnap.exists()) {
-        const configData = docSnap.data();
-        if (configData.logoUrl) {
-            logoUrl = configData.logoUrl;
-        }
-        if (configData.whatsappGlobal) {
-            whatsappGlobal = configData.whatsappGlobal;
-        }
-    }
-} catch (error) {
-    // Al atrapar el fallo aquí, tu consola limpia el log y la web carga rápido
-    console.warn("[Header.astro] Firestore lento o no disponible. Usando logo de respaldo seguro.");
-}
+const { logoUrl, whatsappGlobal } = await getGeneralConfig();
 ---
 <div>
     <div class="container mx-auto flex flex-col xl:flex-row justify-between items-center">

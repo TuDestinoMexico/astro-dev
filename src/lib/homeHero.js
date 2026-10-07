@@ -1,7 +1,9 @@
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
+import { getGeneralConfig } from './generalConfig';
 
 const DEFAULT_AUTOPLAY_MS = 7000;
+const HERO_REQUEST_TIMEOUT_MS = 1_500;
 
 const text = (value, fallback = '') => (
     typeof value === 'string' && value.trim() ? value.trim() : fallback
@@ -18,6 +20,8 @@ const normalizeSlide = (data, id) => ({
     title: text(data.titulo || data.title),
     description: text(data.descripcion || data.description),
     image: text(data.imagenUrl || data.image),
+    imageMobile: text(data.imagenMobileUrl || data.imageMobile),
+    imageTablet: text(data.imagenTabletUrl || data.imageTablet),
     alt: text(data.alt, text(data.titulo || data.title)),
     whatsappMsg: text(data.mensajeWhatsapp || data.whatsappMsg),
     location: text(data.ubicacion || data.location),
@@ -33,16 +37,26 @@ const normalizeAutoplay = (value) => {
     return Math.min(15000, Math.max(4000, Math.round(milliseconds)));
 };
 
+function withTimeout(promise) {
+    let timeoutId;
+
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout loading home hero')), HERO_REQUEST_TIMEOUT_MS);
+        }),
+    ]).finally(() => clearTimeout(timeoutId));
+}
+
 export async function fetchHomeHero() {
     try {
-        const [settingsSnapshot, slidesSnapshot, generalSnapshot] = await Promise.all([
+        const [settingsSnapshot, slidesSnapshot, generalConfig] = await withTimeout(Promise.all([
             getDoc(doc(db, 'config', 'homeHero')),
             getDocs(collection(db, 'hero_slides')),
-            getDoc(doc(db, 'config', 'general')),
-        ]);
+            getGeneralConfig(),
+        ]));
 
         const settings = settingsSnapshot.exists() ? settingsSnapshot.data() : {};
-        const general = generalSnapshot.exists() ? generalSnapshot.data() : {};
         const slides = slidesSnapshot.docs
             .map((slideSnapshot) => ({ id: slideSnapshot.id, ...slideSnapshot.data() }))
             .filter((slide) => slide.activo !== false)
@@ -52,7 +66,7 @@ export async function fetchHomeHero() {
 
         return {
             slides,
-            whatsappNumber: text(general.whatsappGlobal),
+            whatsappNumber: text(generalConfig.whatsappGlobal),
             autoplayMs: normalizeAutoplay(settings.autoplayMs),
         };
     } catch (error) {
