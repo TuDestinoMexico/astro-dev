@@ -43,6 +43,7 @@ import HeroBanner from "../components/ui/single/HeroBanner.astro";
                     <ul class="list-disc pl-6 space-y-2 bg-indigo-50 p-6 rounded-xl border border-indigo-100">
                         <li><strong>Identificación:</strong> Nombre completo.</li>
                         <li><strong>Contacto:</strong> Correo electrónico y <strong>número telefónico</strong> (incluyendo código de área).</li>
+                        <li><strong>Inicio de sesión social:</strong> Identificador de cuenta y, cuando el proveedor los comparta, nombre, correo electrónico y foto de perfil asociados con Google o Facebook.</li>
                         <li><strong>Facturación:</strong> RFC y domicilio fiscal (en caso de requerirse).</li>
                         <li><strong>Pago:</strong> Información procesada de forma cifrada a través de la pasarela segura de Openpay.</li>
                     </ul>
@@ -50,9 +51,35 @@ import HeroBanner from "../components/ui/single/HeroBanner.astro";
             </section>
 
             <section class="mb-12">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Finalidades del Uso de Datos</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Inicio de sesión con Google y Facebook</h2>
+                <div class="space-y-4">
+                    <p>
+                        Puede elegir iniciar sesión en el Área de Clientes usando su cuenta de Google o Facebook. Esta opción es voluntaria; también puede dejar de usarla cerrando sesión y solicitar la atención de sus datos mediante los medios indicados en este aviso.
+                    </p>
+                    <p>
+                        Cuando selecciona uno de estos proveedores, Firebase Authentication procesa la autenticación y recibimos un identificador de cuenta y los datos de perfil que el proveedor comparta, como nombre, correo electrónico o foto de perfil. Facebook puede no proporcionar un correo electrónico en todos los casos. No solicitamos ni almacenamos la contraseña de su cuenta de Google o Facebook.
+                    </p>
+                    <p>
+                        Usamos esos datos únicamente para autenticarle, crear o reconocer su cuenta en el Área de Clientes y permitirle acceder a las funciones asociadas a su cuenta, como sus reservas. No usamos los datos de inicio de sesión social para publicidad ni vendemos esta información.
+                    </p>
+                    <p>
+                        La autenticación involucra a Firebase Authentication y al proveedor que usted elija. Cada proveedor puede tratar sus datos conforme a sus propios avisos de privacidad:
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="text-indigo-600 font-bold underline">Aviso de privacidad de Google</a>.</li>
+                        <li><a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 font-bold underline">Política de privacidad de Facebook (Meta)</a>.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Finalidades del Uso de Datos</h2>
                 <p>Sus datos personales serán utilizados para las siguientes actividades primarias:</p>
                 <div class="grid md:grid-cols-2 gap-4 mt-4">
+                    <div class="p-4 border rounded-lg border-gray-200">
+                        <p class="font-bold text-indigo-600">Acceso al Área de Clientes</p>
+                        <p class="text-sm">Autenticarle mediante el proveedor que elija y mostrar la información asociada a su cuenta.</p>
+                    </div>
                     <div class="p-4 border rounded-lg border-gray-200">
                         <p class="font-bold text-indigo-600">Gestión de Reservas</p>
                         <p class="text-sm">Procesar confirmaciones de hoteles, tours y traslados.</p>
@@ -73,25 +100,37 @@ import HeroBanner from "../components/ui/single/HeroBanner.astro";
             </section>
 
             <section class="mb-12">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Transferencia de Datos</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Transferencia de Datos</h2>
                 <p>
-                    Le informamos que sus datos pueden ser compartidos con proveedores de servicios (Hoteles, Aerolíneas, Operadores de Tours) y con la institución bancaria a través de <strong>Openpay</strong> para completar el pago de su reservación.
+                    Para prestar nuestros servicios, los datos necesarios pueden ser tratados por proveedores de autenticación (Firebase Authentication y el proveedor social que usted seleccione), proveedores de viaje (Hoteles, Aerolíneas y Operadores de Tours) y Openpay y las instituciones financieras participantes para procesar pagos. Cada proveedor trata la información conforme a sus condiciones y avisos de privacidad.
                     <strong>No vendemos ni alquilamos su información personal a terceros para fines publicitarios.</strong>
                 </p>
             </section>
 
             <section class="mb-12 bg-gray-50 p-6 rounded-xl border border-gray-100">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Derechos ARCO</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">6. Derechos ARCO y solicitudes sobre sus datos</h2>
                 <p class="mb-4">
                     Usted tiene derecho a conocer qué datos tenemos de usted, para qué los utilizamos y las condiciones del uso que les damos (Acceso). Asimismo, es su derecho solicitar la corrección de su información (Rectificación), que la eliminemos de nuestros registros (Cancelación) o ponerse al uso de sus datos para fines específicos (Oposición).
                 </p>
                 <p>
-                    Para ejercer estos derechos, debe enviar una solicitud al correo: <a href="mailto:gerencia@tudestinomx.com" class="text-indigo-600 font-bold underline">gerencia@tudestinomx.com</a>.
+                    Para ejercer estos derechos o solicitar la eliminación de los datos asociados a su cuenta, envíe una solicitud a <a href="mailto:gerencia@tudestinomx.com" class="text-indigo-600 font-bold underline">gerencia@tudestinomx.com</a> desde el correo asociado a su cuenta e indique qué proveedor utilizó. No incluya su contraseña ni tokens de acceso. Atenderemos la solicitud conforme a la legislación aplicable y a las obligaciones de conservación que correspondan.
                 </p>
             </section>
 
+            <section id="eliminacion-datos-facebook" class="mb-12 scroll-mt-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">7. Desvinculación y eliminación de datos de Facebook o Google</h2>
+                <div class="space-y-4">
+                    <p>
+                        Para dejar de autorizar el acceso, puede quitar Tu Destino MX de las aplicaciones conectadas desde la configuración de su cuenta. En Facebook, vaya a <strong>Configuración y privacidad → Configuración → Aplicaciones y sitios web</strong> y elimine Tu Destino MX. En Google, visite <a href="https://myaccount.google.com/connections" target="_blank" rel="noopener noreferrer" class="text-indigo-600 font-bold underline">Conexiones con terceros</a> y quite el acceso de Tu Destino MX. Revocar el acceso evita futuras autorizaciones, pero no elimina por sí solo la información que ya esté asociada a su cuenta en nuestros sistemas.
+                    </p>
+                    <p>
+                        Para solicitar que eliminemos los datos personales asociados a su inicio de sesión con Facebook o Google, contacte a <a href="mailto:gerencia@tudestinomx.com" class="text-indigo-600 font-bold underline">gerencia@tudestinomx.com</a> desde el correo de su cuenta e indique el proveedor utilizado. Verificaremos la solicitud y eliminaremos los datos que corresponda, salvo aquellos que debamos conservar por obligaciones legales o relacionadas con los servicios prestados.
+                    </p>
+                </div>
+            </section>
+
             <section class="mb-12">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">6. Seguridad de la Información</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">8. Seguridad de la Información</h2>
                 <p>
                     Implementamos medidas de seguridad técnicas y administrativas, como certificados <strong>SSL</strong> y protocolos de cifrado de datos, para asegurar que su navegación y transacciones en <a href="https://www.tudestinomx.com" class="text-indigo-600">www.tudestinomx.com</a> sean totalmente privadas.
                 </p>

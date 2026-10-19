@@ -31,7 +31,7 @@ Funcionalidades identificadas en el código fuente actual. No incluye planificac
 - [x] Webhook server-side para sincronización de estados Openpay
 
 ### Panel Administrativo
-- [x] Login con Firebase Auth (Google para clientes, email/contraseña para admin)
+- [x] Login con Firebase Auth (Google y Facebook para clientes, email/contraseña para admin)
 - [x] Dashboard con tabs (Inicio, Equipo, Multimedia, Configuración)
 - [x] Vista de leads/cotizaciones recientes
 - [x] CRUD de equipo con drag & drop, paginación, búsqueda
