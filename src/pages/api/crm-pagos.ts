@@ -1,14 +1,29 @@
 import type { APIRoute } from 'astro';
+import { adminDb } from '../../lib/firebaseAdmin';
+
+const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+});
 
 export const POST: APIRoute = async ({ request }) => {
     try {
+        const config = await adminDb.doc('config/general').get();
+        const configData = config.data();
+        if (configData?.modoMantenimiento || configData?.pausarConsultasReservas) {
+            return jsonResponse({
+                success: false,
+                message: 'Estamos haciendo unos ajustes en tus pagos. Vuelve a intentarlo más tarde.'
+            }, 503);
+        }
+
         const { ct } = await request.json();
 
         if (!ct) {
-            return new Response(JSON.stringify({
+            return jsonResponse({
                 success: false,
                 message: 'Falta el CT'
-            }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }, 400);
         }
 
         const apiUrl = import.meta.env.API_CRM_URL;
@@ -23,14 +38,11 @@ export const POST: APIRoute = async ({ request }) => {
 
         const data = await response.json();
 
-        return new Response(JSON.stringify(data), {
-            status: response.status,
-            headers: { 'Content-Type': 'application/json' }
-        });
+        return jsonResponse(data, response.status);
     } catch (error) {
-        return new Response(JSON.stringify({
+        return jsonResponse({
             success: false,
             message: 'Error de conexión con el servidor de pagos'
-        }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }, 500);
     }
 };

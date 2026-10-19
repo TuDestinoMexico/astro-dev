@@ -117,7 +117,7 @@ src/
 - `LayoutAdmin.astro` — Misma base que Layout.astro, usada para páginas admin.
 
 ### Middleware
-- `src/middleware.js` — Lee `config/general.modoMantenimiento` de Firestore con caché de 30s. Si está activo, redirige todo el tráfico (excepto `/admin`) a `/mantenimiento` (HTTP 503).
+- `src/middleware.js` — Lee `config/general.modoMantenimiento` de Firestore con caché de 30s. Si está activo, redirige el tráfico público a `/mantenimiento`, conserva `/admin` y `/cliente`, y deja pasar las APIs CRM de reservas y pagos para que respondan con un aviso JSON 503.
 
 ### Firebase Singleton
 - `src/lib/firebase.js` — Inicializa Firebase con `experimentalForceLongPolling: true` para compatibilidad Node.js. Exporta `auth`, `db` y `storage`.
@@ -126,6 +126,7 @@ src/
 - `/api/openpay-cargo` — Proxy POST a Openpay API (crear cargo). Usa `OPENPAY_MERCHANT_ID` y `OPENPAY_PRIVATE_KEY` del servidor.
 - `/api/openpay-check` — Proxy GET autenticado a Openpay API; verifica pertenencia del `paymentId` en `users/{uid}/pagos` antes de consultar el cargo.
 - `/api/openpay-webhook` — POST autenticado con token secreto; sincroniza el estado de un cargo existente por `openpayChargeId`.
+- `/api/crm-consultar`, `/api/crm-grupo-consultar`, `/api/crm-pagos` y `/api/crm-grupo-pagos` — Proxys CRM de reservas y pagos; no llaman al CRM cuando `modoMantenimiento` o `pausarConsultasReservas` están activos. El historial de vouchers Openpay se consulta directamente en Firestore y no se pausa.
 
 ---
 

@@ -88,6 +88,7 @@ Proxy autenticado a la API CRM de Tu Destino Mexico. Consulta una reserva por CT
 - **Respuesta error:** `{ "success": false, "message": "..." }`
 - **URL destino:** `{API_CRM_URL}/api/reservas/consultar`
 - **Variables de entorno:** `API_CRM_URL`
+- **Mantenimiento:** responde `503` con un mensaje amable y no consulta el CRM si `config/general.modoMantenimiento` o `config/general.pausarConsultasReservas` están activos.
 - **Error 400:** `{ "success": false, "message": "Faltan CT o email" }`
 - **Error 500:** `{ "success": false, "message": "Error de conexión..." }`
 
@@ -107,6 +108,7 @@ Proxy autenticado a la API CRM de Tu Destino Mexico. Consulta un grupo por GB y 
 - **Respuesta error:** `{ "success": false, "message": "..." }`
 - **URL destino:** `{API_CRM_URL}/api/grupos/consultar`
 - **Variables de entorno:** `API_CRM_URL`
+- **Mantenimiento:** responde `503` con un mensaje amable y no consulta el CRM si `config/general.modoMantenimiento` o `config/general.pausarConsultasReservas` están activos.
 - **Error 400:** `{ "success": false, "message": "Faltan GB o email" }`
 - **Error 500:** `{ "success": false, "message": "Error de conexión..." }`
 
@@ -170,6 +172,7 @@ Genera robots.txt dinámico.
 - **Proxy:** `POST /api/crm-pagos` con body `{ ct }` → `GET {API_CRM_URL}/api/pago/{ct}`
 - **Respuesta:** `{ success: true, data: [...] }` — `data` es un array de registros de pago por reserva
 - **Uso:** `ClientPagos.jsx` (selecciona CT vinculado en Firestore `users/{uid}/reservas`)
+- **Mantenimiento:** responde `503` con un mensaje amable y no consulta el CRM si `config/general.modoMantenimiento` o `config/general.pausarConsultasReservas` están activos.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
@@ -190,6 +193,7 @@ Genera robots.txt dinámico.
 - **Proxy:** `POST /api/crm-grupo-pagos` con body `{ gb }` → `GET {API_CRM_URL}/api/gb/{gb}/pagos`
 - **Respuesta:** `{ success: true, data: [...] }` — `data` es un array de registros de pago por grupo, cada uno con campo `gb` inyectado y relación `grupo` oculta
 - **Uso:** `ClientPagos.jsx` (selecciona GB vinculado en Firestore `users/{uid}/grupos`)
+- **Mantenimiento:** responde `503` con un mensaje amable y no consulta el CRM si `config/general.modoMantenimiento` o `config/general.pausarConsultasReservas` están activos.
 - **Estructura:** igual a "Pagos (CRM)" pero con `gb` en lugar de `ct` (los abonos comparten `fecha_abono`, `cantidad`, `tipo_pago.metodo_pago`, `tipo_pago.referencia`)
 
 ### Documentos (CRM)
@@ -380,7 +384,7 @@ Las páginas SSR consumen el catálogo mediante `src/lib/catalog.ts`, que centra
 | `WelcomeModal.tsx` | `/api/openpay-check` | Client-side fetch |
 | `ClientReservas.jsx` | `/api/crm-consultar`, `/api/crm-grupo-consultar`, `/api/crm-documentos`, `/api/crm-documentos-upload` | Client-side fetch (consultar/vincular + ver detalle de CT y GB + documentos) |
 | `DocumentosModal.jsx` | `/api/crm-documentos`, `/api/crm-documentos-upload` | Client-side fetch (listar, preview y subir documentos) |
-| `ClientPagos.jsx` | `/api/crm-pagos`, `/api/crm-grupo-pagos` | Client-side fetch (pagos por CT o GB vinculado) |
+| `ClientPagos.jsx` | `/api/crm-pagos`, `/api/crm-grupo-pagos` | Client-side fetch (pagos por CT o GB vinculado); el historial Openpay se lee por separado desde Firestore y sigue disponible durante la pausa CRM |
 
 ---
 
