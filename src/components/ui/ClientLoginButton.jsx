@@ -1,13 +1,14 @@
 import React, { useId, useState, useEffect } from 'react';
 import { auth } from '../../lib/firebase';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
+import { getClientLoginErrorMessage, signInWithFacebook } from '../../lib/clientAuth';
 import { X, Loader2 } from 'lucide-react';
 import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
 export default function ClientLoginButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState(null);
   const [error, setError] = useState('');
   const titleId = useId();
   const { dialogRef } = useAccessibleDialog({
@@ -23,7 +24,7 @@ export default function ClientLoginButton() {
   }, []);
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setLoadingProvider('google');
     setError('');
     try {
       const provider = new GoogleAuthProvider();
@@ -31,11 +32,23 @@ export default function ClientLoginButton() {
       setIsOpen(false);
       window.location.href = '/cliente/dashboard';
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Error al iniciar sesión. Inténtalo de nuevo.');
-      }
+      setError(getClientLoginErrorMessage(err));
     } finally {
-      setLoading(false);
+      setLoadingProvider(null);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    setLoadingProvider('facebook');
+    setError('');
+    try {
+      await signInWithFacebook();
+      setIsOpen(false);
+      window.location.href = '/cliente/dashboard';
+    } catch (err) {
+      setError(getClientLoginErrorMessage(err));
+    } finally {
+      setLoadingProvider(null);
     }
   };
 
@@ -100,7 +113,7 @@ export default function ClientLoginButton() {
             </div>
 
             {error && (
-              <div class="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-bold text-center">
+              <div role="alert" aria-live="assertive" class="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-bold text-center">
                 {error}
               </div>
             )}
@@ -108,10 +121,10 @@ export default function ClientLoginButton() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={loading}
+              disabled={loadingProvider !== null}
               class="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-200 text-slate-700 font-bold py-3.5 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm disabled:opacity-50"
             >
-              {loading ? (
+              {loadingProvider === 'google' ? (
                 <Loader2 class="w-5 h-5 animate-spin text-slate-400" />
               ) : (
                 <svg class="w-5 h-5" viewBox="0 0 48 48">
@@ -121,11 +134,27 @@ export default function ClientLoginButton() {
                   <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
                 </svg>
               )}
-              <span class="text-sm font-bold">Iniciar sesión con Google</span>
+              <span class="text-sm font-bold">{loadingProvider === 'google' ? 'Iniciando sesión...' : 'Iniciar sesión con Google'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleFacebookLogin}
+              disabled={loadingProvider !== null}
+              class="mt-3 w-full flex items-center justify-center gap-3 bg-[#1877F2] border-2 border-[#1877F2] text-white font-bold py-3.5 rounded-xl hover:bg-[#166FE5] hover:border-[#166FE5] transition-all shadow-sm disabled:opacity-50"
+            >
+              {loadingProvider === 'facebook' ? (
+                <Loader2 class="w-5 h-5 animate-spin text-white" />
+              ) : (
+                <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.019 4.388 11.002 10.125 11.927v-8.437H7.078v-3.49h3.047V9.41c0-3.017 1.791-4.688 4.533-4.688 1.312 0 2.686.236 2.686.236v2.953h-1.513c-1.491 0-1.956.93-1.956 1.886v2.276h3.328l-.532 3.49h-2.796V24C19.612 23.075 24 18.092 24 12.073z" />
+                </svg>
+              )}
+              <span class="text-sm font-bold">{loadingProvider === 'facebook' ? 'Iniciando sesión...' : 'Iniciar sesión con Facebook'}</span>
             </button>
 
             <p class="text-center text-[11px] text-slate-400 mt-6 leading-relaxed">
-              Al iniciar sesión podrás ver el historial de tus cotizaciones y reservas.
+              Al iniciar sesión podrás ver tus reservas. Consulta nuestro <a href="/privacidad" class="font-bold text-indigo-600 underline">Aviso de Privacidad</a>.
             </p>
           </div>
         </div>

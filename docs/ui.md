@@ -98,7 +98,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + diálogo accesible de Google sign-in |
+| `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + diálogo accesible de inicio con Google y Facebook |
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico con dimensiones reservadas (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |

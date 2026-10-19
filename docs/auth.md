@@ -4,15 +4,18 @@
 
 ## Resumen
 
-Firebase Authentication con dos flujos: Google para clientes y email/contraseña para administradores. Todo el flujo de autenticación ocurre del lado del cliente (client-side). No hay validación server-side de sesiones ni middleware de autenticación.
+Firebase Authentication con proveedores Google y Facebook para clientes, y email/contraseña para administradores. Todo el flujo de autenticación ocurre del lado del cliente (client-side). No hay validación server-side de sesiones ni middleware de autenticación.
 
 ---
 
 ## Proveedor
 
-- **Firebase Auth** — Google (clientes) y Email/Password (administradores)
+- **Firebase Auth** — Google y Facebook (clientes) y Email/Password (administradores)
 - SDK: `firebase/auth`
 - Singleton en `src/lib/firebase.js`
+- Facebook solicita únicamente el permiso `email`; el App ID y App Secret se configuran en Firebase Console, y la URL de callback que indica Firebase se registra en Meta. Estas credenciales no se guardan en el código ni en variables del frontend.
+- Los dominios de producción y de Preview usados para autenticar deben estar autorizados en Firebase Authentication.
+- Mantener habilitada en Firebase la opción de una cuenta por dirección de correo: cuando Facebook entra con el correo de una cuenta Google, se solicita iniciar sesión con Google y se vincula la credencial de Facebook al mismo UID.
 
 ---
 
@@ -31,10 +34,12 @@ Firebase Authentication con dos flujos: Google para clientes y email/contraseña
 ### Login de clientes
 
 1. Usuario visita `/cliente/login.astro`.
-2. Se monta `GoogleLoginButton.tsx` o `ClientLoginButton.jsx` con `client:only="react"`.
-3. Usuario inicia sesión con Google mediante `signInWithPopup`.
-4. Éxito → acceso a `/cliente/dashboard`.
-5. `ClientPanel.jsx` verifica el usuario con `onAuthStateChanged`; si no existe sesión, redirige a `/cliente/login`.
+2. Se monta `GoogleLoginButton.tsx` o `ClientLoginButton.jsx` con `client:only="react"`; ambos presentan Google y Facebook.
+3. El usuario inicia sesión mediante `signInWithPopup`. Facebook solicita el permiso `email`.
+4. Si el correo de Facebook ya pertenece a una cuenta Google, el usuario inicia sesión con Google y el proveedor Facebook se vincula a esa misma cuenta Firebase, conservando UID y datos asociados.
+5. Si Facebook no comparte un correo, se muestra una indicación para intentar con otra cuenta o Google.
+6. Éxito → acceso al destino seguro solicitado o a `/cliente/dashboard`.
+7. `ClientPanel.jsx` verifica el usuario con `onAuthStateChanged`; si no existe sesión, redirige a `/cliente/login`.
 
 ---
 
@@ -91,8 +96,9 @@ Firebase Authentication con dos flujos: Google para clientes y email/contraseña
 | `src/pages/admin/login.astro` | Página login |
 | `src/pages/admin/dashboard.astro` | Página dashboard |
 | `src/components/ui/admin/LoginForm.jsx` | Formulario login |
-| `src/components/ui/client/GoogleLoginButton.tsx` | Login Google de clientes |
-| `src/components/ui/ClientLoginButton.jsx` | Botón/login Google del sitio público |
+| `src/components/ui/client/GoogleLoginButton.tsx` | Botones de login Google y Facebook de clientes |
+| `src/components/ui/ClientLoginButton.jsx` | Botón de Área de Clientes y diálogo de login Google/Facebook |
+| `src/lib/clientAuth.js` | Login Facebook, vinculación a la cuenta Google existente y mensajes de error amigables |
 | `src/components/ui/admin/DashboardLayout.jsx` | Guard de ruta admin |
 | `src/middleware.js` | Solo maintenance mode (no auth) |
 
