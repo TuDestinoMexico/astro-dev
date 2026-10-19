@@ -9,6 +9,16 @@ const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringif
 export const POST: APIRoute = async ({ request }) => {
     try {
         const user = await requireFirebaseUser(request, { requireVerifiedEmail: true });
+
+        const config = await adminDb.doc('config/general').get();
+        const configData = config.data();
+        if (configData?.modoMantenimiento || configData?.pausarConsultasReservas) {
+            return jsonResponse({
+                success: false,
+                message: 'Estamos haciendo unos ajustes en tus reservas. Vuelve a intentarlo más tarde.'
+            }, 503);
+        }
+
         const { ct, email, detail } = await request.json();
 
         if (!ct || (!email && !detail)) {

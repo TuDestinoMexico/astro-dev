@@ -102,9 +102,9 @@ Renderizados en servidor. Sin estado cliente.
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico con dimensiones reservadas (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |
-| `ClientPagos.jsx` | — | Abonos de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso, tarjetas monetarias responsive de 1/2/3 columnas con formato compacto MXN, lista de abonos con método y referencia, e historial independiente de vouchers Openpay |
+| `ClientPagos.jsx` | — | Abonos CRM de reservas y grupos vinculados: chips mixtos de CT (ámbar) y GB (cian), barra de progreso, tarjetas monetarias responsive de 1/2/3 columnas con formato compacto MXN y lista de abonos. Durante mantenimiento oculta esa consulta y muestra un aviso, conservando visible el historial independiente de vouchers Openpay |
 | `ClientFavoritos.jsx` | — | Favoritos reales del cliente (Firestore `users/{uid}/favoritos` vía `onSnapshot`, recientes primero): tarjetas con imagen/nombre/destino/badge Hotel-Tour, link al detalle `/{tipo}/{slug}` y eliminar con confirmación |
-| `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Persiste solo el vínculo mínimo; el detalle (reserva / `GrupoDetalle`) y PDF se consultan bajo demanda con autenticación + botón de documentos por tarjeta |
+| `ClientReservas.jsx` | — | Consulta, vincula, elimina reservas (CT) y grupos (GB) CRM con toggle segmentado. Persiste solo el vínculo mínimo; el detalle (reserva / `GrupoDetalle`) y PDF se consultan bajo demanda con autenticación + botón de documentos por tarjeta. Durante mantenimiento o pausa administrativa de consultas muestra un aviso casual y no ofrece consultas CRM |
 | `DocumentosModal.jsx` | — | Diálogo accesible de documentos de una reserva (CT) o grupo (GB): checklist de tipos solicitados (según Q/NQ) con estados (Pendiente / En revisión / Verificado "Tú" / Rechazado / Agente), lista de documentos con badge de estado + motivo de rechazo (incl. documentos rechazados por el admin) sin botón de vista previa, y formulario de subida (drag&drop, máx 10MB, JPG/PNG/PDF/DOC/DOCX). Consume `/api/crm-documentos` y `/api/crm-documentos-upload` |
 | `GrupoDetalle.jsx` | — | Contenido del modal de detalle de grupo: hero con GB y tipo (Q/NQ), timeline, stats, cliente titular, sección de hoteles con pasajeros |
 | `LayoutClient.astro` | SSR | Shell layout con Poppins, SEO, Analytics (sin Header.astro) |
@@ -120,7 +120,7 @@ Renderizados en servidor. Sin estado cliente.
 | `TeamView.jsx` | — | CRUD equipo con drag & drop, paginación, búsqueda, selector de fotos |
 | `OfertasView.jsx` | — | CRUD de ofertas (Firestore `ofertas` con `onSnapshot`, tiempo real): formulario (título, descripción, descuento, código, color, vigencia opcional, activo), tabla con drag & drop + búsqueda + paginación, toggle visible/oculta y badge "Vencida" |
 | `MediaManager.jsx` | — | Explorador Firebase Storage con CRUD de archivos/carpetas |
-| `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, maintenance), comunicado oficial, conversión WebP adaptable y eliminación sincronizada de imágenes |
+| `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, mantenimiento general y pausa de consultas CRM para reservas/grupos), comunicado oficial, conversión WebP adaptable y eliminación sincronizada de imágenes |
 
 ### Otros
 
@@ -177,7 +177,7 @@ Los componentes que consumen Firestore, Storage o APIs deben distinguir carga, e
 |---|---|---|
 | `ClientFavoritos.jsx` | Firestore `users/{uid}/favoritos` | Carga, error con reintento, vacío, eliminación con error |
 | `ClientOfertas.jsx` | Firestore `ofertas` + `config/general` | Carga, error con reintento, vacío |
-| `ClientPagos.jsx` | Firestore + CRM | Carga de vínculos, historial y pagos; errores con reintento; vacíos por contexto |
+| `ClientPagos.jsx` | Firestore + CRM | Carga de vínculos y abonos CRM; aviso durante mantenimiento; historial de vouchers Openpay independiente, errores con reintento y vacíos por contexto |
 | `ClientReservas.jsx` | Firestore + CRM | Carga de vínculos, consulta, detalle, error con reintento y vacío |
 | `DocumentosModal.jsx` | CRM documentos | Carga, error con reintento, vacío, subida, éxito y error |
 | `LeadsView.jsx` | Firestore `cotizaciones` | Carga, error con reintento y vacío |

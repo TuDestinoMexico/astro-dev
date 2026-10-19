@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Wallet, Loader2, AlertCircle, Landmark, CreditCard, Receipt, CalendarDays, CheckCircle2, Clock, Hash, Building2, TrendingUp, Users, ExternalLink } from 'lucide-react';
 import { db } from '../../../lib/firebase';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc } from 'firebase/firestore';
 
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
@@ -212,6 +212,25 @@ export default function ClientPagos({ user }) {
   const [error, setError] = useState('');
   const [retryKey, setRetryKey] = useState(0);
   const [paymentsRetryKey, setPaymentsRetryKey] = useState(0);
+  const [crmEnMantenimiento, setCrmEnMantenimiento] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'config', 'general'), (snapshot) => {
+      const config = snapshot.data();
+      const pausado = !!(config?.modoMantenimiento || config?.pausarConsultasReservas);
+      setCrmEnMantenimiento(pausado);
+      if (pausado) {
+        setPagos(null);
+        setError('');
+        setCargando(false);
+      }
+    }, (snapshotError) => {
+      console.error('Error consultando el estado de pagos CRM:', snapshotError);
+      setCrmEnMantenimiento(true);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -256,6 +275,11 @@ export default function ClientPagos({ user }) {
   }, [vinculadas]);
 
   useEffect(() => {
+    if (crmEnMantenimiento !== false) {
+      setPagos(null);
+      setCargando(false);
+      return undefined;
+    }
     if (!activo || !activo.codigo) {
       setPagos(null);
       return;
@@ -274,6 +298,12 @@ export default function ClientPagos({ user }) {
         });
         const data = await res.json();
         if (!activoFlag) return;
+        if (res.status === 503) {
+          setCrmEnMantenimiento(true);
+          setPagos(null);
+          setCargando(false);
+          return;
+        }
         if (!data.success) {
           setError(data.message || 'No se encontraron pagos.');
           setPagos(null);
@@ -290,7 +320,7 @@ export default function ClientPagos({ user }) {
     };
     load();
     return () => { activoFlag = false; };
-  }, [activo, paymentsRetryKey]);
+  }, [activo, paymentsRetryKey, crmEnMantenimiento]);
 
   return (
     <div class="space-y-6 w-full">
@@ -304,7 +334,18 @@ export default function ClientPagos({ user }) {
 
       <OpenpayHistory user={user} />
 
-      {loadingVinculadas ? (
+      {crmEnMantenimiento === null ? (
+        <div role="status" aria-live="polite" class="flex flex-col items-center justify-center py-12 text-slate-400">
+          <Loader2 size={28} class="animate-spin text-amber-500 mb-3" />
+          <span class="text-xs font-bold uppercase tracking-widest">Cargando el estado de tus pagos...</span>
+        </div>
+      ) : crmEnMantenimiento ? (
+        <div role="status" aria-live="polite" class="mx-auto w-full max-w-2xl rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+          <Wallet size={36} class="mx-auto mb-3 text-amber-600" />
+          <h3 class="text-lg font-black text-slate-800">Estamos haciendo unos ajustes</h3>
+          <p class="mt-2 text-sm leading-6 text-slate-600">En un ratito podrás volver a consultar los pagos y abonos de tus reservas. El historial de vouchers Openpay sigue disponible arriba.</p>
+        </div>
+      ) : loadingVinculadas ? (
         <div role="status" aria-live="polite" aria-atomic="true" class="flex flex-col items-center justify-center py-16 text-slate-400">
           <Loader2 size={32} class="animate-spin text-amber-500 mb-3" />
           <span class="text-xs font-bold uppercase tracking-widest">Cargando reservas y grupos...</span>

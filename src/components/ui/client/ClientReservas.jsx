@@ -164,12 +164,33 @@ export default function ClientReservas({ user }) {
   const [errorReservas, setErrorReservas] = useState('');
   const [retryKey, setRetryKey] = useState(0);
   const [guardando, setGuardando] = useState(false);
+  const [reservasEnMantenimiento, setReservasEnMantenimiento] = useState(null);
 
   const [detalleReserva, setDetalleReserva] = useState(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [errorDetalle, setErrorDetalle] = useState('');
 
   const [documentosItem, setDocumentosItem] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'config', 'general'), (snapshot) => {
+      const config = snapshot.data();
+      const pausadas = !!(config?.modoMantenimiento || config?.pausarConsultasReservas);
+      setReservasEnMantenimiento(pausadas);
+      if (pausadas) {
+        setDetalleReserva(null);
+        setCargandoDetalle(false);
+        setErrorDetalle('');
+        setResultado(null);
+        setDocumentosItem(null);
+      }
+    }, (err) => {
+      console.error('Error consultando el estado de reservas:', err);
+      setReservasEnMantenimiento(true);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -209,6 +230,7 @@ export default function ClientReservas({ user }) {
 
   const handleConsultar = async (e) => {
     e.preventDefault();
+    if (reservasEnMantenimiento !== false) return;
     setError('');
     setResultado(null);
 
@@ -241,6 +263,13 @@ export default function ClientReservas({ user }) {
         body: JSON.stringify(body)
       });
       const data = await res.json();
+
+      if (res.status === 503) {
+        setReservasEnMantenimiento(true);
+        setConsultando(false);
+        setResultado(null);
+        return;
+      }
 
       if (!data.success) {
         setError(data.message || 'No se encontró la información.');
@@ -282,6 +311,7 @@ export default function ClientReservas({ user }) {
   };
 
   const handleVerDetalle = async (res) => {
+    if (reservasEnMantenimiento !== false) return;
     setDetalleReserva(null);
     setErrorDetalle('');
     setCargandoDetalle(true);
@@ -295,6 +325,14 @@ export default function ClientReservas({ user }) {
         body: JSON.stringify(body)
       });
       const data = await resApi.json();
+
+      if (resApi.status === 503) {
+        setReservasEnMantenimiento(true);
+        setCargandoDetalle(false);
+        setDetalleReserva(null);
+        setErrorDetalle('');
+        return;
+      }
 
       if (!data.success) {
         setErrorDetalle(data.message || 'No se pudo consultar la información.');
@@ -332,6 +370,21 @@ export default function ClientReservas({ user }) {
           </div>
         </div>
 
+        {reservasEnMantenimiento === null ? (
+          <div role="status" aria-live="polite" class="border-t border-slate-100 pt-8 flex items-center justify-center gap-2 py-12 text-slate-400">
+            <Loader2 size={20} class="animate-spin text-purple-500" />
+            <span class="text-sm font-medium">Cargando el estado de tus reservas...</span>
+          </div>
+        ) : reservasEnMantenimiento ? (
+          <div role="status" aria-live="polite" class="border-t border-slate-100 pt-8">
+            <div class="mx-auto max-w-2xl rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+              <Clock size={36} class="mx-auto mb-3 text-amber-600" />
+              <h2 class="text-lg font-black text-slate-800">Estamos haciendo unos ajustes</h2>
+              <p class="mt-2 text-sm leading-6 text-slate-600">En un ratito podrás volver a consultar tus reservas. Si necesitas ayuda mientras tanto, escríbenos por WhatsApp y con gusto te atendemos.</p>
+            </div>
+          </div>
+        ) : (
+        <>
         <div class="border-t border-slate-100 pt-8">
           <div class="flex items-center gap-2 mb-6">
             <Search size={20} class="text-purple-600" />
@@ -522,6 +575,8 @@ export default function ClientReservas({ user }) {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
 
       {/* MODAL DOCUMENTOS */}

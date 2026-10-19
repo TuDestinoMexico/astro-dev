@@ -23,8 +23,9 @@ Documento único con configuración global del sitio.
 | `logoUrl` | string | URL del logo en Firebase Storage |
 | `whatsappGlobal` | string | Número WhatsApp (solo dígitos, con código país) |
 | `modoMantenimiento` | boolean | Activa/desactiva modo mantenimiento |
+| `pausarConsultasReservas` | boolean | Pausa las consultas CRM de reservas, grupos y sus pagos/abonos en el área de clientes |
 
-**Uso:** `Header.astro` (lectura SSR con timeout 2.5s), `ConfigView.jsx` (CRUD admin), `middleware.js` (lectura con caché 30s).
+**Uso:** `Header.astro` (lectura SSR con timeout 2.5s), `ConfigView.jsx` (CRUD admin), `middleware.js` (lectura con caché 30s), `ClientReservas.jsx` y `ClientPagos.jsx` (estado en tiempo real). Al activar `modoMantenimiento` también se pausan las consultas CRM de reservas, grupos y pagos. El historial de vouchers Openpay se conserva porque se lee desde Firestore.
 
 #### `config/comunicado`
 Documento único para el comunicado oficial que puede mostrar el sitio público.

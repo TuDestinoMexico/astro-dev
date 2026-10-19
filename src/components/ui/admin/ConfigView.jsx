@@ -10,7 +10,8 @@ export default function ConfigView() {
         sitioNombre: '',
         logoUrl: '',
         whatsappGlobal: '',
-        modoMantenimiento: false
+        modoMantenimiento: false,
+        pausarConsultasReservas: false
     });
 
     const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +63,8 @@ export default function ConfigView() {
                     sitioNombre: 'Tu Destino MX',
                     logoUrl: 'https://placehold.co/200x60?text=Tu+Logo',
                     whatsappGlobal: '529987141365',
-                    modoMantenimiento: false
+                    modoMantenimiento: false,
+                    pausarConsultasReservas: false
                 };
                 await setDoc(configDocRef, defaultData);
                 setConfigData(defaultData);
@@ -442,6 +444,22 @@ export default function ConfigView() {
                                 checked={configData.modoMantenimiento}
                                 onChange={(e) => setConfigData({ ...configData, modoMantenimiento: e.target.checked })}
                                 className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 accent-indigo-600 cursor-pointer mt-1"
+                            />
+                        </div>
+
+                        <div className="flex items-start gap-4 bg-amber-50 p-4 rounded-2xl border border-amber-100">
+                            <div className="pt-0.5">
+                                <ShieldAlert className={configData.pausarConsultasReservas ? "text-amber-600" : "text-slate-400"} size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <label className="text-xs font-black text-slate-800 uppercase tracking-wide block select-none">Pausar consultas de reservas y pagos CRM</label>
+                                <span className="text-[11px] text-slate-500 font-medium block mt-0.5">Se pausarán reservas, grupos y abonos del CRM para clientes. El historial de vouchers Openpay seguirá disponible. También se pausa automáticamente al activar el mantenimiento general.</span>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={!!configData.pausarConsultasReservas}
+                                onChange={(e) => setConfigData({ ...configData, pausarConsultasReservas: e.target.checked })}
+                                className="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500 accent-amber-600 cursor-pointer mt-1"
                             />
                         </div>
                     </div>

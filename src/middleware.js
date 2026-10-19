@@ -34,6 +34,16 @@ export async function onRequest({ url, redirect }, next) {
         return next();
     }
 
+    // Estas rutas CRM responden con un 503 JSON durante el mantenimiento, no con un redirect HTML.
+    if (
+        url.pathname === '/api/crm-consultar' ||
+        url.pathname === '/api/crm-grupo-consultar' ||
+        url.pathname === '/api/crm-pagos' ||
+        url.pathname === '/api/crm-grupo-pagos'
+    ) {
+        return next();
+    }
+
     // 2. Lógica para la ruta /mantenimiento
     if (url.pathname === '/mantenimiento') {
         // A. Si está desactivado: Redirigir a HOME (en lugar de 404)
