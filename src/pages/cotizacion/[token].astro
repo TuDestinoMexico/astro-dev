@@ -1,0 +1,110 @@
+---
+import { getStorage } from 'firebase-admin/storage';
+import Layout from '../../layouts/Layout.astro';
+import { getFirebaseAdminApp } from '../../lib/firebaseAdmin';
+
+const { token } = Astro.params;
+Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+
+let quote: any = null;
+let unavailable = false;
+let connectionError = false;
+
+try {
+    const apiUrl = import.meta.env.API_CRM_URL;
+    const response = await fetch(`${apiUrl}/api/cotizaciones/publicas/${encodeURIComponent(token || '')}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Api-Token': import.meta.env.API_CRM_TOKEN,
+        },
+        signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+        unavailable = response.status === 404;
+        connectionError = !unavailable;
+    } else {
+        const payload = await response.json();
+        quote = payload?.success ? payload.data : null;
+        unavailable = !quote;
+    }
+} catch {
+    connectionError = true;
+}
+
+if (!quote) Astro.response.status = unavailable ? 404 : 503;
+
+const bucketName = import.meta.env.CATALOG_STORAGE_BUCKET || 'tudestinomx';
+const signedImage = async (image: any) => {
+    const path = typeof image?.path === 'string' ? image.path : '';
+    if (!/^cotizaciones\/\d+\/(hotel|tours\/[A-Za-z0-9_-]+)\/[^/]+$/.test(path)) return null;
+    try {
+        const [url] = await getStorage(getFirebaseAdminApp()).bucket(bucketName).file(path).getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 60 * 60 * 1000,
+        });
+        return { url, alt: typeof image.alt === 'string' ? image.alt : '' };
+    } catch {
+        return null;
+    }
+};
+
+const hotelImages = quote?.hotel?.images ? (await Promise.all(quote.hotel.images.map(signedImage))).filter(Boolean) : [];
+const tours = quote?.tours?.length ? await Promise.all(quote.tours.map(async (tour: any) => ({
+    ...tour,
+    images: (await Promise.all((tour.images || []).map(signedImage))).filter(Boolean),
+}))) : [];
+const formatCurrency = (amount: unknown) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(amount || 0));
+const formatDate = (value: unknown) => {
+    if (!value || typeof value !== 'string') return '';
+    const date = new Date(`${value.slice(0, 10)}T12:00:00`);
+    return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+};
+const pax = quote?.guests || {};
+const guestSummary = [pax.adultos && `${pax.adultos} adultos`, pax.menores && `${pax.menores} menores`].filter(Boolean).join(' · ');
+const amenities = Array.isArray(quote?.hotel?.amenities) ? quote.hotel.amenities.flatMap((group: any) => Array.isArray(group?.items) ? group.items : typeof group === 'string' ? [group] : typeof group?.name === 'string' ? [group.name] : []) : [];
+---
+
+<Layout title={quote ? `Cotización ${quote.folio} | Tu Destino México` : 'Cotización no disponible | Tu Destino México'} description="Consulta los detalles de tu cotización de viaje." noindex={true} nofollow={true}>
+    <main class="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 sm:py-12">
+        {!quote ? (
+            <section class="mx-auto mt-12 max-w-xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-12">
+                <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-fuchsia-50 text-2xl text-fuchsia-700">{connectionError ? '!' : '⌁'}</div>
+                <h1 class="mt-5 text-2xl font-bold text-slate-900">{connectionError ? 'No pudimos cargar la cotización' : 'Este enlace ya no está disponible'}</h1>
+                <p class="mt-3 text-sm leading-6 text-slate-600">{connectionError ? 'Intenta abrirlo de nuevo en unos minutos o contacta a tu asesor.' : 'Solicita a tu asesor un nuevo enlace para consultar tu propuesta de viaje.'}</p>
+                <a href="/" class="mt-7 inline-flex rounded-xl bg-fuchsia-700 px-5 py-3 text-sm font-bold text-white hover:bg-fuchsia-800">Ir al sitio</a>
+            </section>
+        ) : (
+            <div class="mx-auto max-w-5xl">
+                <header class="mb-7 flex flex-col gap-5 rounded-3xl bg-slate-950 p-6 text-white sm:flex-row sm:items-end sm:justify-between sm:p-9">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[.2em] text-fuchsia-300">Tu propuesta de viaje</p>
+                        <h1 class="mt-2 text-3xl font-extrabold sm:text-4xl">Hola, {quote.client_name || 'viajero'}.</h1>
+                        <p class="mt-2 text-sm text-slate-300">Cotización {quote.folio}{quote.created_at ? ` · ${formatDate(quote.created_at)}` : ''}</p>
+                    </div>
+                    <a href={quote.pdf_url} target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-fuchsia-50">Descargar PDF <span class="ml-2" aria-hidden="true">↗</span></a>
+                </header>
+
+                <section class="grid gap-4 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total estimado</p><p class="mt-2 text-2xl font-extrabold text-fuchsia-800">{formatCurrency(quote.amount)}</p></div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Fechas</p><p class="mt-2 font-bold text-slate-900">{formatDate(quote.dates?.checkin) || 'Por definir'}{quote.dates?.checkout ? ` — ${formatDate(quote.dates.checkout)}` : ''}</p></div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Viajeros</p><p class="mt-2 font-bold text-slate-900">{guestSummary || 'Por confirmar'}</p></div>
+                </section>
+
+                {quote.description && <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-6"><h2 class="text-lg font-bold text-slate-900">Tu viaje</h2><p class="mt-2 whitespace-pre-line leading-7 text-slate-600">{quote.description}</p></section>}
+
+                {quote.hotel && <section class="mt-8">
+                    <div class="mb-4 flex flex-wrap items-end justify-between gap-3"><div><p class="text-xs font-bold uppercase tracking-[.16em] text-fuchsia-700">Hospedaje</p><h2 class="mt-1 text-2xl font-extrabold text-slate-900">{quote.hotel.name}</h2><p class="mt-1 text-sm text-slate-500">{quote.hotel.destination || quote.hotel.address}{quote.hotel.room?.tipo_habitacion ? ` · ${quote.hotel.room.tipo_habitacion}` : ''}{quote.hotel.room?.cantidad_habitaciones ? ` · ${quote.hotel.room.cantidad_habitaciones} habitación(es)` : ''}</p></div><strong class="text-lg text-slate-900">{formatCurrency(quote.hotel.price)}</strong></div>
+                    {hotelImages.length > 0 && <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">{hotelImages.slice(0, 6).map((image: any, index: number) => <img src={image.url} alt={image.alt || quote.hotel.name} loading={index > 1 ? 'lazy' : 'eager'} class:list={["h-40 w-full rounded-2xl object-cover sm:h-52", { 'col-span-2 row-span-2 h-full min-h-64 sm:col-span-1 sm:row-span-2 sm:min-h-[27rem]': index === 0 }]} />)}</div>}
+                    {quote.hotel.description && <p class="mt-4 leading-7 text-slate-600">{quote.hotel.description}</p>}
+                    {amenities.length > 0 && <div class="mt-5 flex flex-wrap gap-2">{amenities.slice(0, 12).map((item: string) => <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600">{item}</span>)}</div>}
+                </section>}
+
+                {tours.length > 0 && <section class="mt-9"><div class="mb-4"><p class="text-xs font-bold uppercase tracking-[.16em] text-sky-700">Experiencias</p><h2 class="mt-1 text-2xl font-extrabold text-slate-900">Tours incluidos en tu propuesta</h2></div><div class="space-y-5">{tours.map((tour: any, index: number) => <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"><div class="grid md:grid-cols-[minmax(0,1fr)_19rem]"><div class="p-6 sm:p-7"><div class="flex items-start justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-wide text-sky-700">Tour {index + 1}</p><h3 class="mt-1 text-xl font-bold text-slate-900">{tour.name}</h3><p class="mt-1 text-sm text-slate-500">{[tour.destination, tour.duration, tour.category].filter(Boolean).join(' · ')}</p></div><strong class="whitespace-nowrap text-sm text-slate-900">{formatCurrency(tour.price)}</strong></div>{tour.description && <p class="mt-4 leading-6 text-slate-600">{tour.description}</p>}{Array.isArray(tour.highlights) && tour.highlights.length > 0 && <ul class="mt-4 space-y-1 text-sm text-slate-600">{tour.highlights.slice(0, 5).map((item: string) => <li>• {item}</li>)}</ul>}{Array.isArray(tour.includes) && tour.includes.length > 0 && <p class="mt-4 text-sm text-slate-500"><strong class="text-slate-700">Incluye:</strong> {tour.includes.join(', ')}</p>}{Array.isArray(tour.not_includes) && tour.not_includes.length > 0 && <p class="mt-2 text-sm text-slate-500"><strong class="text-slate-700">No incluye:</strong> {tour.not_includes.join(', ')}</p>}</div>{tour.images?.[0] && <img src={tour.images[0].url} alt={tour.images[0].alt || tour.name} loading="lazy" class="h-52 w-full object-cover md:h-full" />}</div></article>)}</div></section>}
+
+                <footer class="mt-9 rounded-2xl border border-fuchsia-100 bg-fuchsia-50 p-5 text-sm leading-6 text-fuchsia-950"><strong>¿Quieres ajustar esta propuesta?</strong> Comunícate con tu asesor para confirmar disponibilidad, fechas y condiciones. Este enlace es privado y vence el {formatDate(quote.expires_at)}.</footer>
+            </div>
+        )}
+    </main>
+</Layout>
