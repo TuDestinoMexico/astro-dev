@@ -1,7 +1,10 @@
 ---
 import { getStorage } from 'firebase-admin/storage';
+import Gallery from '../../components/ui/hotel/Gallery.jsx';
 import Layout from '../../layouts/Layout.astro';
+import { fetchHotelGalleryById } from '../../lib/catalog';
 import { getFirebaseAdminApp } from '../../lib/firebaseAdmin';
+import { sanitizeCatalogHtml } from '../../lib/sanitizeHtml';
 
 const { token } = Astro.params;
 Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
@@ -44,13 +47,25 @@ const signedImage = async (image: any) => {
             action: 'read',
             expires: Date.now() + 60 * 60 * 1000,
         });
-        return { url, alt: typeof image.alt === 'string' ? image.alt : '' };
+        return {
+            url,
+            alt: typeof image.alt === 'string' ? image.alt : '',
+            category: typeof image.category === 'string' ? image.category : 'uncategorized',
+            is_exclusive: Boolean(image.is_exclusive),
+        };
     } catch {
         return null;
     }
 };
 
-const hotelImages = quote?.hotel?.images ? (await Promise.all(quote.hotel.images.map(signedImage))).filter(Boolean) : [];
+let hotelImages = quote?.hotel?.is_catalog && quote.hotel.images
+    ? (await Promise.all(quote.hotel.images.map(signedImage))).filter(Boolean)
+    : [];
+if (quote?.hotel?.is_catalog && hotelImages.length === 0 && quote.hotel.catalog_id) {
+    const currentCatalogGallery = await fetchHotelGalleryById(String(quote.hotel.catalog_id));
+    if (currentCatalogGallery.status === 'ok') hotelImages = currentCatalogGallery.data;
+}
+const safeDescription = sanitizeCatalogHtml(quote?.description);
 const tours = quote?.tours?.length ? await Promise.all(quote.tours.map(async (tour: any) => ({
     ...tour,
     images: (await Promise.all((tour.images || []).map(signedImage))).filter(Boolean),
@@ -92,11 +107,11 @@ const amenities = Array.isArray(quote?.hotel?.amenities) ? quote.hotel.amenities
                     <div class="rounded-2xl border border-slate-200 bg-white p-5"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Viajeros</p><p class="mt-2 font-bold text-slate-900">{guestSummary || 'Por confirmar'}</p></div>
                 </section>
 
-                {quote.description && <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-6"><h2 class="text-lg font-bold text-slate-900">Tu viaje</h2><p class="mt-2 whitespace-pre-line leading-7 text-slate-600">{quote.description}</p></section>}
+                {safeDescription && <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-6"><h2 class="text-lg font-bold text-slate-900">Tu viaje</h2><div class="mt-2 leading-7 text-slate-600 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:ml-1 [&_strong]:font-bold [&_b]:font-bold [&_em]:italic [&_i]:italic" set:html={safeDescription} /></section>}
 
                 {quote.hotel && <section class="mt-8">
                     <div class="mb-4 flex flex-wrap items-end justify-between gap-3"><div><p class="text-xs font-bold uppercase tracking-[.16em] text-fuchsia-700">Hospedaje</p><h2 class="mt-1 text-2xl font-extrabold text-slate-900">{quote.hotel.name}</h2><p class="mt-1 text-sm text-slate-500">{quote.hotel.destination || quote.hotel.address}{quote.hotel.room?.tipo_habitacion ? ` · ${quote.hotel.room.tipo_habitacion}` : ''}{quote.hotel.room?.cantidad_habitaciones ? ` · ${quote.hotel.room.cantidad_habitaciones} habitación(es)` : ''}</p></div><strong class="text-lg text-slate-900">{formatCurrency(quote.hotel.price)}</strong></div>
-                    {hotelImages.length > 0 && <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">{hotelImages.slice(0, 6).map((image: any, index: number) => <img src={image.url} alt={image.alt || quote.hotel.name} loading={index > 1 ? 'lazy' : 'eager'} class:list={["h-40 w-full rounded-2xl object-cover sm:h-52", { 'col-span-2 row-span-2 h-full min-h-64 sm:col-span-1 sm:row-span-2 sm:min-h-[27rem]': index === 0 }]} />)}</div>}
+                    {quote.hotel.is_catalog && hotelImages.length > 0 && <Gallery client:visible images={hotelImages} hotelName={quote.hotel.name} type="hotels" />}
                     {quote.hotel.description && <p class="mt-4 leading-7 text-slate-600">{quote.hotel.description}</p>}
                     {amenities.length > 0 && <div class="mt-5 flex flex-wrap gap-2">{amenities.slice(0, 12).map((item: string) => <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600">{item}</span>)}</div>}
                 </section>}

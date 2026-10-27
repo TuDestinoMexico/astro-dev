@@ -165,7 +165,8 @@ Genera robots.txt dinámico.
 
 - **Página:** `GET /cotizacion/{token}`. Render SSR noindex/nofollow y `Cache-Control: private, no-store`.
 - **Consulta:** Astro llama server-side a `GET {API_CRM_URL}/api/cotizaciones/publicas/{token}` con `X-Api-Token`; el secreto nunca llega al navegador.
-- **Imágenes:** las rutas de snapshots se convierten en URLs firmadas de lectura usando Firebase Admin y el bucket `CATALOG_STORAGE_BUCKET`.
+- **Imágenes del hotel:** solo se muestra la galería cuando la API identifica `hotel.is_catalog` y `hotel.catalog_id`. Se priorizan las fotos snapshot de la cotización; si no hay, Astro consulta la galería vigente de ese ID en Firestore. Las fotos externas no se muestran ni se modifican. Las URLs se firman server-side usando Firebase Admin y `CATALOG_STORAGE_BUCKET`.
+- **Formato de descripción:** Astro renderiza la descripción sanitizada con el helper `sanitizeCatalogHtml`, conservando párrafos, listas y énfasis sin aceptar HTML arbitrario.
 - **PDF:** el botón abre el PDF del CRM web con el mismo token, sujeto a vencimiento/revocación.
 - **Variables:** `API_CRM_URL`, `API_CRM_TOKEN`, `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, `FIREBASE_ADMIN_PRIVATE_KEY` y opcionalmente `CATALOG_STORAGE_BUCKET`.
 - **Privacidad:** el token es portador de acceso; el CRM permite revocarlo o renovarlo desde la lista de cotizaciones. El enlace vence a los 30 días.

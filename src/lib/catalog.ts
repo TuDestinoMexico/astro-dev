@@ -200,6 +200,21 @@ export function fetchHotelDetail<T = unknown>(slug: string): Promise<CatalogResu
     return detailCatalog<T>('hotel', slug);
 }
 
+export async function fetchHotelGalleryById(id: string): Promise<CatalogResult<Array<{ url: string; alt: string; category: string; is_exclusive: boolean }>>> {
+    if (!/^[A-Za-z0-9_-]+$/.test(id)) return { status: 'not-found' };
+
+    try {
+        const document = await getFirestore(getFirebaseAdminApp(), DATABASE_ID).collection('hotels').doc(id).get();
+        if (!document.exists || !isActive(document.data()?.active)) return { status: 'not-found' };
+
+        const hotel = await normalizeItem('hotel', document.id, document.data()!);
+        return { status: 'ok', data: hotel.gallery };
+    } catch (error) {
+        console.error('[catalog] Error leyendo galería de hotel', { error });
+        return { status: 'unavailable' };
+    }
+}
+
 export function fetchTourDetail<T = unknown>(slug: string): Promise<CatalogResult<T>> {
     return detailCatalog<T>('tour', slug);
 }
