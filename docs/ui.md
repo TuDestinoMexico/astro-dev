@@ -27,7 +27,7 @@ Renderizados en servidor. Sin estado cliente.
 | `HeroBanner.astro` | `components/ui/single/HeroBanner.astro` | Banner de cabecera para páginas de listing |
 | `HeroBannerOutBounds.astro` | `components/ui/single/HeroBannerOutBounds.astro` | Hero banner extendido |
 | `Card.astro` | `components/ui/single/Card.astro` | Tarjeta reutilizable para hoteles/tours (incluye botón favorito `FavoriteButton.jsx` en zona de imagen) |
-| `Gallery.astro` | `components/ui/hotel/Gallery.astro` | Galería de imágenes con LightGallery |
+| `Gallery.jsx` | `components/ui/hotel/Gallery.jsx` | Mosaico SSR de portada y tarjetas por categoría que abren el visor modal filtrado; diseño adaptable a iPhone/iPad con áreas seguras, altura dinámica, controles táctiles de 44 px y navegación por swipe/teclado |
 | `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta editorial de miembro del equipo con foto, rol y tratamiento de Vacation Planner |
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
@@ -67,13 +67,15 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `HotelTabs.tsx` | `client:load` | Tabs de descripción/amenidades/ubicación con Google Maps iframe; recibe `descriptionHtml` saneado en SSR |
+| `HotelTabs.tsx` | `client:load` | Tabs de descripción/amenidades/ubicación; presenta amenidades por categoría con el icono Lucide definido en Firestore y conserva fallback para listas planas |
 | `BookingCalendar.tsx` | `client:only="react"` | Modal accesible responsive de reserva con selector profesional de rango para hoteles (dos meses desktop, uno móvil, preview y mínimo una noche), footer de aplicación y formulario con envío WhatsApp. Usa GSAP, portal al `body` y trap de foco |
 
 ### Tours
 
 | Componente | Directiva | Propósito |
 |---|---|---|
+| `TourExperienceDetails.tsx` | SSR | Resumen editorial responsive con duración, categoría, destacados, incluidos y no incluidos; omite campos y secciones sin datos |
+| `HotelTabs.tsx` | `client:load` | Reutiliza descripción y ubicación en tours, ocultando la pestaña de amenidades que no aplica; en hoteles conserva descripción/amenidades/ubicación |
 | `BookingCalendar.tsx` | `client:only="react"` | Mismo modal accesible en modo fecha única (`isSingleDate=true`) para tours; `client:only` evita cargar GSAP durante SSR en Vercel |
 
 ### Recomendaciones
@@ -138,7 +140,7 @@ El hook no controla la animación ni el portal: cada componente conserva su comp
 
 Los formularios deben asociar cada `label` con su control mediante `htmlFor` e `id`. El `placeholder` se utiliza únicamente como ejemplo o ayuda contextual; nunca reemplaza el nombre visible o accesible del campo. Los controles dinámicos, como las edades de `MinorAges.tsx`, deben generar IDs únicos por instancia.
 
-El HTML del catálogo externo se sanea server-side mediante `src/lib/sanitizeHtml.ts` antes de llegar a `HotelTabs` o a cualquier `set:html`. La política usa una allowlist estricta y las metadata/JSON-LD usan texto plano.
+La descripción del catálogo se sanea server-side mediante `src/lib/sanitizeHtml.ts` antes de llegar a `HotelTabs` o a cualquier `set:html`. La política usa una allowlist estricta y las metadata/JSON-LD usan texto plano.
 
 ## Estilos
 

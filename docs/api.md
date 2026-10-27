@@ -4,7 +4,7 @@
 
 ## Resumen
 
-El proyecto expone endpoints API server-side (proxy y webhook de Openpay, además de proxys a CRM de reservas y grupos) y consume una API REST externa para el catálogo de productos. También genera un robots.txt dinámico.
+El proyecto expone endpoints API server-side (proxy y webhook de Openpay, además de proxys a CRM de reservas y grupos), lee el catálogo directamente desde Firestore y genera un robots.txt dinámico.
 
 ---
 
@@ -307,45 +307,11 @@ Cada elemento de `hoteles`:
 
 ### Catálogo (Hoteles y Tours)
 
-- **Base URL:** `https://api.tudestinomx.com`
+Las páginas SSR consultan las colecciones `hotels` y `tours` de la base Firestore `FIRESTORE_DATABASE` (por defecto `tdmx-db`) mediante Firebase Admin SDK. Los detalles se resuelven por `slug`; los documentos activos sin slug reciben uno derivado de su nombre o ID en memoria. Los objetos de galería de `gallery[].path` se sirven mediante URLs firmadas con una hora de vigencia desde `CATALOG_STORAGE_BUCKET`.
 
-### Autenticación
+Los campos opcionales ausentes reciben defaults solo al adaptar los datos para las plantillas: strings y listas vacías, precio y reseñas nulos, ubicación neutra y título derivado del nombre. Los slugs temporales no se guardan en Firestore. Los registros con `active: false` no se publican y los documentos sin `active` se consideran activos.
 
-Bearer token enviado en todas las requests:
-
-```
-Authorization: Bearer {VITE_API_TOKEN}
-Accept: application/json
-```
-
-### Endpoints
-
-| Método | Endpoint | Respuesta | Uso en proyecto |
-|---|---|---|---|
-| GET | `/api/hotel` | Array de hoteles | `Welcome.astro`, `hoteles.astro` |
-| GET | `/api/hotel/slug/{slug}` | Objeto hotel | `hotel/[slug].astro` |
-| GET | `/api/tour` | Array de tours | `tours.astro` |
-| GET | `/api/tour/slug/{slug}` | Objeto tour | `tour/[slug].astro` |
-
-### Estructura de respuesta
-
-Las respuestas pueden venir como array directo o como `{ data: [...] }`. El proyecto normaliza con:
-
-```js
-const data = Array.isArray(raw) ? raw : (raw.data || []);
-```
-
-### Manejo de errores del catálogo
-
-Las páginas SSR consumen el catálogo mediante `src/lib/catalog.ts`, que centraliza headers, timeout, validación y normalización de respuestas.
-
-- **Timeout:** 8 segundos por solicitud mediante `AbortSignal.timeout`.
-- **Headers:** `Accept: application/json` y `Authorization: Bearer {VITE_API_TOKEN}`.
-- **HTTP 404:** se interpreta como recurso inexistente. En páginas de detalle redirige a `/404`; en listados se conserva el estado vacío.
-- **Otros errores HTTP:** se consideran indisponibilidad temporal del catálogo.
-- **Timeout, error de red o JSON inválido:** se consideran indisponibilidad temporal del catálogo.
-- **Estructura inválida:** una lista debe ser un array directo o estar dentro de `data`; un detalle debe ser un objeto directo o estar dentro de `data`.
-- **Logging:** los errores se registran únicamente server-side con recurso, tipo de consulta, slug cuando aplica y código HTTP. Nunca se registran tokens, headers sensibles ni cuerpos completos de respuesta.
+Errores de lectura de Firestore o de firma de imágenes se consideran indisponibilidad temporal del catálogo y se registran solo server-side, sin exponer credenciales ni documentos.
 
 ### Fallbacks públicos
 
@@ -375,11 +341,11 @@ Las páginas SSR consumen el catálogo mediante `src/lib/catalog.ts`, que centra
 
 | Componente | API | Momento |
 |---|---|---|
-| `Welcome.astro` | REST (hoteles) | SSR - frontmatter |
-| `hoteles.astro` | REST (hoteles) | SSR - frontmatter |
-| `hotel/[slug].astro` | REST (hotel detail) | SSR - frontmatter |
-| `tours.astro` | REST (tours) | SSR - frontmatter |
-| `tour/[slug].astro` | REST (tour detail) | SSR - frontmatter |
+| `Welcome.astro` | Firestore `hotels` | SSR - frontmatter |
+| `hoteles.astro` | Firestore `hotels` | SSR - frontmatter |
+| `hotel/[slug].astro` | Firestore `hotels` | SSR - frontmatter |
+| `tours.astro` | Firestore `tours` | SSR - frontmatter |
+| `tour/[slug].astro` | Firestore `tours` | SSR - frontmatter |
 | `PaymentMethods.jsx` | `/api/openpay-cargo` | Client-side fetch |
 | `WelcomeModal.tsx` | `/api/openpay-check` | Client-side fetch |
 | `ClientReservas.jsx` | `/api/crm-consultar`, `/api/crm-grupo-consultar`, `/api/crm-documentos`, `/api/crm-documentos-upload` | Client-side fetch (consultar/vincular + ver detalle de CT y GB + documentos) |
@@ -398,5 +364,4 @@ Las páginas SSR consumen el catálogo mediante `src/lib/catalog.ts`, que centra
 ## Pendiente de documentar
 
 - Estructura de respuesta de tours
-- Rate limiting de API externa
 - Documentación Openpay (referencia externa)

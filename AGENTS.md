@@ -17,7 +17,7 @@ Plataforma conversional con catálogo de hoteles y tours, cotizaciones, pagos on
 - **Base de datos:** Firebase Firestore (NoSQL)
 - **Archivos:** Firebase Storage
 - **Auth:** Firebase Auth solo client-side: Google para clientes y email/contraseña para administradores
-- **API externa:** https://api.tudestinomx.com (hoteles, tours, destinos)
+- **Catálogo:** Firebase Firestore compartido con `tdmx_v3` (colecciones `hotels` y `tours`)
 - **API CRM:** https://xolopi.tudestinomx.com (reservas, pagos)
 - **Firestore users/{uid}/reservas:** Reservas vinculadas por clientes (Google Auth)
 - **Pagos:** Openpay (tarjetas, OXXO, transferencias, SPEI)

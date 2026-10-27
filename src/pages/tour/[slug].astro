@@ -4,9 +4,10 @@ import Header from "../../components/layout/Header.astro";
 import Footer from "../../components/layout/Footer.astro";
 import CatalogUnavailable from "../../components/ui/single/CatalogUnavailable.astro";
 import { Icon } from 'astro-icon/components';
-import Gallery from '../../components/ui/hotel/Gallery.astro';
+import Gallery from '../../components/ui/hotel/Gallery.jsx';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
+import TourExperienceDetails from '../../components/ui/TourExperienceDetails';
 import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import { fetchTourDetail } from '../../lib/catalog';
@@ -33,10 +34,9 @@ if (catalogUnavailable) {
 const tour: any = catalogResult.status === 'ok' ? catalogResult.data : {};
 const tourDescriptionHtml = sanitizeCatalogHtml(tour.description);
 const tourDescriptionText = stripCatalogHtml(tour.description);
-const tourIncludesHtml = sanitizeCatalogHtml(tour.includes);
 const tourIncludesText = stripCatalogHtml(tour.includes);
 
-const amenities = tour.amenities_list || [];
+const amenities = tour.amenities || [];
 const coordinates = tour.google_maps || [];
 const address = tour.address || tour.destino || "Ubicación no disponible";
 
@@ -115,7 +115,7 @@ const tourSchema = {
 };
 ---
 
-<Layout 
+<Layout safeArea
   title={tour.name || "Detalle de Tour"} 
   description={tourDescriptionText || "Detalle de Tour"}
   image={principalImage}
@@ -165,8 +165,16 @@ const tourSchema = {
                 </div>
             </div>
 
-            <Gallery images={allImages} hotelName={tour.name} />
+            <Gallery client:visible images={tour.gallery || allImages} hotelName={tour.name} type="tours" />
         </div>
+
+        <TourExperienceDetails
+            duration={tour.duration}
+            category={tour.category}
+            highlights={tour.highlights || []}
+            includes={tour.includes_list || []}
+            notIncludes={tour.not_includes || []}
+        />
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -178,15 +186,10 @@ const tourSchema = {
                             coordinates={coordinates}
                             address={address}
                             amenities={amenities}
+                            showAmenities={false}
                     />
                 </div>
 
-                {tourIncludesHtml && (
-                        <div class="bg-slate-50 border border-slate-100 p-6 rounded-2xl">
-                            <h3 class="text-xl font-bold text-slate-800 mb-4">¿Qué incluye esta experiencia?</h3>
-                            <div class="prose prose-slate max-w-none text-slate-600" set:html={tourIncludesHtml}></div>
-                        </div>
-                )}
             </div>
 
             <div class="lg:col-span-1">

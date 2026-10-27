@@ -44,7 +44,7 @@ Funcionalidades identificadas en el código fuente actual. No incluye planificac
 - [x] Encuesta en tiempo real (Firestore onSnapshot)
 - [x] "Vistos recientemente" con localStorage
 - [x] Calendario de reserva con envío a WhatsApp
-- [x] Galería de imágenes con LightGallery
+- [x] Mosaico de hoteles y tours por categorías Firestore integrado con visor modal y miniaturas
 - [x] Google Maps integrado (iframe)
 - [x] Timeline interactiva
 - [x] Mapa de México

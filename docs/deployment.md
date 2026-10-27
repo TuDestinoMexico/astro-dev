@@ -81,7 +81,6 @@ Todas las variables deben configurarse en el dashboard de Vercel. No hay archivo
 | `PUBLIC_FIREBASE_STORAGE_BUCKET` | Público | Firebase Storage |
 | `PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Público | Firebase |
 | `PUBLIC_FIREBASE_APP_ID` | Público | Firebase |
-| `VITE_API_TOKEN` | Público | API REST externa |
 | `OPENPAY_MERCHANT_ID` | Privado | Endpoints Openpay |
 | `OPENPAY_PRIVATE_KEY` | Privado | Endpoints Openpay |
 | `OPENPAY_API_BASE_URL` | Privado | Base URL de Openpay Sandbox o Production |
@@ -103,6 +102,8 @@ Todas las variables deben configurarse en el dashboard de Vercel. No hay archivo
 | `OPENPAY_IDEMPOTENCY_TTL_SECONDS` | Privado | Tiempo de retención de claves idempotentes |
 
 Las variables `FIREBASE_ADMIN_*` deben configurarse en los entornos Preview y Production de Vercel. La llave privada se obtiene desde Firebase Console → Project Settings → Service Accounts y nunca se guarda en el repositorio.
+
+El catálogo usa por defecto la base nombrada `tdmx-db` y el bucket `tudestinomx`, que son los recursos configurados actualmente en `tdmx_v3`. `FIRESTORE_DATABASE` y `CATALOG_STORAGE_BUCKET` son variables privadas opcionales para sobrescribirlos en otro entorno.
 
 El webhook debe registrarse por separado en Openpay Sandbox y Production. La URL debe incluir el token correspondiente al entorno: `https://dominio/api/openpay-webhook?token=...`. Si el token se rota, hay que actualizar la URL registrada en Openpay.
 

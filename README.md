@@ -12,7 +12,7 @@ Plataforma web moderna, rápida y orientada a la conversión para la agencia de 
 
 ## ✨ Funcionalidades Destacadas
 
-* **Páginas Dinámicas (Hoteles y Tours):** Consumo de REST API (`api.tudestinomx.com`) desde el servidor de Astro para generar vistas SEO-friendly de manera instantánea.
+* **Páginas Dinámicas (Hoteles y Tours):** Lectura server-side del catálogo compartido en Firebase Firestore para generar páginas SEO-friendly.
 * **Historial "Vistos Recientemente":** Sistema de almacenamiento en `localStorage` que guarda la navegación del usuario sin comprometer el rendimiento del servidor, mostrando tarjetas cinemáticas de los últimos destinos visitados.
 * **Sliders Premium:** Carruseles automatizados (Autoplay) con animaciones de entrada, escalado y transiciones fluidas controladas por GSAP.
 * **Marketing Automatizado (Ribbons):** Cintas promocionales en el Header (Hot Sale, Mundial 2026) que reaccionan de forma autónoma a la fecha del sistema, alternando entre contadores regresivos y botones de acción (WhatsApp).
