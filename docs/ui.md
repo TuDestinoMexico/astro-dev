@@ -16,6 +16,7 @@ Renderizados en servidor. Sin estado cliente.
 |---|---|---|
 | `Header.astro` | `components/layout/Header.astro` | Nav principal con logo de dimensiones reservadas, contacto, menú sticky, submenú horizontal y panel móvil responsive de una columna hasta 399px |
 | `Footer.astro` | `components/layout/Footer.astro` | Footer con SECTUR, SAT, redes sociales y términos |
+| `tu-destino-mexico-es-confiable.astro` | `pages/tu-destino-mexico-es-confiable.astro` | Página pública de identidad empresarial y orientación para verificar datos antes de reservar; usa la imagen cuadrada de la marca como vista previa social |
 | `Content.astro` | `components/layout/Content.astro` | Wrapper simple con `<slot/>` |
 | `Banner.astro` | `components/ui/Banner.astro` | Banner promocional con imagen y enlace |
 | `Button.astro` | `components/ui/Button.astro` | Botón reutilizable |

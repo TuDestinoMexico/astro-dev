@@ -99,6 +99,7 @@ src/
     ├── destinos.astro         # Página destinos
     ├── convenios.astro        # Convenios corporativos
     ├── nosotros.astro         # Quiénes somos / equipo
+    ├── tu-destino-mexico-es-confiable.astro # Identidad empresarial y verificación para viajeros
     ├── pagos.astro            # Métodos de pago Openpay
     ├── recomendaciones.astro  # Recomendaciones
     ├── mantenimiento.astro    # Página 503 mantenimiento
