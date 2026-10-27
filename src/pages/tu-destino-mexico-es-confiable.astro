@@ -1,0 +1,169 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+
+const title = "¿Tu Destino México es confiable? | Tu Destino México";
+const description = "Conoce cómo identificar a Tu Destino México, quién opera tudestinomx.com y qué puedes verificar antes de reservar o pagar un viaje.";
+const socialImage = new URL("/images/brand/tu-destino-mexico-confiable-1x1.png", Astro.site).href;
+---
+
+<Layout title={title} description={description} image={socialImage}>
+    <Header />
+
+    <main class="mx-auto max-w-7xl px-5 pb-16 pt-6 md:px-8 md:pb-24 md:pt-10">
+        <nav aria-label="Migas de pan" class="mb-6 text-sm font-medium text-brand-muted">
+            <a href="/" class="transition-colors hover:text-brand-primary-hover">Inicio</a>
+            <span class="px-2 text-brand-border" aria-hidden="true">/</span>
+            <span aria-current="page" class="text-brand-ink">¿Tu Destino México es confiable?</span>
+        </nav>
+
+        <section class="relative isolate overflow-hidden rounded-panel bg-brand-ink px-6 py-9 text-white shadow-card md:px-12 md:py-12 lg:px-14">
+            <div class="absolute -right-20 -top-24 -z-10 h-80 w-80 rounded-full border border-white/10"></div>
+            <div class="absolute -right-7 -top-12 -z-10 h-56 w-56 rounded-full border border-brand-primary/30"></div>
+            <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_19rem]">
+                <div class="max-w-3xl">
+                    <p class="inline-flex items-center gap-2 rounded-pill border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-teal-200">
+                        <span class="h-1.5 w-1.5 rounded-full bg-brand-primary"></span>
+                        Información para viajeros
+                    </p>
+                    <h1 class="mt-5 text-3xl font-black leading-tight tracking-[-0.04em] md:text-5xl">
+                        ¿Tu Destino México es confiable?
+                    </h1>
+                    <p class="mt-5 max-w-2xl text-base leading-7 text-slate-200 md:text-lg">
+                        Si estás investigando a <strong class="text-white">Tu Destino México</strong>, verifica que estés en el sitio oficial
+                        <strong class="text-white">tudestinomx.com</strong> y revisa los datos de la empresa y de tu reservación antes de pagar.
+                        Aquí reunimos la información que publicamos y algunas formas prácticas de comprobarla.
+                    </p>
+                    <div class="mt-7 flex flex-wrap gap-3">
+                        <a href="https://rnt-consulta.sectur.gob.mx/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-card bg-brand-primary px-5 py-3 text-sm font-black text-brand-ink transition hover:-translate-y-0.5 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-ink">
+                            Consultar registro RNT
+                        </a>
+                        <a href="tel:+529989806611" class="inline-flex items-center justify-center rounded-card border border-white/25 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white">
+                            Llamar a Tu Destino México
+                        </a>
+                    </div>
+                </div>
+
+                <aside class="rounded-card border border-white/15 bg-white p-5 text-brand-ink shadow-card md:p-6" aria-label="Datos de identificación">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-[0.18em] text-brand-muted">Identificación</p>
+                            <h2 class="mt-2 text-xl font-black leading-tight">Tu Destino México</h2>
+                        </div>
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-brand-primary/15 text-sm font-black text-brand-ink">TD</div>
+                    </div>
+                    <dl class="mt-5 space-y-4 border-t border-brand-border pt-4 text-sm">
+                        <div>
+                            <dt class="font-bold text-brand-muted">Sitio oficial</dt>
+                            <dd class="mt-1"><a class="font-bold text-brand-ink underline decoration-brand-primary underline-offset-4" href="https://www.tudestinomx.com/">tudestinomx.com</a></dd>
+                        </div>
+                        <div>
+                            <dt class="font-bold text-brand-muted">Teléfono de ventas</dt>
+                            <dd class="mt-1"><a class="font-bold text-brand-ink underline decoration-brand-primary underline-offset-4" href="tel:+529989806611">(998) 980 6611</a></dd>
+                        </div>
+                        <div>
+                            <dt class="font-bold text-brand-muted">Número RNT publicado</dt>
+                            <dd class="mt-1 font-bold text-brand-ink">0423005c2dd75</dd>
+                        </div>
+                    </dl>
+                </aside>
+            </div>
+        </section>
+
+        <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_19rem] lg:gap-12">
+            <article class="space-y-8 text-brand-muted">
+                <section aria-labelledby="identificar" class="rounded-card border border-brand-border bg-white p-6 shadow-card md:p-8">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary-hover">01 · Identidad</p>
+                    <h2 id="identificar" class="mt-2 text-2xl font-black tracking-tight text-brand-ink">¿Cómo identificar a Tu Destino México?</h2>
+                    <p class="mt-4 leading-7">
+                        El sitio oficial de la agencia es <a class="font-bold text-brand-ink underline decoration-brand-primary underline-offset-4" href="https://www.tudestinomx.com/">www.tudestinomx.com</a>.
+                        En el pie del sitio, la empresa se identifica como <strong class="text-brand-ink">TU DESTINO MX ROLANDO X MEXICO S.A. de C.V.</strong>
+                        y publica el teléfono de ventas <a class="font-bold text-brand-ink underline decoration-brand-primary underline-offset-4" href="tel:+529989806611">(998) 980 6611</a>.
+                    </p>
+                    <p class="mt-3 leading-7">
+                        También puedes llegar a nuestros perfiles sociales desde los enlaces que aparecen en el mismo sitio. Si recibes
+                        una oferta por otro dominio, cuenta o número, confirma primero con los canales publicados en tudestinomx.com.
+                    </p>
+                </section>
+
+                <section aria-labelledby="registro" class="rounded-card border border-brand-border bg-brand-surface p-6 md:p-8">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary-hover">02 · Registro</p>
+                    <h2 id="registro" class="mt-2 text-2xl font-black tracking-tight text-brand-ink">¿Cómo comprobar el registro turístico?</h2>
+                    <p class="mt-4 leading-7">
+                        El sitio publica el número <strong class="text-brand-ink">0423005c2dd75</strong> asociado al Registro Nacional de Turismo (RNT).
+                        Puedes consultar el registro directamente en el portal de la Secretaría de Turismo y comparar el nombre y los
+                        datos que aparezcan con la información de tu reservación.
+                    </p>
+                    <a href="https://rnt-consulta.sectur.gob.mx/" target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex items-center justify-center rounded-card bg-brand-primary px-5 py-3 text-sm font-black text-brand-ink transition hover:bg-brand-primary-hover hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2">
+                        Consultar el RNT en SECTUR
+                    </a>
+                    <p class="mt-3 text-sm leading-6">La consulta en el portal oficial es la forma adecuada de confirmar el estado actual del registro.</p>
+                </section>
+
+                <section aria-labelledby="antes-pagar" class="rounded-card border border-brand-border bg-white p-6 shadow-card md:p-8">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-accent">03 · Antes de reservar</p>
+                    <h2 id="antes-pagar" class="mt-2 text-2xl font-black tracking-tight text-brand-ink">Qué revisar antes de reservar o pagar</h2>
+                    <ul class="mt-5 space-y-3 leading-7">
+                        <li class="flex gap-3"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-primary"></span><span>Solicita una cotización por escrito con fechas, hotel o servicio, pasajeros, precio total y condiciones aplicables.</span></li>
+                        <li class="flex gap-3"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-primary"></span><span>Lee las políticas de cambios, cancelaciones y reembolsos antes de confirmar.</span></li>
+                        <li class="flex gap-3"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-primary"></span><span>Inicia el pago desde los medios indicados en el sitio oficial y conserva el comprobante.</span></li>
+                        <li class="flex gap-3"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-primary"></span><span>Verifica que los datos de la reservación coincidan con la cotización y pide confirmación por un canal oficial.</span></li>
+                        <li class="flex gap-3"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-primary"></span><span>Si algo no coincide o tienes dudas, pausa el pago y contacta al teléfono publicado en esta página.</span></li>
+                    </ul>
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <a href="/pagos" class="rounded-card border border-brand-border px-4 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-primary hover:bg-brand-surface">Ver métodos de pago</a>
+                        <a href="/terminos-condiciones" class="rounded-card border border-brand-border px-4 py-3 text-sm font-bold text-brand-ink transition hover:border-brand-primary hover:bg-brand-surface">Leer términos y condiciones</a>
+                    </div>
+                </section>
+
+                <section aria-labelledby="preguntas" class="rounded-card border border-brand-border bg-brand-surface p-6 md:p-8">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary-hover">Respuestas claras</p>
+                    <h2 id="preguntas" class="mt-2 text-2xl font-black tracking-tight text-brand-ink">Preguntas frecuentes</h2>
+                    <div class="mt-5 divide-y divide-brand-border">
+                        <details class="group py-4" open>
+                            <summary class="cursor-pointer list-none pr-8 font-bold text-brand-ink marker:content-none focus-visible:outline-2 focus-visible:outline-brand-primary">
+                                ¿Cuál es el sitio oficial de Tu Destino México?
+                                <span class="float-right text-brand-primary group-open:rotate-45" aria-hidden="true">＋</span>
+                            </summary>
+                            <p class="mt-3 leading-7">El sitio oficial es <a class="font-semibold text-brand-ink underline decoration-brand-primary underline-offset-4" href="https://www.tudestinomx.com/">tudestinomx.com</a>. Comprueba el dominio antes de compartir datos o realizar un pago.</p>
+                        </details>
+                        <details class="group py-4">
+                            <summary class="cursor-pointer list-none pr-8 font-bold text-brand-ink marker:content-none focus-visible:outline-2 focus-visible:outline-brand-primary">
+                                ¿Cómo contacto a la agencia?
+                                <span class="float-right text-brand-primary group-open:rotate-45" aria-hidden="true">＋</span>
+                            </summary>
+                            <p class="mt-3 leading-7">El número de ventas publicado en el sitio es <a class="font-semibold text-brand-ink underline decoration-brand-primary underline-offset-4" href="tel:+529989806611">(998) 980 6611</a>. También puedes abrir la sección <a class="font-semibold text-brand-ink underline decoration-brand-primary underline-offset-4" href="/nosotros">Quiénes somos</a>.</p>
+                        </details>
+                        <details class="group py-4">
+                            <summary class="cursor-pointer list-none pr-8 font-bold text-brand-ink marker:content-none focus-visible:outline-2 focus-visible:outline-brand-primary">
+                                ¿Qué hago si hay datos que no coinciden?
+                                <span class="float-right text-brand-primary group-open:rotate-45" aria-hidden="true">＋</span>
+                            </summary>
+                            <p class="mt-3 leading-7">No continúes con el pago hasta aclararlos. Contacta a la agencia mediante los datos publicados en tudestinomx.com y solicita que te confirmen por escrito la cotización y las condiciones de tu reservación.</p>
+                        </details>
+                    </div>
+                </section>
+            </article>
+
+            <aside class="h-fit rounded-card border border-brand-border bg-brand-ink p-6 text-white shadow-card lg:sticky lg:top-8" aria-label="Más información">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-200">Sigue verificando</p>
+                <h2 class="mt-2 text-xl font-black">Reserva con información clara</h2>
+                <p class="mt-3 text-sm leading-6 text-slate-300">Consulta los canales de contacto, las opciones de pago y las condiciones publicadas por Tu Destino México.</p>
+                <div class="mt-6 space-y-3">
+                    <a href="/nosotros" class="flex items-center justify-between rounded-card border border-white/15 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10">
+                        Quiénes somos <span class="text-brand-primary" aria-hidden="true">↗</span>
+                    </a>
+                    <a href="/pagos" class="flex items-center justify-between rounded-card border border-white/15 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10">
+                        Métodos de pago <span class="text-brand-primary" aria-hidden="true">↗</span>
+                    </a>
+                    <a href="/privacidad" class="flex items-center justify-between rounded-card border border-white/15 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10">
+                        Aviso de privacidad <span class="text-brand-primary" aria-hidden="true">↗</span>
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <Footer />
+</Layout>
