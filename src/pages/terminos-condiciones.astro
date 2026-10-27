@@ -4,17 +4,19 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import Content from "../components/layout/Content.astro";
 import HeroBanner from "../components/ui/single/HeroBanner.astro";
+const termsHeroImage = new URL('/images/banners/terminos-desktop.jpg', Astro.site ?? 'https://tudestinomx.com').href;
 
 
 ---
-<Layout title="Términos y Condiciones de Reservación | Tu Destino México" description="Consulta los términos, condiciones de reservación, métodos de pago, cancelaciones y reembolsos de Tu Destino México.">
+<Layout title="Términos y Condiciones de Reservación | Tu Destino México" description="Consulta los términos, condiciones de reservación, métodos de pago, cancelaciones y reembolsos de Tu Destino México." image={termsHeroImage}>
     <Header/>
 
     <Content>
         <HeroBanner
                 title="Términos y Condiciones"
-                imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
-                altText="Fondo de documentos legales"
+                imageSrc="/images/banners/terminos-desktop.jpg"
+                mobileImageSrc="/images/banners/terminos-mobile.jpg"
+                altText="Documentos de viaje sobre un escritorio junto a una ventana con vista al mar"
         />
 
         <div class="max-w-4xl mx-auto px-6 py-10 text-gray-700 leading-relaxed">

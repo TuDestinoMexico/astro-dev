@@ -30,7 +30,7 @@ TU DESTINO MX ROLANDO X MEXICO S.A. de C.V.
 
 ## Propósito
 
-Plataforma conversional con SSR (Astro) para SEO, catálogo de hoteles y tours desde API REST externa, pagos online vía Openpay, panel administrativo con Firebase y contenido promocional animado con GSAP.
+Plataforma conversional con SSR (Astro) para SEO, catálogo compartido de hoteles y tours en Firestore, pagos online vía Openpay, panel administrativo con Firebase y contenido promocional animado con GSAP.
 
 ---
 
@@ -53,7 +53,7 @@ Plataforma conversional con SSR (Astro) para SEO, catálogo de hoteles y tours d
 | @react-google-maps/api | ^2.20.8 | Google Maps |
 | @vercel/analytics | ^2.0.1 | Analytics Vercel |
 | astro-seo | ^1.1.0 | Meta tags SEO |
-| astro-lightgallery | ^2.3.0 | Galería de imágenes |
+| astro-lightgallery | ^2.3.0 | Dependencia heredada, ya no usada por la galería actual |
 | date-fns | ^4.1.0 | Manipulación de fechas |
 | react-day-picker | ^10.0.1 | Selector de fechas y rangos del calendario de reservas |
 | @iconify-json/material-symbols | ^1.2.73 | Iconos Material |
@@ -93,7 +93,8 @@ Plataforma conversional con SSR (Astro) para SEO, catálogo de hoteles y tours d
 | `PUBLIC_FIREBASE_STORAGE_BUCKET` | Público | Firebase Storage bucket |
 | `PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Público | Firebase Sender ID |
 | `PUBLIC_FIREBASE_APP_ID` | Público | Firebase App ID |
-| `VITE_API_TOKEN` | Público | Token API REST externa |
+| `FIRESTORE_DATABASE` | Privado | Base Firestore con el catálogo compartido (por defecto `tdmx-db`) |
+| `CATALOG_STORAGE_BUCKET` | Privado | Bucket Firebase Storage de las galerías del catálogo (por defecto `tudestinomx`) |
 | `OPENPAY_MERCHANT_ID` | Privado | ID de comercio Openpay |
 | `OPENPAY_PRIVATE_KEY` | Privado | Llave privada Openpay (producción) |
 | `OPENPAY_API_BASE_URL` | Privado | Base URL de Openpay Sandbox o Production |

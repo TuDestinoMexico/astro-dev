@@ -6,15 +6,17 @@ import Content from "../components/layout/Content.astro";
 import HeroBanner from "../components/ui/single/HeroBanner.astro";
 import Grid from "../components/ui/Grid.astro";
 import FacebookReel from "../components/ui/recomendacion/FacebookReel";
+const recommendationsHeroImage = new URL('/images/banners/recomendaciones-desktop.jpg', Astro.site ?? 'https://tudestinomx.com').href;
 ---
 
-<Layout title="Opiniones y Recomendaciones de Viajes | Tu Destino MX" description="Conoce recomendaciones y experiencias compartidas sobre hoteles y viajes con Tu Destino México antes de planear tus vacaciones.">
+<Layout title="Opiniones y Recomendaciones de Viajes | Tu Destino MX" description="Conoce recomendaciones y experiencias compartidas sobre hoteles y viajes con Tu Destino México antes de planear tus vacaciones." image={recommendationsHeroImage}>
     <Header/>
         <Content>
             <HeroBanner
                 title="Nuestras recomendaciones"
-                imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/img/recomendaciones-tdmx-v1.png"
-                altText="Reseñas Tu Destino Mexico"
+                imageSrc="/images/banners/recomendaciones-desktop.jpg"
+                mobileImageSrc="/images/banners/recomendaciones-mobile.jpg"
+                altText="Una pareja recibe recomendaciones de una anfitriona en un resort tropical"
             />
             <Grid
                 grid={4}

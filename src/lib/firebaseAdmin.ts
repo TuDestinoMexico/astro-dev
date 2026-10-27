@@ -12,7 +12,7 @@ export class FirebaseAuthError extends Error {
     }
 }
 
-function getFirebaseAdminApp(): App {
+export function getFirebaseAdminApp(): App {
     const existingApp = getApps()[0];
     if (existingApp) return existingApp;
 

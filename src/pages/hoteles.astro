@@ -16,6 +16,7 @@ const hoteles = catalogResult.status === 'ok'
 
 // Configuramos cuántos mostrar inicialmente
 const INITIAL_VISIBLE = 8;
+const hotelHeroImage = new URL('/images/banners/hoteles-desktop.jpg', Astro.site ?? 'https://tudestinomx.com').href;
 
 const hotelListSchema = {
     '@context': 'https://schema.org',
@@ -48,8 +49,8 @@ const hotelListSchema = {
 
 <Layout 
   title="Hoteles en Cancún, Riviera Maya y México | Tu Destino MX"
-  description="Encuentra hoteles para tus vacaciones en Cancún, Riviera Maya, Los Cabos y otros destinos. Compara opciones y recibe atención personalizada."
-  image="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
+  description="Encuentra hoteles para tus vacaciones en Cancún, Riviera Maya y otros destinos. Compara opciones y recibe atención personalizada."
+  image={hotelHeroImage}
   type="website"
 >
     <Header/>
@@ -61,8 +62,9 @@ const hotelListSchema = {
     <Content>
         <HeroBanner
                 title="Nuestros Hoteles"
-                imageSrc="https://storage.googleapis.com/tudestinomx_bucket/assets/test/Section%20Hoteles.png"
-                altText="Fondo sección de hoteles"
+                imageSrc="/images/banners/hoteles-desktop.jpg"
+                mobileImageSrc="/images/banners/hoteles-mobile.jpg"
+                altText="Resort tropical con alberca infinita frente al mar Caribe"
         />
 
         <div class="container mx-auto py-12 px-4">

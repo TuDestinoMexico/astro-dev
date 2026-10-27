@@ -260,7 +260,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
 
         const mensaje = encodeURIComponent(
             `¡Hola Tu Destino México! 👋\n\n` +
-            `Me interesa el tour: *${hotelName}*\n` +
+            `${isSingleDate ? 'Me interesa el tour' : 'Me interesa reservar el hotel'}: *${hotelName}*\n` +
             `──────────────────────────\n` +
             `👤 *Nombre:* ${formData.nombre}\n` +
             `${infoFechas}\n` +

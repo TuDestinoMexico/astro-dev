@@ -4,7 +4,7 @@
 
 ## Resumen
 
-El proyecto utiliza tres fuentes de datos: Firebase Firestore (NoSQL) para datos de aplicación y admin, Firebase Storage para archivos multimedia, y una API REST externa para el catálogo de hoteles y tours.
+El proyecto utiliza Firebase Firestore (NoSQL) para datos de aplicación, administración y el catálogo compartido de hoteles/tours; Firebase Storage para archivos multimedia.
 
 ---
 
@@ -139,20 +139,13 @@ Almacenamiento de archivos multimedia. Las URLs son públicas (sin token de segu
 
 ---
 
-## API REST externa
+## Catálogo compartido de hoteles y tours
 
-Endpoint base: `https://api.tudestinomx.com`
+El catálogo se lee en SSR desde las colecciones `hotels` y `tours` de la base Firestore nombrada `tdmx-db`, compartida con `tdmx_v3`. `src/lib/catalog.ts` accede con Firebase Admin SDK, filtra documentos inactivos y adapta los campos del catálogo al formato que ya consumen las páginas Astro. `FIRESTORE_DATABASE` permite sobrescribir el nombre de la base.
 
-Autenticación: Bearer token vía `VITE_API_TOKEN`.
+Los documentos conservan su ID, `name`, `slug`, `destination`, `address`, `description`, `amenities`, `gallery`, `active` y campos editoriales disponibles. Cada grupo de amenidades preserva `category`, `icon` e `items`; `amenities_list` se deriva como lista plana solo para metadata y compatibilidad. Las páginas muestran los grupos con el mismo mapa de iconos Lucide usado en `tdmx_v3`, y las amenidades antiguas en lista se presentan en “Otros”. Las galerías guardan rutas de Storage en `gallery[].path`; Astro genera URLs firmadas de lectura con expiración de una hora usando `CATALOG_STORAGE_BUCKET` (por defecto `tudestinomx`).
 
-| Endpoint | Propósito | Uso |
-|---|---|---|
-| `GET /api/hotel` | Listado de hoteles | `Welcome.astro`, `hoteles.astro` |
-| `GET /api/hotel/slug/{slug}` | Detalle de hotel | `hotel/[slug].astro` |
-| `GET /api/tour` | Listado de tours | `tours.astro` |
-| `GET /api/tour/slug/{slug}` | Detalle de tour | `tour/[slug].astro` |
-
-Campos detectados en respuestas: `name`, `slug`, `active`, `images` (principal, secundaria, adicional), `description`, `address`, `amenities_list`, `google_maps` (coordenadas), `reviews`, `destino`.
+Si faltan datos opcionales, Astro aplica defaults solo en la respuesta renderizada: título derivado de `name`, slug derivado de `name` (o ID si no hay nombre), destino vacío, ubicación descriptiva neutra, descripción y listas vacías, y precio/reseñas nulos. Los slugs generados no se escriben de vuelta a Firestore. Los documentos sin `active` se consideran activos, de acuerdo con `tdmx_v3`.
 
 ---
 
@@ -217,7 +210,7 @@ Hoteles y tours del catálogo API guardados por clientes desde el sitio público
 | Campo | Tipo | Propósito |
 |---|---|---|
 | `tipo` | string | `hotel` \| `tour` |
-| `slug` | string | Slug del item en la API externa (URL de detalle: `/{tipo}/{slug}`) |
+| `slug` | string | Slug del documento del catálogo (URL de detalle: `/{tipo}/{slug}`) |
 | `nombre` | string | Nombre del hotel/tour al guardar |
 | `imagen` | string | URL de imagen principal (snapshot) |
 | `destino` | string | Destino asociado |

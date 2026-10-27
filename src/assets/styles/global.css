@@ -17,3 +17,76 @@
   --shadow-card: 0 10px 25px -12px rgb(15 23 42 / 0.2);
   --shadow-card-hover: 0 20px 35px -14px rgb(15 23 42 / 0.28);
 }
+
+.tdmx-safe-area-page {
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+.tdmx-gallery-dialog {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overscroll-behavior: contain;
+  --tdmx-gallery-header-gutter: 1rem;
+  --tdmx-gallery-content-gutter: 0.75rem;
+}
+
+.tdmx-gallery-dialog__header {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-right: max(var(--tdmx-gallery-header-gutter), env(safe-area-inset-right));
+  padding-left: max(var(--tdmx-gallery-header-gutter), env(safe-area-inset-left));
+}
+
+.tdmx-gallery-dialog__content {
+  padding-right: max(var(--tdmx-gallery-content-gutter), env(safe-area-inset-right));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  padding-left: max(var(--tdmx-gallery-content-gutter), env(safe-area-inset-left));
+}
+
+.tdmx-gallery-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.tdmx-gallery button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (min-width: 640px) {
+  .tdmx-gallery-dialog {
+    --tdmx-gallery-header-gutter: 1.75rem;
+    --tdmx-gallery-content-gutter: 1.25rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .tdmx-gallery-dialog__header {
+    padding-top: max(0.25rem, env(safe-area-inset-top));
+    padding-bottom: 0.25rem;
+  }
+
+  .tdmx-gallery-dialog__content {
+    padding-top: 0.5rem;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .tdmx-gallery-dialog__caption {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  .tdmx-gallery-dialog__thumbnails button {
+    height: 2.75rem;
+    width: 4rem;
+  }
+}

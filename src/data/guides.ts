@@ -26,7 +26,6 @@ export interface GuideContent {
 
 const cancunImage = 'https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/cancun.png';
 const rivieraImage = 'https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/riviera-maya.png';
-const losCabosImage = 'https://storage.googleapis.com/tudestinomx_bucket/assets/promos/destinos/los-cabos.png';
 
 export const guides: GuideContent[] = [
     {
@@ -233,47 +232,6 @@ export const guides: GuideContent[] = [
             { label: 'Tours en Riviera Maya', href: '/destinos/riviera-maya/tours/' }
         ]
     },
-    {
-        slug: 'viajar-a-los-cabos',
-        title: 'Viajar a Los Cabos: qué considerar antes de reservar',
-        metaTitle: 'Viajar a Los Cabos: Hoteles y Experiencias | Tu Destino MX',
-        description: 'Guía para planear un viaje a Los Cabos: tipo de hospedaje, actividades, traslados y recomendaciones de organización.',
-        excerpt: 'Los Cabos combina resorts, paisajes y actividades de aventura. Conoce qué revisar para elegir una experiencia adecuada.',
-        image: losCabosImage,
-        imageAlt: 'Paisaje y vacaciones en Los Cabos',
-        category: 'Los Cabos',
-        destinationSlug: 'los-cabos',
-        publishedAt: '2026-10-02',
-        updatedAt: '2026-10-02',
-        sections: [
-            {
-                heading: 'Define si buscas descanso o aventura',
-                paragraphs: [
-                    'Los Cabos puede funcionar para una escapada de descanso, una celebración o un viaje con actividades. El tipo de plan determina la zona, el hotel y los traslados que conviene considerar.',
-                    'Anota tus actividades prioritarias antes de comparar hospedajes para evitar elegir solo por fotografía o precio.'
-                ]
-            },
-            {
-                heading: 'Revisa traslados y distancias',
-                paragraphs: [
-                    'La experiencia cambia según la distancia entre aeropuerto, hotel y puntos de salida. Confirmar la logística antes de reservar ayuda a proteger tiempo y presupuesto.',
-                    'Pregunta si los tours incluyen transporte y qué condiciones aplican para cada actividad.'
-                ]
-            },
-            {
-                heading: 'Compara opciones con asesoría',
-                paragraphs: [
-                    'Un hotel de categoría similar puede ofrecer una experiencia distinta por ubicación, plan de alimentos y servicios. Comparar el conjunto de servicios es más útil que mirar una sola tarifa.',
-                    'Explora hoteles y tours en Los Cabos para iniciar tu cotización.'
-                ]
-            }
-        ],
-        relatedLinks: [
-            { label: 'Viajes a Los Cabos', href: '/destinos/los-cabos/' },
-            { label: 'Hoteles en Los Cabos', href: '/destinos/los-cabos/hoteles/' },
-            { label: 'Todos los destinos', href: '/destinos/' }
-        ]
-    }
 ];
 
 export function getGuide(slug: string) {

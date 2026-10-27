@@ -56,7 +56,7 @@ El middleware usa una variable en memoria con caché de 30 segundos para evitar 
 ## Base de datos
 
 ### Firebase sobre backend propio
-Se eligió Firebase (Firestore + Auth + Storage) como backend de datos en lugar de un backend propio. Para el catálogo público (hoteles/tours) se consume una API REST externa (Laravel).
+Se eligió Firebase (Firestore + Auth + Storage) como backend de datos. El catálogo público de hoteles y tours se lee en SSR desde las colecciones `hotels` y `tours` compartidas con `tdmx_v3`; Firebase Admin selecciona la base nombrada `tdmx-db` y genera URLs firmadas para la galería.
 
 ### Sin ORM ni schema migrations
 Firestore es schemaless. No hay migraciones, validación de esquemas ni tipado estricto para las colecciones. Los tipos se validan implícitamente en el código de componentes.

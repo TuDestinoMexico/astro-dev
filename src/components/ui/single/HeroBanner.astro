@@ -2,11 +2,12 @@
 interface Props {
     title: string;
     imageSrc?: string;
+    mobileImageSrc?: string;
     videoSrc?: string;
     altText?: string;
 }
 
-const { title, imageSrc, videoSrc, altText = "Encabezado de página" } = Astro.props;
+const { title, imageSrc, mobileImageSrc, videoSrc, altText = "Encabezado de página" } = Astro.props;
 ---
 
 <header class="relative mx-4 my-5 flex min-h-64 md:min-h-80 items-center justify-center overflow-hidden rounded-lg xl:mx-0">
@@ -32,12 +33,15 @@ const { title, imageSrc, videoSrc, altText = "Encabezado de página" } = Astro.p
             ></video>
     ) : (
         imageSrc && (
+            <picture class="absolute inset-0 z-10 h-full w-full">
+                {mobileImageSrc && <source media="(max-width: 767px)" srcset={mobileImageSrc} />}
                 <img
-                        class="absolute inset-0 z-10 h-full w-full object-cover"
-                        src={imageSrc}
-                        alt={altText}
-                        fetchpriority="high"
+                    class="h-full w-full object-cover"
+                    src={imageSrc}
+                    alt={altText}
+                    fetchpriority="high"
                 />
+            </picture>
         )
     )}
 </header>

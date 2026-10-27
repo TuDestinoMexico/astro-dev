@@ -13,8 +13,8 @@ Aplicación web SSR con Astro v6, utilizando React para componentes interactivos
 ```
 Cliente (Browser)
     │
-    ├── Astro SSR ──────────── API REST externa (hoteles, tours)
-    │       │                     https://api.tudestinomx.com
+    ├── Astro SSR ──────────── Firebase Admin SDK (catálogo hotels/tours)
+    │       │                     Firestore `tdmx-db` + Storage
     │       │
     │       ├── Páginas .astro (SSR)
     │       ├── Layouts (Layout.astro, LayoutAdmin.astro)
@@ -39,7 +39,7 @@ Cliente (Browser)
 ## Patrón de renderizado
 
 - **SSR (`output: 'server'`):** todas las páginas se renderizan en el servidor.
-- **Home crítico:** el hero se renderiza en SSR y usa su fallback si Firestore supera 1.5 segundos; el catálogo destacado usa una server island con fallback para que su API externa no retrase el HTML inicial. La configuración general de header y hero se consulta mediante una caché compartida de 60 segundos por instancia.
+- **Home crítico:** el hero se renderiza en SSR y usa su fallback si Firestore supera 1.5 segundos; el catálogo destacado usa una server island con fallback para que su lectura de Firestore no retrase el HTML inicial. La configuración general de header y hero se consulta mediante una caché compartida de 60 segundos por instancia.
 - **React islands:** componentes con directivas `client:only`, `client:load`, `client:visible` para interactividad. `BookingCalendar` usa `client:only="react"` porque depende de GSAP, `createPortal` y APIs del navegador.
 - **No hay SSG** (no se prerenderizan páginas estáticamente).
 - **Sitemap de catálogo:** `/sitemap-catalog.xml` consulta hoteles y tours en SSR y se declara en el índice de sitemap estático.
@@ -61,7 +61,7 @@ src/
 │       ├── admin/             # DashboardLayout, LoginForm, Sidebar, etc.
 │       ├── client/            # ClientPanel, ClientTopbar, ClientReservas
 │       ├── home/              # EventsHeroSlider, MatchPoll, Promo ribbons
-│       ├── hotel/             # Gallery.astro, HotelTabs.tsx
+│       ├── hotel/             # Gallery.jsx por categorías, HotelTabs.tsx
 │       ├── recomendacion/     # FacebookReel.jsx
 │       ├── single/            # Card.astro, HeroBanner.astro
 │       ├── team/              # MemberCard.astro, MemberSkeleton.astro
@@ -91,8 +91,8 @@ src/
     ├── admin/
     │   ├── dashboard.astro    # Panel admin (client:only react)
     │   └── login.astro        # Login admin (client:only react)
-    ├── hotel/[slug].astro     # Detalle de hotel (SSR + API externa)
-    ├── tour/[slug].astro      # Detalle de tour (SSR + API externa)
+    ├── hotel/[slug].astro     # Detalle de hotel (SSR + Firestore)
+    ├── tour/[slug].astro      # Detalle de tour (SSR + Firestore)
     ├── index.astro            # Homepage
     ├── hoteles.astro          # Listado hoteles
     ├── tours.astro            # Listado tours
@@ -133,7 +133,7 @@ src/
 ## Flujo de datos
 
 ### Hoteles / Tours (público)
-1. Página Astro (`hoteles.astro`, `hotel/[slug].astro`) hace fetch SSR a API externa.
+1. Página Astro (`hoteles.astro`, `hotel/[slug].astro`) lee Firestore server-side mediante Firebase Admin SDK.
 2. Renderiza HTML con datos. React islands agregan interactividad (BookingCalendar, HotelTabs).
 
 ### Admin (Firebase directo)

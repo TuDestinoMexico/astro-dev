@@ -17,6 +17,7 @@ if (!destination) {
 }
 
 const catalog = await fetchDestinationCatalog(destination);
+const destinationImage = new URL(destination.image, Astro.site ?? 'https://tudestinomx.com').href;
 const relatedGuides = guides.filter((guide) => guide.destinationSlug === destination.slug);
 if (catalog.unavailable) {
     Astro.response.headers.set('Retry-After', '3600');
@@ -28,7 +29,7 @@ const destinationSchema = {
     name: destination.name,
     description: destination.description,
     url: `https://tudestinomx.com/destinos/${destination.slug}/`,
-    image: destination.image,
+    image: destinationImage,
     containedInPlace: {
         '@type': 'Country',
         name: destination.country
@@ -39,7 +40,7 @@ const title = `Viajes a ${destination.name}: Hoteles, Tours y Vacaciones | Tu De
 const description = `Planea tu viaje a ${destination.name}. Descubre hoteles, tours y experiencias, y recibe asesoría personalizada de Tu Destino México.`;
 ---
 
-<Layout title={title} description={description} image={destination.image} type="website" noindex={catalog.unavailable}>
+<Layout title={title} description={description} image={destinationImage} type="website" noindex={catalog.unavailable}>
     <Header />
     <script type="application/ld+json" set:html={JSON.stringify(destinationSchema)} />
 

@@ -10,6 +10,7 @@ import { fetchTourList } from "../lib/catalog";
 const catalogResult = await fetchTourList<any>();
 const catalogUnavailable = catalogResult.status === 'unavailable';
 const tours = catalogResult.status === 'ok' ? catalogResult.data : [];
+const toursHeroImage = new URL('/images/banners/tours-desktop.jpg', Astro.site ?? 'https://tudestinomx.com').href;
 
 const tourListSchema = {
     '@context': 'https://schema.org',
@@ -50,8 +51,8 @@ const tourListSchema = {
 
 <Layout 
   title="Tours y Excursiones en Cancún y México | Tu Destino MX"
-  description="Descubre tours, excursiones y experiencias en Cancún, Cozumel, Riviera Maya y otros destinos. Recibe recomendaciones y cotiza tu actividad."
-  image="https://images.unsplash.com/photo-1544735745-b89b18555f60?q=80&w=2070&auto=format&fit=crop"
+  description="Descubre tours, excursiones y experiencias en Cancún, Riviera Maya y otros destinos. Recibe recomendaciones y cotiza tu actividad."
+  image={toursHeroImage}
   type="website"
 >
     <Header/>
@@ -63,8 +64,9 @@ const tourListSchema = {
     <Content>
         <HeroBanner
                 title="Nuestros Tours"
-                imageSrc="https://images.unsplash.com/photo-1544735745-b89b18555f60?q=80&w=2070&auto=format&fit=crop"
-                altText="Fondo sección de tours y aventuras"
+                imageSrc="/images/banners/tours-desktop.jpg"
+                mobileImageSrc="/images/banners/tours-mobile.jpg"
+                altText="Excursión en catamarán por el mar Caribe mexicano"
         />
 
         <div class="max-w-7xl mx-auto px-6 py-12">

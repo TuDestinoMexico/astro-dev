@@ -4,7 +4,7 @@ import Header from "../../components/layout/Header.astro";
 import Footer from "../../components/layout/Footer.astro";
 import CatalogUnavailable from "../../components/ui/single/CatalogUnavailable.astro";
 import { Icon } from 'astro-icon/components';
-import Gallery from '../../components/ui/hotel/Gallery.astro';
+import Gallery from '../../components/ui/hotel/Gallery.jsx';
 import BookingCalendar from '../../components/ui/BookingCalendar';
 import HotelTabs from '../../components/ui/hotel/HotelTabs';
 import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
@@ -38,7 +38,8 @@ if (catalogResult.status === 'ok' && Number(hotel.active) === 0) {
     return Astro.redirect('/404');
 }
 
-const amenities = hotel.amenities_list || [];
+const amenities = hotel.amenities || [];
+const amenityNames = hotel.amenities_list || [];
 const coordinates = hotel.google_maps || [];
 
 const rawImages = hotel.images || {};
@@ -93,7 +94,7 @@ const hotelSchema = {
         bestRating: '5',
         worstRating: '1'
     } : undefined,
-    amenityFeature: amenities.map((a: string) => ({
+    amenityFeature: amenityNames.map((a: string) => ({
         '@type': 'LocationFeatureSpecification',
         name: a,
         value: true
@@ -119,7 +120,7 @@ const hotelSchema = {
 };
 ---
 
-<Layout 
+<Layout safeArea
   title={hotel.name || "Detalle de Hotel"} 
   description={hotelDescriptionText || "Detalle de Hotel"}
   image={principalImage}
@@ -169,7 +170,7 @@ const hotelSchema = {
                 </div>
             </div>
 
-            <Gallery images={allImages} hotelName={hotel.name} />
+            <Gallery client:visible images={hotel.gallery || allImages} hotelName={hotel.name} type="hotels" />
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

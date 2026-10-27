@@ -11,9 +11,10 @@ interface Props {
 	type?: 'website' | 'article'
 	noindex?: boolean
 	nofollow?: boolean
+	safeArea?: boolean
 }
 
-const { title, description, image, type = 'website', noindex = false, nofollow = false } = Astro.props
+const { title, description, image, type = 'website', noindex = false, nofollow = false, safeArea = false } = Astro.props
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).href
 const ogImage = image || 'https://storage.googleapis.com/tudestinomx_bucket/assets/og-default.jpg'
 const ogTitle = title || 'Tu Destino México | Agencia de Viajes en Cancún'
@@ -59,7 +60,7 @@ const websiteSchema = {
 <html lang="es-MX">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content={safeArea ? 'width=device-width, initial-scale=1, viewport-fit=cover' : 'width=device-width'} />
 		<link rel="icon" type="image/svg+xml" href="https://storage.googleapis.com/tudestinomx_bucket/assets/favicon/32h/tdmxicon.png" />
 		<link rel="icon" href="https://storage.googleapis.com/tudestinomx_bucket/assets/favicon/32h/tdmxicon.png" />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,7 +104,7 @@ const websiteSchema = {
 		<script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
 		<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 	</head>
-	<body>
+	<body class={safeArea ? 'tdmx-safe-area-page' : undefined}>
 		<slot />
 	</body>
 	<Analytics/>
