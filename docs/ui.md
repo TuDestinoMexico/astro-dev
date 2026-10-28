@@ -84,6 +84,7 @@ Renderizados en servidor. Sin estado cliente.
 | Componente | Directiva | Propósito |
 |---|---|---|
 | `FacebookReel.jsx` | `client:only="react"` | Reel embebido de Facebook con formato vertical máximo de 315x560px y ancho adaptable en móviles |
+| `FacebookReviewsBanner.astro` | — | Banner responsive clicable a las reseñas de Facebook con imágenes generadas para móvil (1536×1024) y escritorio (2172×724); identifica la marca con el texto «Tu Destino México» |
 
 ### Pagos
 
