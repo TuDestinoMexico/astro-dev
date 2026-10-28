@@ -4,9 +4,11 @@ import Gallery from '../../components/ui/hotel/Gallery.jsx';
 import Layout from '../../layouts/Layout.astro';
 import { fetchHotelGalleryById } from '../../lib/catalog';
 import { getFirebaseAdminApp } from '../../lib/firebaseAdmin';
+import { getGeneralConfig } from '../../lib/generalConfig.js';
 import { sanitizeCatalogHtml } from '../../lib/sanitizeHtml';
 
 const { token } = Astro.params;
+const { logoUrl } = await getGeneralConfig();
 Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
 
@@ -94,9 +96,13 @@ const amenities = Array.isArray(quote?.hotel?.amenities) ? quote.hotel.amenities
             <div class="mx-auto max-w-5xl">
                 <header class="mb-7 flex flex-col gap-5 rounded-3xl bg-slate-950 p-6 text-white sm:flex-row sm:items-end sm:justify-between sm:p-9">
                     <div>
+                        <div class="mb-5 inline-flex h-14 max-w-56 items-center rounded-xl bg-white px-3 py-2 shadow-sm">
+                            <img src={logoUrl} alt="Tu Destino México" width="224" height="56" class="h-full w-auto max-w-52 object-contain" loading="eager" decoding="async" />
+                        </div>
                         <p class="text-xs font-bold uppercase tracking-[.2em] text-fuchsia-300">Tu propuesta de viaje</p>
                         <h1 class="mt-2 text-3xl font-extrabold sm:text-4xl">Hola, {quote.client_name || 'viajero'}.</h1>
                         <p class="mt-2 text-sm text-slate-300">Cotización {quote.folio}{quote.created_at ? ` · ${formatDate(quote.created_at)}` : ''}</p>
+                        {quote.creator_name && <p class="mt-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-sm text-slate-100"><span class="font-semibold text-fuchsia-200">Vacation Planner</span><span aria-hidden="true" class="text-white/40">·</span><span>{quote.creator_name}</span></p>}
                     </div>
                     <a href={quote.pdf_url} target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-fuchsia-50">Descargar PDF <span class="ml-2" aria-hidden="true">↗</span></a>
                 </header>
@@ -122,4 +128,13 @@ const amenities = Array.isArray(quote?.hotel?.amenities) ? quote.hotel.amenities
             </div>
         )}
     </main>
+    <footer class="border-t border-slate-200 bg-white px-4 py-7 sm:px-6">
+        <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+            <p class="text-xs leading-5 text-slate-500">© {new Date().getFullYear()} TU DESTINO MX ROLANDO X MEXICO S.A. de C.V. Todos los derechos reservados.</p>
+            <nav aria-label="Enlaces legales" class="flex items-center gap-5 text-xs font-semibold text-slate-600">
+                <a href="/privacidad" class="transition hover:text-fuchsia-700">Aviso de privacidad</a>
+                <a href="/terminos-condiciones" class="transition hover:text-fuchsia-700">Términos y condiciones</a>
+            </nav>
+        </div>
+    </footer>
 </Layout>
