@@ -6,6 +6,43 @@ import Footer from "../components/layout/Footer.astro";
 const title = "¿Tu Destino México es confiable? | Tu Destino México";
 const description = "Conoce cómo identificar a Tu Destino México, quién opera tudestinomx.com y qué puedes verificar antes de reservar o pagar un viaje.";
 const socialImage = new URL("/images/brand/tu-destino-mexico-confiable-1x1.png", Astro.site).href;
+
+const faqs = [
+    {
+        question: "¿Cuál es el sitio oficial de Tu Destino México?",
+        answer: "El sitio oficial es tudestinomx.com. Comprueba el dominio antes de compartir datos o realizar un pago.",
+    },
+    {
+        question: "¿Cómo contacto a la agencia?",
+        answer: "El número de ventas publicado en el sitio es (998) 980 6611. También puedes consultar la sección Quiénes somos.",
+    },
+    {
+        question: "¿Qué hago si hay datos que no coinciden?",
+        answer: "No continúes con el pago hasta aclararlos. Contacta a la agencia mediante los datos publicados en tudestinomx.com y solicita que te confirmen por escrito la cotización y las condiciones de tu reservación.",
+    },
+    {
+        question: "¿Cómo verifico que la agencia esté registrada?",
+        answer: "Consulta el número RNT publicado, 0423005c2dd75, en el portal de consulta de la Secretaría de Turismo (SECTUR) y compara el nombre y los datos del registro con tu reservación.",
+    },
+    {
+        question: "¿Cómo se procesan los pagos en línea?",
+        answer: "Los pagos en línea se procesan a través de Openpay. Consulta los medios de pago disponibles en la página de métodos de pago antes de pagar.",
+    },
+    {
+        question: "¿Dónde puedo presentar una queja?",
+        answer: "Primero contacta a la agencia por el teléfono publicado para intentar resolverla. Si no se resuelve, puedes acudir a Profeco, que tiene un Buró Comercial donde se consultan los antecedentes de las empresas.",
+    },
+];
+
+const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+};
 ---
 
 <Layout title={title} description={description} image={socialImage}>
@@ -121,28 +158,17 @@ const socialImage = new URL("/images/brand/tu-destino-mexico-confiable-1x1.png",
                     <p class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary-hover">Respuestas claras</p>
                     <h2 id="preguntas" class="mt-2 text-2xl font-black tracking-tight text-brand-ink">Preguntas frecuentes</h2>
                     <div class="mt-5 divide-y divide-brand-border">
-                        <details class="group py-4" open>
-                            <summary class="cursor-pointer list-none pr-8 font-bold text-brand-ink marker:content-none focus-visible:outline-2 focus-visible:outline-brand-primary">
-                                ¿Cuál es el sitio oficial de Tu Destino México?
-                                <span class="float-right text-brand-primary group-open:rotate-45" aria-hidden="true">＋</span>
-                            </summary>
-                            <p class="mt-3 leading-7">El sitio oficial es <a class="font-semibold text-brand-ink underline decoration-brand-primary underline-offset-4" href="https://www.tudestinomx.com/">tudestinomx.com</a>. Comprueba el dominio antes de compartir datos o realizar un pago.</p>
-                        </details>
-                        <details class="group py-4">
-                            <summary class="cursor-pointer list-none pr-8 font-bold text-brand-ink marker:content-none focus-visible:outline-2 focus-visible:outline-brand-primary">
-                                ¿Cómo contacto a la agencia?
-                                <span class="float-right text-brand-primary group-open:rotate-45" aria-hidden="true">＋</span>
-                            </summary>
-                            <p class="mt-3 leading-7">El número de ventas publicado en el sitio es <a class="font-semibold text-brand-ink underline decoration-brand-primary underline-offset-4" href="tel:+529989806611">(998) 980 6611</a>. También puedes abrir la sección <a class="font-semibold text-brand-ink underline decoration-brand-primary underline-offset-4" href="/nosotros">Quiénes somos</a>.</p>
-                        </details>
-                        <details class="group py-4">
-                            <summary class="cursor-pointer list-none pr-8 font-bold text-brand-ink marker:content-none focus-visible:outline-2 focus-visible:outline-brand-primary">
-                                ¿Qué hago si hay datos que no coinciden?
-                                <span class="float-right text-brand-primary group-open:rotate-45" aria-hidden="true">＋</span>
-                            </summary>
-                            <p class="mt-3 leading-7">No continúes con el pago hasta aclararlos. Contacta a la agencia mediante los datos publicados en tudestinomx.com y solicita que te confirmen por escrito la cotización y las condiciones de tu reservación.</p>
-                        </details>
+                        {faqs.map((faq, index) => (
+                            <details class="group py-4" open={index === 0}>
+                                <summary class="cursor-pointer list-none pr-8 font-bold text-brand-ink marker:content-none focus-visible:outline-2 focus-visible:outline-brand-primary">
+                                    {faq.question}
+                                    <span class="float-right text-brand-primary group-open:rotate-45" aria-hidden="true">＋</span>
+                                </summary>
+                                <p class="mt-3 leading-7">{faq.answer}</p>
+                            </details>
+                        ))}
                     </div>
+                    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
                 </section>
             </article>
 
