@@ -13,6 +13,17 @@ export const BUEN_FIN_TOPBAR = {
 // Cupón simbólico de la temporada. No indica un monto de descuento.
 export const BUEN_FIN_COUPON = 'BUENFIN-TDMX';
 
+// Tarjetas con los colores de la temporada (cinta roja y línea de fechas).
+// Se apagan solas después del último día de la temporada.
+export const BUEN_FIN_CARDS = {
+    enabled: true,
+    end: new Date('2026-11-17T23:59:59-05:00'),
+} as const;
+
+export function isBuenFinCardsActive(now: Date = new Date()): boolean {
+    return BUEN_FIN_CARDS.enabled && now.getTime() <= BUEN_FIN_CARDS.end.getTime();
+}
+
 export type BuenFinPhase = 'before' | 'active' | 'ended';
 
 export function getBuenFinPhase(now: Date = new Date()): BuenFinPhase {
