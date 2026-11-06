@@ -1,6 +1,5 @@
 ---
 import { Icon } from "astro-icon/components";
-import FooterBanner from "../ui/FooterBanner.astro";
 import { getGeneralConfig } from "../../lib/generalConfig";
 
 const { whatsappGlobal } = await getGeneralConfig();
@@ -23,8 +22,6 @@ const linkClass = "font-semibold text-white underline-offset-4 hover:underline h
 const socialClass = "inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-orange-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded";
 const sectionTitleClass = "text-[11px] font-black uppercase tracking-[0.2em] text-white/70";
 ---
-
-<FooterBanner />
 
 <footer class="bg-white py-10 px-4 relative">
     <div class="container mx-auto flex flex-col gap-10">
