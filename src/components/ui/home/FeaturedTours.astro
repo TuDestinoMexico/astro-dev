@@ -1,0 +1,44 @@
+---
+import MobileRail from '../single/MobileRail.astro';
+import Card from '../single/Card.astro';
+import { fetchTourList } from '../../../lib/catalog';
+
+const catalogResult = await fetchTourList<any>();
+const catalogUnavailable = catalogResult.status === 'unavailable';
+const tours = catalogResult.status === 'ok' ? catalogResult.data : [];
+---
+
+<section class="space-y-6 py-8" aria-labelledby="featured-tours-heading">
+    <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-purple-600">Actividades y excursiones</p>
+            <h2 id="featured-tours-heading" class="mt-2 text-3xl font-black tracking-tight text-slate-900">Tours para complementar tu viaje</h2>
+        </div>
+        <a href="/tours" class="font-bold text-purple-700 hover:underline">Ver todos los tours</a>
+    </div>
+
+    {catalogUnavailable ? (
+        <div class="px-4 py-12 text-center">
+            <p class="font-semibold text-gray-700">El catálogo de tours no está disponible temporalmente.</p>
+            <p class="mt-2 text-gray-500">Puedes continuar explorando el sitio o contactarnos para encontrar una experiencia.</p>
+        </div>
+    ) : tours.length > 0 ? (
+        <MobileRail class="md:grid-cols-2 lg:grid-cols-3 md:gap-8">
+            {tours.slice(0, 6).map(
+                (tour: { name: string | undefined; slug: string | undefined; images: any; destino: string | undefined }) => (
+                    <Card
+                        title={tour.name}
+                        slug={tour.slug}
+                        photo={tour.images}
+                        type="tour"
+                        destino={tour.destino}
+                    />
+                )
+            )}
+        </MobileRail>
+    ) : (
+        <div class="px-4 py-12 text-center">
+            <p class="italic text-gray-500">No se encontraron tours disponibles en este momento.</p>
+        </div>
+    )}
+</section>
