@@ -24,7 +24,6 @@ Renderizados en servidor. Sin estado cliente.
 | `IconSocial.astro` | `components/ui/IconSocial.astro` | Icono de red social |
 | `MenuBar.astro` | `components/ui/MenuBar.astro` | Barra de contacto adaptable al ancho disponible con icono, título y subtítulo |
 | `SubMenu.astro` | `components/ui/SubMenu.astro` | Item de navegación con icono Material |
-| `FooterBanner.astro` | `components/ui/FooterBanner.astro` | Banner promocional pre-footer |
 | `HeroBanner.astro` | `components/ui/single/HeroBanner.astro` | Banner de cabecera para páginas de listing |
 | `HeroBannerOutBounds.astro` | `components/ui/single/HeroBannerOutBounds.astro` | Hero banner extendido |
 | `Card.astro` | `components/ui/single/Card.astro` | Tarjeta reutilizable para hoteles/tours (incluye botón favorito `FavoriteButton.jsx` en zona de imagen) |
