@@ -39,8 +39,12 @@ const tabItems = [
     { title: "Cuenta", icon: "user-round", url: "/cliente/dashboard" },
 ];
 
-const iconButtonClass = "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-purple-800 hover:text-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60";
-const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-purple-800 hover:text-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60";
+// El movimiento de presión y de elevación solo se aplica si el usuario no pide movimiento reducido.
+const iconButtonClass = "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition-colors hover:border-purple-800 hover:text-purple-800 motion-safe:transition-transform motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60";
+const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:border-purple-800 hover:text-purple-800 motion-safe:transition-transform motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60";
+// Paneles de menú: cerrados quedan invisibles e inertes (no reciben foco ni clics).
+const panelBaseClass = "transition duration-200 ease-out motion-reduce:transition-none";
+const panelClosedClass = "invisible pointer-events-none opacity-0 -translate-y-2";
 ---
 
 <!-- ESCRITORIO: navegación con ícono y acciones a la derecha -->
@@ -75,7 +79,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
                 href={cotizarHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 rounded-full bg-green-700 px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-md transition hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                class="inline-flex items-center gap-2 rounded-full bg-green-700 px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-md transition-colors hover:bg-green-800 motion-safe:transition-transform motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
             >
                 <Icon name="simple-icons:whatsapp" class="h-4 w-4" aria-hidden="true" />
                 Cotizar
@@ -91,10 +95,13 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
                 <Icon data-icon-open name="lucide:menu" class="h-5 w-5" aria-hidden="true" />
                 <Icon data-icon-close name="lucide:x" class="hidden h-5 w-5" aria-hidden="true" />
             </button>
-            <ClientLoginButton client:only="react" />
+            <!-- Contenedor de tamaño fijo: evita que el header cambie al hidratar el botón de cuenta. -->
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center">
+                <ClientLoginButton client:only="react" />
+            </div>
         </div>
 
-        <div id="menu-desktop" hidden class="absolute right-5 top-full z-50 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+        <div id="menu-desktop" role="region" aria-label="Menú" inert class={`absolute right-5 top-full z-50 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ${panelBaseClass} ${panelClosedClass}`}>
             <ul class="space-y-1">
                 {menuLinks.map(({ title, icon, url }) => (
                     <li>
@@ -117,7 +124,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
 
 <!-- MÓVIL: barra superior con pagar, cotizar y menú -->
 <header id="mobile-header" class="relative bg-white shadow-sm xl:hidden">
-    <div class="flex items-center justify-between gap-3 px-4 py-3">
+    <div class="flex min-h-[60px] items-center justify-between gap-3 px-4 py-3">
         <a href="/" class="shrink-0" aria-label="Tu Destino México, inicio">
             <img class="h-9 w-auto object-contain" src={logoUrl} alt="Tu Destino México" width="180" height="45" decoding="async">
         </a>
@@ -131,7 +138,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Cotizar por WhatsApp"
-                class="flex h-11 w-11 items-center justify-center rounded-full bg-green-700 text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                class="flex h-11 w-11 items-center justify-center rounded-full bg-green-700 text-white shadow-md motion-safe:transition-transform motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
             >
                 <Icon name="simple-icons:whatsapp" class="h-5 w-5" aria-hidden="true" />
             </a>
@@ -149,7 +156,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
         </div>
     </div>
 
-    <div id="menu-mobile" hidden class="absolute inset-x-0 top-full z-50 max-h-[70vh] overflow-y-auto border-t border-slate-100 bg-white px-4 pb-6 pt-4 shadow-lg">
+    <div id="menu-mobile" role="region" aria-label="Menú" inert class={`absolute inset-x-0 top-full z-50 max-h-[70vh] overflow-y-auto border-t border-slate-100 bg-white px-4 pb-6 pt-4 shadow-lg ${panelBaseClass} ${panelClosedClass}`}>
         <nav aria-label="Secciones" class="grid grid-cols-2 gap-3">
             {mobileMenuLinks.map(({ title, icon, url }) => (
                 <a href={url} class:list={["flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-sm font-bold", isActive(url) ? "border-purple-800 text-purple-800" : "text-slate-700"]}>
@@ -164,7 +171,9 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
                 <Icon name="lucide:phone" class="h-4 w-4" aria-hidden="true" />
                 {ventasTelLabel}
             </a>
-            <ClientLoginButton client:only="react" />
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center">
+                <ClientLoginButton client:only="react" />
+            </div>
         </div>
     </div>
 </header>
@@ -174,7 +183,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
     <ul class="mx-auto grid max-w-md grid-cols-5 items-end px-2">
         {tabItems.slice(0, 2).map(({ title, icon, url }) => (
             <li>
-                <a href={url} aria-current={isActive(url) ? "page" : undefined} class:list={["flex flex-col items-center gap-1 py-2.5 text-[11px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60 rounded-lg", isActive(url) ? "text-purple-800" : "text-slate-500"]}>
+                <a href={url} aria-current={isActive(url) ? "page" : undefined} class:list={["flex flex-col items-center gap-1 py-2.5 text-[11px] font-bold transition-colors motion-safe:transition-transform motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60 rounded-lg", isActive(url) ? "text-purple-800" : "text-slate-500"]}>
                     <Icon name={`lucide:${icon}`} class="h-5 w-5" aria-hidden="true" />
                     {title}
                 </a>
@@ -186,7 +195,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
                 href={cotizarHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-green-700 text-white shadow-lg ring-4 ring-white focus-visible:outline-none focus-visible:ring-green-700"
+                class="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-green-700 text-white shadow-lg ring-4 ring-white motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-green-700"
                 aria-label="Cotizar por WhatsApp"
             >
                 <Icon name="simple-icons:whatsapp" class="h-6 w-6" aria-hidden="true" />
@@ -196,7 +205,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
 
         {tabItems.slice(2).map(({ title, icon, url }) => (
             <li>
-                <a href={url} aria-current={isActive(url) ? "page" : undefined} class:list={["flex flex-col items-center gap-1 py-2.5 text-[11px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60 rounded-lg", isActive(url) ? "text-purple-800" : "text-slate-500"]}>
+                <a href={url} aria-current={isActive(url) ? "page" : undefined} class:list={["flex flex-col items-center gap-1 py-2.5 text-[11px] font-bold transition-colors motion-safe:transition-transform motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60 rounded-lg", isActive(url) ? "text-purple-800" : "text-slate-500"]}>
                     <Icon name={`lucide:${icon}`} class="h-5 w-5" aria-hidden="true" />
                     {title}
                 </a>
@@ -217,11 +226,19 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
 <script>
     // Un solo mecanismo para los dos menús hamburguesa (escritorio y móvil).
     const toggles = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-menu-toggle]'));
+    const OPEN_CLASSES = ['visible', 'pointer-events-auto', 'opacity-100', 'translate-y-0'];
+    const CLOSED_CLASSES = ['invisible', 'pointer-events-none', 'opacity-0', '-translate-y-2'];
+
+    const getPanel = (button: HTMLButtonElement) => document.getElementById(button.getAttribute('aria-controls') ?? '');
+
+    const isOpen = (button: HTMLButtonElement) => button.getAttribute('aria-expanded') === 'true';
 
     const setPanel = (button: HTMLButtonElement, open: boolean) => {
-        const panel = document.getElementById(button.getAttribute('aria-controls') ?? '');
+        const panel = getPanel(button);
         if (!panel) return;
-        panel.hidden = !open;
+        panel.classList.remove(...(open ? CLOSED_CLASSES : OPEN_CLASSES));
+        panel.classList.add(...(open ? OPEN_CLASSES : CLOSED_CLASSES));
+        panel.inert = !open;
         button.setAttribute('aria-expanded', String(open));
         button.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
         button.querySelector('[data-icon-open]')?.classList.toggle('hidden', open);
@@ -230,13 +247,13 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
 
     const closeAll = (except?: HTMLButtonElement) => {
         toggles.forEach((button) => {
-            if (button !== except && button.getAttribute('aria-expanded') === 'true') setPanel(button, false);
+            if (button !== except && isOpen(button)) setPanel(button, false);
         });
     };
 
     toggles.forEach((button) => {
         button.addEventListener('click', () => {
-            const willOpen = button.getAttribute('aria-expanded') !== 'true';
+            const willOpen = !isOpen(button);
             closeAll(button);
             setPanel(button, willOpen);
         });
@@ -244,7 +261,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
 
     document.addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') return;
-        const open = toggles.find((button) => button.getAttribute('aria-expanded') === 'true');
+        const open = toggles.find(isOpen);
         if (open) {
             setPanel(open, false);
             open.focus();
@@ -254,10 +271,7 @@ const pillOutlineClass = "inline-flex items-center gap-2 rounded-full border bor
     document.addEventListener('mousedown', (event) => {
         const target = event.target as Node | null;
         if (!target) return;
-        const insideMenu = toggles.some((button) => {
-            const panel = document.getElementById(button.getAttribute('aria-controls') ?? '');
-            return button.contains(target) || panel?.contains(target);
-        });
+        const insideMenu = toggles.some((button) => button.contains(target) || getPanel(button)?.contains(target));
         if (!insideMenu) closeAll();
     });
 
