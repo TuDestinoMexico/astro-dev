@@ -7,6 +7,7 @@ import HeroBanner from "../components/ui/single/HeroBanner.astro";
 import Card from "../components/ui/single/Card.astro";
 import SearchSummary from "../components/ui/single/SearchSummary.astro";
 import SearchResultsSkeleton from "../components/ui/single/SearchResultsSkeleton.astro";
+import MobileRail from "../components/ui/single/MobileRail.astro";
 import SearchEditor from "../components/ui/single/SearchEditor";
 import { fetchTourList } from "../lib/catalog";
 import { hasSearchFilters, matchesDestino, parseSearchQuery, toSearchString } from "../lib/searchParams";
@@ -116,7 +117,7 @@ const tourListSchema = {
                         <p class="text-gray-500 mt-2">Intenta nuevamente más tarde o contáctanos para encontrar una experiencia.</p>
                     </div>
             ) : tours.length > 0 ? (
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <MobileRail class="md:grid-cols-2 lg:grid-cols-3 md:gap-8">
                         {tours.map((tour: any) => (
                                 <Card
                                         title={tour.name || tour.title}
@@ -127,7 +128,7 @@ const tourListSchema = {
                                         query={searchQueryString}
                                 />
                         ))}
-                    </div>
+                    </MobileRail>
             ) : (
                     <div class="mx-auto max-w-2xl py-16 text-center">
                         {searchFiltered ? (
