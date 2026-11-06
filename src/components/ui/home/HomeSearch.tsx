@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FocusEvent, FormEvent, KeyboardEvent, MouseEvent } from 'react';
-import { CalendarDays, ChevronDown, Compass, Hotel, Minus, Palmtree, Plus, Search, Sparkles, Sun, Users, Waves, X } from 'lucide-react';
+import { ChevronDown, Compass, Hotel, Minus, Palmtree, Plus, Search, Sparkles, Sun, Users, Waves, X } from 'lucide-react';
+import SearchDatePicker from './SearchDatePicker';
 
 type Tipo = 'hotel' | 'tour';
 
@@ -17,13 +18,12 @@ const MIN_CARACTERES_SUGERENCIA = 2;
 const RETRASO_SUGERENCIA_MS = 250;
 const EDADES_MENOR = Array.from({ length: 18 }, (_, edad) => String(edad));
 
-const todayInCancun = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Cancun' });
-
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const plural = (count: number, singular: string, pluralForm: string) => `${count} ${count === 1 ? singular : pluralForm}`;
 
-const fieldClass = 'min-h-[48px] w-full rounded-card border border-brand-border bg-white px-4 py-3 text-sm font-semibold text-brand-ink transition hover:border-brand-primary/60 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40';
+// Todos los controles del buscador miden lo mismo (56 px). El texto de 16 px evita el zoom automático de iOS al enfocar.
+const fieldClass = 'h-14 w-full rounded-card border border-brand-border bg-white px-4 py-3 text-base font-semibold md:text-sm text-brand-ink transition hover:border-brand-primary/60 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40';
 const labelClass = 'mb-2 block text-[11px] font-black uppercase tracking-[0.16em] text-brand-muted';
 const stepperButtonClass = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-border bg-white text-brand-ink transition hover:border-brand-primary hover:text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40 disabled:opacity-40';
 
@@ -127,7 +127,6 @@ export default function HomeSearch({ initial }: { initial?: HomeSearchInitial } 
     const idBase = useId();
     const dialogRef = useRef<HTMLDialogElement>(null);
     const destinoWrapperRef = useRef<HTMLDivElement>(null);
-    const minDate = todayInCancun();
 
     const listboxId = `${idBase}-sugerencias`;
     const mostrarSugerencias = sugerenciasAbiertas && destino.trim().length >= MIN_CARACTERES_SUGERENCIA;
@@ -300,7 +299,12 @@ export default function HomeSearch({ initial }: { initial?: HomeSearchInitial } 
             aria-label="Buscar hoteles o tours"
             className="rounded-panel border border-brand-border bg-white p-5 text-brand-ink shadow-card-hover md:p-8"
         >
-            <div className="mb-5 inline-flex rounded-pill bg-brand-surface p-1" role="group" aria-label="Tipo de búsqueda">
+            <div className="relative mb-5 inline-grid grid-cols-2 rounded-pill bg-brand-surface p-1" role="group" aria-label="Tipo de búsqueda">
+                {/* Píldora que se desliza hacia la pestaña activa. Con movimiento reducido cambia sin animar. */}
+                <span
+                    aria-hidden="true"
+                    className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-pill bg-brand-primary shadow-sm transition-transform duration-300 ease-out motion-reduce:transition-none ${tipo === 'tour' ? 'translate-x-full' : 'translate-x-0'}`}
+                />
                 {([
                     { value: 'hotel', label: 'Hotel', Icon: Hotel },
                     { value: 'tour', label: 'Tour', Icon: Compass },
@@ -310,9 +314,9 @@ export default function HomeSearch({ initial }: { initial?: HomeSearchInitial } 
                         type="button"
                         aria-pressed={tipo === value}
                         onClick={() => setTipo(value)}
-                        className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-xs font-black uppercase tracking-wider transition ${tipo === value ? 'bg-brand-primary text-brand-ink' : 'text-brand-muted hover:text-brand-ink'}`}
+                        className={`relative z-10 inline-flex items-center justify-center gap-2 rounded-pill px-5 py-2 text-xs font-black uppercase tracking-wider transition-colors duration-300 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/50 ${tipo === value ? 'text-brand-ink' : 'text-brand-muted hover:text-brand-ink'}`}
                     >
-                        <Icon size={14} aria-hidden="true" /> {label}
+                        <Icon size={14} aria-hidden="true" className="motion-safe:transition-transform motion-safe:duration-300" /> {label}
                     </button>
                 ))}
             </div>
@@ -382,23 +386,14 @@ export default function HomeSearch({ initial }: { initial?: HomeSearchInitial } 
                 </div>
 
                 {tipo === 'hotel' ? (
-                    <>
-                        <div className="md:col-span-2">
-                            <label htmlFor={`${idBase}-entrada`} className={labelClass}>Entrada</label>
-                            <input id={`${idBase}-entrada`} type="date" min={minDate} value={entrada} onChange={(event) => setEntrada(event.target.value)} className={fieldClass} />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label htmlFor={`${idBase}-salida`} className={labelClass}>Salida</label>
-                            <input id={`${idBase}-salida`} type="date" min={entrada || minDate} value={salida} onChange={(event) => setSalida(event.target.value)} className={fieldClass} />
-                        </div>
-                    </>
+                    <div className="md:col-span-4">
+                        <span className={`${labelClass} block`}>Estancia</span>
+                        <SearchDatePicker mode="range" from={entrada} to={salida} onChange={(nuevaEntrada, nuevaSalida) => { setEntrada(nuevaEntrada); setSalida(nuevaSalida); }} />
+                    </div>
                 ) : (
                     <div className="md:col-span-4">
-                        <label htmlFor={`${idBase}-fecha`} className={labelClass}>Fecha</label>
-                        <div className="relative">
-                            <CalendarDays size={16} aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted" />
-                            <input id={`${idBase}-fecha`} type="date" min={minDate} value={fecha} onChange={(event) => setFecha(event.target.value)} className={`${fieldClass} pl-11`} />
-                        </div>
+                        <span className={`${labelClass} block`}>Fecha</span>
+                        <SearchDatePicker mode="single" from={fecha} to="" onChange={(nuevaFecha) => setFecha(nuevaFecha)} />
                     </div>
                 )}
 
