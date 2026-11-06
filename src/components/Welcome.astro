@@ -1,15 +1,19 @@
 ---
 import TikTokCTA from "./ui/home/TikTokCTA.astro";
+import HomeBanner from "./ui/home/HomeBanner.astro";
+import { fetchHomeBanner } from "../lib/homeBanner";
 import Content from "./layout/Content.astro";
 import WelcomeModal from "./modal/WelcomeModal";
 import OfficialAnnouncementModal from "./ui/OfficialAnnouncementModal.jsx";
 import RecentlyViewed from "./ui/RecentlyViewed";
-import EventsHero from "./ui/home/EventsHero.astro";
 import FeaturedHotels from "./ui/home/FeaturedHotels.astro";
+import FeaturedTours from "./ui/home/FeaturedTours.astro";
 import { destinations } from "../data/destinations";
+
+const homeBanner = await fetchHomeBanner();
 ---
 
-<EventsHero />
+<HomeBanner banner={homeBanner} />
 <Content>
     <WelcomeModal client:only="react" />
     <OfficialAnnouncementModal client:only="react" />
@@ -51,15 +55,6 @@ import { destinations } from "../data/destinations";
         </div>
     </section>
 
-    <section class="space-y-6 py-8" aria-labelledby="featured-tours-heading">
-        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-                <p class="text-xs font-black uppercase tracking-[0.2em] text-purple-600">Actividades y excursiones</p>
-                <h2 id="featured-tours-heading" class="mt-2 text-3xl font-black tracking-tight text-slate-900">Tours para complementar tu viaje</h2>
-            </div>
-            <a href="/tours" class="font-bold text-purple-700 hover:underline">Ver todos los tours</a>
-        </div>
-        <p class="max-w-3xl leading-7 text-slate-600">Descubre experiencias acuáticas, culturales y de aventura. Consulta disponibilidad y combina tus actividades con el hospedaje que prefieras.</p>
-    </section>
+    <FeaturedTours />
 
 </Content>

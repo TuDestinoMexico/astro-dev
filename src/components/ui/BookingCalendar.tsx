@@ -10,10 +10,29 @@ import { CalendarDays, User, Send, X } from 'lucide-react';
 import { MinorAges } from './MinorAges';
 import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
+// Datos del buscador de la portada que llegan por URL. Son opcionales y solo precargan el formulario.
+export interface BookingInitialSearch {
+    entrada?: string;
+    salida?: string;
+    fecha?: string;
+    adultos?: number;
+    menores?: number;
+    edades?: string[];
+}
+
 interface Props {
     hotelName: string;
     isSingleDate?: boolean; // Opcional para no romper Hoteles
+    initialSearch?: BookingInitialSearch;
 }
+
+// Convierte YYYY-MM-DD a fecha local. Las fechas pasadas se ignoran.
+const parseLocalDay = (value?: string): Date | undefined => {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return isBefore(date, startOfToday()) ? undefined : date;
+};
 
 type BookingFormData = {
     nombre: string;
@@ -22,38 +41,30 @@ type BookingFormData = {
     edadesMenores: string[];
 };
 
-const calendarClassNames = {
-    months: 'flex flex-col md:flex-row gap-6 justify-center',
-    month: 'space-y-4 rounded-2xl border border-slate-100 bg-white p-2 sm:p-3',
-    month_caption: 'hidden',
-    caption_label: 'text-sm font-black capitalize text-slate-800',
-    nav: 'hidden',
-    month_grid: 'border-collapse',
-    weekdays: 'grid grid-cols-7',
-    weekday: 'w-10 text-center text-[10px] font-black uppercase text-slate-400',
-    week: 'grid grid-cols-7 mt-1',
-    day: 'relative flex h-10 w-10 items-center justify-center p-0 text-center text-sm',
-    day_button: 'h-10 w-10 rounded-xl font-bold text-slate-700 transition-all hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer',
-    selected: '[&>button]:!bg-indigo-600 [&>button]:!text-white [&>button]:shadow-md',
-    range_start: '[&>button]:!bg-indigo-600 [&>button]:!text-white [&>button]:rounded-l-xl [&>button]:rounded-r-none [&>button]:shadow-md',
-    range_end: '[&>button]:!bg-indigo-600 [&>button]:!text-white [&>button]:rounded-r-xl [&>button]:rounded-l-none [&>button]:shadow-md',
-    range_middle: '[&>button]:!bg-indigo-50 [&>button]:!text-indigo-800 [&>button]:rounded-none',
-    today: 'font-black text-indigo-600',
-    outside: 'text-slate-200',
-    disabled: '[&>button]:!bg-slate-50 [&>button]:!text-slate-300 [&>button]:!opacity-70 [&>button]:cursor-not-allowed',
-    hidden: 'invisible'
-};
+import { calendarClassNames } from './calendarClassNames';
 
 
-export default function BookingCalendar({ hotelName, isSingleDate = false }: Props) {
+export default function BookingCalendar({ hotelName, isSingleDate = false, initialSearch }: Props) {
+    // PRECARGA DESDE EL BUSCADOR (solo se usa en el primer render)
+    const prefillCheckIn = parseLocalDay(isSingleDate ? initialSearch?.fecha : initialSearch?.entrada);
+    const prefillCheckOut = isSingleDate ? undefined : parseLocalDay(initialSearch?.salida);
+    const prefillRangeEnd = prefillCheckIn && prefillCheckOut && isAfter(prefillCheckOut, prefillCheckIn) ? prefillCheckOut : undefined;
+    const hasPrefill = Boolean(prefillCheckIn);
+    const prefillMenores = Math.min(6, Math.max(0, initialSearch?.menores ?? 0));
+
     // ESTADOS
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
-    const [checkIn, setCheckIn] = useState<Date | null>(null);
-    const [checkOut, setCheckOut] = useState<Date | null>(null);
-    const [range, setRange] = useState<DateRange | undefined>();
+    const [currentMonth, setCurrentMonth] = useState(startOfMonth(prefillCheckIn ?? new Date()));
+    const [checkIn, setCheckIn] = useState<Date | null>(prefillCheckIn ?? null);
+    const [checkOut, setCheckOut] = useState<Date | null>(prefillRangeEnd ?? null);
+    const [range, setRange] = useState<DateRange | undefined>(prefillCheckIn ? { from: prefillCheckIn, to: prefillRangeEnd } : undefined);
     const [isClosing, setIsClosing] = useState(false);
-    const [formData, setFormData] = useState<BookingFormData>({ nombre: '', adultos: 2, menores: 0, edadesMenores: [] });
+    const [formData, setFormData] = useState<BookingFormData>({
+        nombre: '',
+        adultos: initialSearch?.adultos ?? 2,
+        menores: prefillMenores,
+        edadesMenores: (initialSearch?.edades ?? []).slice(0, prefillMenores),
+    });
     const [validationMessage, setValidationMessage] = useState('');
 
     const titleId = useId();
@@ -273,6 +284,11 @@ export default function BookingCalendar({ hotelName, isSingleDate = false }: Pro
 
     return (
         <div className="w-full space-y-4">
+            {hasPrefill && (
+                <p className="rounded-xl bg-indigo-50 px-4 py-3 text-xs font-semibold leading-5 text-indigo-900">
+                    Cargamos los datos de tu búsqueda. Revisa fechas y viajeros antes de enviar tu solicitud.
+                </p>
+            )}
 
             {/* 1. Resumen de fechas */}
             <div className="w-full">

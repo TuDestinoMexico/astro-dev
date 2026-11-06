@@ -6,13 +6,38 @@ import Content from "../components/layout/Content.astro";
 import HeroBanner from "../components/ui/single/HeroBanner.astro";
 import Card from "../components/ui/single/Card.astro";
 import HeroBannerOutBounds from "../components/ui/single/HeroBannerOutBounds.astro";
+import SearchSummary from "../components/ui/single/SearchSummary.astro";
+import SearchResultsSkeleton from "../components/ui/single/SearchResultsSkeleton.astro";
+import SearchEditor from "../components/ui/single/SearchEditor";
+import MobileRail from "../components/ui/single/MobileRail.astro";
 import { fetchHotelList } from "../lib/catalog";
+import { hasSearchFilters, matchesDestino, parseSearchQuery, toSearchString } from "../lib/searchParams";
 
 const catalogResult = await fetchHotelList<any>();
 const catalogUnavailable = catalogResult.status === 'unavailable';
-const hoteles = catalogResult.status === 'ok'
+const hotelesActivos = catalogResult.status === 'ok'
     ? catalogResult.data.filter((hotel: any) => Number(hotel.active) === 1)
     : [];
+
+// El buscador de la portada llega aquí con destino, fechas y viajeros en la URL.
+const searchQuery = parseSearchQuery(Astro.url.searchParams);
+const searchFiltered = hasSearchFilters(searchQuery);
+const hoteles = searchQuery.destino
+    ? hotelesActivos.filter((hotel: any) => matchesDestino(hotel, searchQuery.destino))
+    : hotelesActivos;
+const searchQueryString = toSearchString(searchQuery);
+const searchInitial = {
+    tipo: 'hotel' as const,
+    destino: searchQuery.destino,
+    entrada: searchQuery.entrada,
+    salida: searchQuery.salida,
+    adultos: searchQuery.adultos,
+    menores: searchQuery.menores,
+    edades: searchQuery.edades,
+};
+const whatsappNoResultsUrl = `https://wa.me/529987141365?text=${encodeURIComponent(
+    `Hola, busqué "${searchQuery.destino}" en su sitio de hoteles y no encontré opciones publicadas. ¿Me pueden ayudar?`
+)}`;
 
 // Configuramos cuántos mostrar inicialmente
 const INITIAL_VISIBLE = 8;
@@ -75,6 +100,16 @@ const hotelListSchema = {
                 <p class="mx-auto mt-4 max-w-3xl leading-7 text-gray-600">Explora opciones de hospedaje en México y el Caribe. Si necesitas comparar ubicación, categoría, amenidades o fechas, nuestro equipo puede ayudarte a elegir.</p>
             </div>
 
+            {searchFiltered && <SearchResultsSkeleton label="Buscando tus próximas vacaciones" />}
+
+            <div data-search-results class={searchFiltered ? 'hidden' : undefined}>
+            {!catalogUnavailable && searchFiltered && (
+                    <div>
+                        <SearchSummary query={searchQuery} tipo="hotel" total={hoteles.length} filtrado={Boolean(searchQuery.destino)} />
+                        <SearchEditor client:load initial={searchInitial} />
+                    </div>
+            )}
+
             {catalogUnavailable ? (
                     <div class="text-center py-20">
                         <p class="text-gray-700 font-semibold">El catálogo de hoteles no está disponible temporalmente.</p>
@@ -82,34 +117,51 @@ const hotelListSchema = {
                     </div>
             ) : hoteles.length > 0 ? (
                     <div class="flex flex-col items-center">
-                        <div id="hotel-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
+                        <MobileRail class="md:grid-cols-2 lg:grid-cols-4 md:gap-8 w-full">
                             {hoteles.map((hotel: any, index: number) => (
-                                    <div class={`hotel-card ${index >= INITIAL_VISIBLE ? 'hidden' : ''}`}>
+                                    <div class={`hotel-card ${index >= INITIAL_VISIBLE ? 'md:hidden' : ''}`} data-extra={index >= INITIAL_VISIBLE ? '' : undefined}>
                                         <Card
                                                 title={hotel.name || hotel.title}
                                                 slug={hotel.slug}
                                                 type="hotel"
                                                 destino={hotel.destino}
                                                 photo={hotel.images || hotel.imagenes}
+                                                query={searchQueryString}
                                         />
                                     </div>
                             ))}
-                        </div>
+                        </MobileRail>
 
                         {hoteles.length > INITIAL_VISIBLE && (
                                 <button
                                         id="load-more-btn"
-                                        class="mt-12 px-8 py-3 bg-purple-800 text-white font-bold rounded-full hover:bg-purple-900 transition-colors shadow-lg"
+                                        class="hidden md:block mt-12 px-8 py-3 bg-purple-800 text-white font-bold rounded-full hover:bg-purple-900 transition-colors shadow-lg"
                                 >
                                     Ver más hoteles
                                 </button>
                         )}
                     </div>
             ) : (
-                    <div class="text-center py-20">
-                        <p class="text-gray-500 italic">No se encontraron hoteles disponibles en este momento.</p>
+                    <div class="mx-auto max-w-2xl py-16 text-center">
+                        {searchFiltered ? (
+                            <>
+                                <p class="text-xl font-extrabold text-gray-800">
+                                    {searchQuery.destino ? `No encontramos hoteles para "${searchQuery.destino}"` : 'No encontramos hoteles con esa búsqueda'}
+                                </p>
+                                <p class="mt-3 leading-7 text-gray-600">
+                                    Revisa la ortografía o prueba con otro destino. También puedes escribirnos y te ayudamos a encontrar opciones con tus fechas.
+                                </p>
+                                <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                                    <a href="/hoteles" class="rounded-full border border-gray-300 px-6 py-3 font-bold text-gray-800 transition hover:border-purple-700">Ver todos los hoteles</a>
+                                    <a href={whatsappNoResultsUrl} target="_blank" rel="noopener noreferrer" class="rounded-full bg-emerald-600 px-6 py-3 font-bold text-white transition hover:bg-emerald-700">Escribir a un asesor</a>
+                                </div>
+                            </>
+                        ) : (
+                            <p class="text-gray-500 italic">No se encontraron hoteles disponibles en este momento.</p>
+                        )}
                     </div>
             )}
+            </div>
         </div>
     </Content>
 
@@ -117,25 +169,26 @@ const hotelListSchema = {
 </Layout>
 
 <script>
+    // En móvil todas las tarjetas están en el carrusel; el botón solo existe en escritorio.
+    // En escritorio, "Ver más" muestra el siguiente bloque de 8 quitando md:hidden.
     const btn = document.getElementById('load-more-btn');
-    const cards = document.querySelectorAll('.hotel-card.hidden');
-    let currentVisible = 8;
     const increment = 8;
 
+    const hiddenCards = () =>
+        Array.from(document.querySelectorAll<HTMLElement>('.hotel-card[data-extra]')).filter((card) =>
+            card.classList.contains('md:hidden')
+        );
+
     btn?.addEventListener('click', () => {
-        const hiddenCards = document.querySelectorAll('.hotel-card.hidden');
+        hiddenCards()
+            .slice(0, increment)
+            .forEach((card) => {
+                card.classList.remove('md:hidden');
+                card.classList.add('animate-fade-in');
+            });
 
-        // Mostramos el siguiente bloque de 8
-        for (let i = 0; i < increment; i++) {
-            if (hiddenCards[i]) {
-                hiddenCards[i].classList.remove('hidden');
-                // Añadimos una pequeña animación de entrada opcional
-                hiddenCards[i].classList.add('animate-fade-in');
-            }
-        }
-
-        // Si ya no hay más cartas ocultas, quitamos el botón
-        if (document.querySelectorAll('.hotel-card.hidden').length === 0) {
+        // Si ya no hay más tarjetas ocultas, quitamos el botón
+        if (hiddenCards().length === 0 && btn) {
             btn.style.display = 'none';
         }
     });

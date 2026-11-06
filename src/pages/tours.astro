@@ -5,11 +5,35 @@ import Footer from "../components/layout/Footer.astro";
 import Content from "../components/layout/Content.astro";
 import HeroBanner from "../components/ui/single/HeroBanner.astro";
 import Card from "../components/ui/single/Card.astro";
+import SearchSummary from "../components/ui/single/SearchSummary.astro";
+import SearchResultsSkeleton from "../components/ui/single/SearchResultsSkeleton.astro";
+import MobileRail from "../components/ui/single/MobileRail.astro";
+import SearchEditor from "../components/ui/single/SearchEditor";
 import { fetchTourList } from "../lib/catalog";
+import { hasSearchFilters, matchesDestino, parseSearchQuery, toSearchString } from "../lib/searchParams";
 
 const catalogResult = await fetchTourList<any>();
 const catalogUnavailable = catalogResult.status === 'unavailable';
-const tours = catalogResult.status === 'ok' ? catalogResult.data : [];
+const toursDisponibles = catalogResult.status === 'ok' ? catalogResult.data : [];
+
+// El buscador de la portada llega aquí con destino, fecha y viajeros en la URL.
+const searchQuery = parseSearchQuery(Astro.url.searchParams);
+const searchFiltered = hasSearchFilters(searchQuery);
+const tours = searchQuery.destino
+    ? toursDisponibles.filter((tour: any) => matchesDestino(tour, searchQuery.destino))
+    : toursDisponibles;
+const searchQueryString = toSearchString(searchQuery);
+const searchInitial = {
+    tipo: 'tour' as const,
+    destino: searchQuery.destino,
+    fecha: searchQuery.fecha,
+    adultos: searchQuery.adultos,
+    menores: searchQuery.menores,
+    edades: searchQuery.edades,
+};
+const whatsappNoResultsUrl = `https://wa.me/529987141365?text=${encodeURIComponent(
+    `Hola, busqué "${searchQuery.destino}" en su sitio de tours y no encontré opciones publicadas. ¿Me pueden ayudar?`
+)}`;
 const toursHeroImage = new URL('/images/banners/tours-desktop.jpg', Astro.site ?? 'https://tudestinomx.com').href;
 
 const tourListSchema = {
@@ -77,13 +101,23 @@ const tourListSchema = {
                 <p class="mx-auto mt-4 max-w-3xl leading-7 text-gray-600">Encuentra actividades acuáticas, recorridos culturales y aventuras para disfrutar tus vacaciones. Consulta disponibilidad y recibe asesoría antes de reservar.</p>
             </div>
 
+            {searchFiltered && <SearchResultsSkeleton label="Buscando tus próximas aventuras" />}
+
+            <div data-search-results class={searchFiltered ? 'hidden' : undefined}>
+            {!catalogUnavailable && searchFiltered && (
+                    <div>
+                        <SearchSummary query={searchQuery} tipo="tour" total={tours.length} filtrado={Boolean(searchQuery.destino)} />
+                        <SearchEditor client:load initial={searchInitial} />
+                    </div>
+            )}
+
             {catalogUnavailable ? (
                     <div class="text-center py-20">
                         <p class="text-gray-700 font-semibold">El catálogo de tours no está disponible temporalmente.</p>
                         <p class="text-gray-500 mt-2">Intenta nuevamente más tarde o contáctanos para encontrar una experiencia.</p>
                     </div>
             ) : tours.length > 0 ? (
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <MobileRail class="md:grid-cols-2 lg:grid-cols-3 md:gap-8">
                         {tours.map((tour: any) => (
                                 <Card
                                         title={tour.name || tour.title}
@@ -91,14 +125,31 @@ const tourListSchema = {
                                         type="tour"
                                         destino={tour.destino}
                                         photo={tour.images || tour.imagenes}
+                                        query={searchQueryString}
                                 />
                         ))}
-                    </div>
+                    </MobileRail>
             ) : (
-                    <div class="text-center py-20">
-                        <p class="text-gray-500 italic">No se encontraron tours disponibles en este momento.</p>
+                    <div class="mx-auto max-w-2xl py-16 text-center">
+                        {searchFiltered ? (
+                            <>
+                                <p class="text-xl font-extrabold text-gray-800">
+                                    {searchQuery.destino ? `No encontramos tours para "${searchQuery.destino}"` : 'No encontramos tours con esa búsqueda'}
+                                </p>
+                                <p class="mt-3 leading-7 text-gray-600">
+                                    Revisa la ortografía o prueba con otro destino. También puedes escribirnos y te ayudamos a encontrar una experiencia.
+                                </p>
+                                <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                                    <a href="/tours" class="rounded-full border border-gray-300 px-6 py-3 font-bold text-gray-800 transition hover:border-purple-700">Ver todos los tours</a>
+                                    <a href={whatsappNoResultsUrl} target="_blank" rel="noopener noreferrer" class="rounded-full bg-emerald-600 px-6 py-3 font-bold text-white transition hover:bg-emerald-700">Escribir a un asesor</a>
+                                </div>
+                            </>
+                        ) : (
+                            <p class="text-gray-500 italic">No se encontraron tours disponibles en este momento.</p>
+                        )}
                     </div>
             )}
+            </div>
         </div>
     </Content>
 

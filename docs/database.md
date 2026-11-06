@@ -51,8 +51,24 @@ Documento único con la configuración general del hero editorial de la portada.
 
 **Uso:** `HeroView.jsx` (configuración administrativa) y `homeHero.js` (lectura SSR pública). Si el documento no existe, se conserva el intervalo técnico de 7000 milisegundos.
 
-#### `hero_slides/{slideId}`
-Diapositivas independientes del hero editorial principal, administradas desde `HeroView.jsx`.
+#### `config/homeBanner`
+Banner de promoción de la portada, encima del buscador de hoteles y tours. Lo administra `HomeBannerView.jsx` y lo lee `homeBanner.js` en SSR.
+
+| Campo | Tipo | Propósito |
+|---|---|---|
+| `activo` | boolean | Si es `false`, no se muestra imagen ni texto del banner |
+| `titulo` | string | Encabezado para lectores de pantalla y texto de respaldo; el texto visible del banner va dentro de la imagen |
+| `ctaLabel`, `ctaUrl` | string | Botón del banner; `ctaUrl` debe empezar con `/` o `https://` |
+| `alt` | string | Texto alternativo de la imagen de escritorio |
+| `vigenciaInicio`, `vigenciaFin` | string `YYYY-MM-DD` | Vigencia en hora de Cancún (UTC-5); fuera de ella el banner no se muestra |
+| `imagenDesktopUrl`, `imagenDesktopPath` | string | Imagen de escritorio (recomendada 2400 × 900 px) y su ruta en Storage |
+| `imagenMobileUrl`, `imagenMobilePath` | string | Imagen de móvil (recomendada 1080 × 1350 px) y su ruta en Storage |
+| `actualizadoEn` | timestamp | Última modificación administrativa |
+
+**Uso:** `HomeBannerView.jsx` (escritura, solo administradores) y `homeBanner.js` (lectura SSR pública con timeout de 1.5 s). Si la lectura falla o el banner está apagado, la portada muestra el buscador sin imagen. Las imágenes viven en Storage en `home-banner/` y se borran al reemplazarlas o quitarlas, después de guardar.
+
+#### `hero_slides/{slideId}` (sin uso)
+Colección del hero editorial anterior. Ya no se lee desde la portada ni se administra desde el admin; se conserva en Firestore.
 
 | Campo | Tipo | Propósito |
 |---|---|---|

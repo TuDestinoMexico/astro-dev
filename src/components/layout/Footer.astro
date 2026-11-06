@@ -1,47 +1,60 @@
 ---
 import { Icon } from "astro-icon/components";
-import FooterBanner from "../ui/FooterBanner.astro";
+import { getGeneralConfig } from "../../lib/generalConfig";
+
+const { whatsappGlobal } = await getGeneralConfig();
+const whatsappHref = `https://wa.me/${whatsappGlobal}`;
 
 const vercelEnv = import.meta.env.VERCEL_ENV;
 const vercelBranch = import.meta.env.VERCEL_GIT_COMMIT_REF;
 const showDevelopmentBadge =
     import.meta.env.DEV ||
     (vercelEnv === "preview" && vercelBranch === "dev");
+
+// Horarios en hora de Cancún (UTC-5, sin horario de verano).
+const horarios = [
+    { label: "Reservaciones de hoteles", hours: "13:00 – 21:00" },
+    { label: "Tours y traslados", hours: "10:00 – 17:00" },
+    { label: "Atención al cliente", hours: "13:00 – 20:00" },
+];
+
+const linkClass = "font-semibold text-white underline-offset-4 hover:underline hover:text-orange-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded";
+const socialClass = "inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-orange-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded";
+const sectionTitleClass = "text-[11px] font-black uppercase tracking-[0.2em] text-white/70";
 ---
 
-<FooterBanner />
 <footer class="bg-white py-10 px-4 relative">
     <div class="container mx-auto flex flex-col gap-10">
 
-
-        <div class="bg-brand-accent text-white rounded-panel p-8 sm:p-10 flex flex-col gap-8 shadow-lg border border-white/20 relative">
+        <div class="bg-slate-900 text-white rounded-panel p-8 sm:p-10 flex flex-col gap-10 shadow-lg border border-white/10 border-t-4 border-t-brand-accent relative">
 
             {/* AVISO FLOTANTE (Oculto por defecto, se activa con JS) */}
-            <div id="copy-toast" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+            <div id="copy-toast" role="status" aria-live="polite" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
                 <Icon name="lucide:circle-check" class="text-green-300" size={16} aria-hidden="true" />
                 <span>Folio copiado. Redireccionando...</span>
             </div>
 
-            <div class="flex flex-col lg:flex-row justify-between items-center gap-10 border-b border-white/20 pb-8">
+            {/* 1. VERIFICACIÓN: primero, para que el cliente confirme que la agencia es real */}
+            <section aria-labelledby="footer-verificacion" class="flex flex-col gap-6">
+                <h2 id="footer-verificacion" class={sectionTitleClass}>Empresa verificada</h2>
 
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
-
-                    {/* ENLACE SECTUR MODIFICADO CON ID Y SIN HREF POR DEFECTO */}
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10">
+                    {/* ENLACE SECTUR CON ID Y SIN HREF POR DEFECTO */}
                     <button
                             id="sectur-link"
-                            class="flex flex-col items-center group hover:scale-105 transition-transform duration-300 cursor-pointer text-left"
+                            class="flex items-center gap-4 group hover:scale-105 transition-transform duration-300 cursor-pointer text-left rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                             aria-label="Verificar Registro Nacional de Turismo"
                     >
                         <img
                                 src="https://storage.googleapis.com/tudestinomx_bucket/assets/img/sectur_logo.png"
                                 alt="Secretaría de Turismo"
-                                class="h-10 sm:h-12 md:h-14 w-auto object-contain mb-3 drop-shadow-md"
+                                class="h-12 sm:h-14 w-auto object-contain drop-shadow-md"
                         />
-                        <div class="overflow-hidden rounded shadow-md w-44 text-[9px] sm:text-[10px] border border-white/30">
+                        <div class="overflow-hidden rounded shadow-md w-44 sm:w-48 text-[10px] border border-white/30">
                             <div class="bg-[#b90309] text-white text-center py-1 font-bold uppercase tracking-wider">
                                 SECTUR No.
                             </div>
-                            <div class="bg-black text-white text-center py-1 font-mono group-hover:bg-slate-900 transition-colors">
+                            <div class="bg-black text-white text-center py-1.5 font-mono text-xs group-hover:bg-slate-900 transition-colors">
                                 0423005c2dd75
                             </div>
                         </div>
@@ -51,61 +64,123 @@ const showDevelopmentBadge =
                         <img
                                 src="https://storage.googleapis.com/tudestinomx_bucket/assets/img/sat_logo.png"
                                 alt="Hacienda y Crédito Público"
-                                class="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-md"
+                                class="h-12 sm:h-14 w-auto object-contain drop-shadow-md"
                         />
                     </div>
                 </div>
 
-                <div class="flex gap-5">
-                    <a href="https://fb.com/tudestinomexicoo" target="_blank" aria-label="Facebook">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:facebook" aria-hidden="true" />
-                    </a>
-                    <a href="https://instagram.com/tudestinomexico" target="_blank" aria-label="Instagram">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:instagram" aria-hidden="true" />
-                    </a>
-                    <a href="https://tiktok.com/@tudestinomexico" target="_blank" aria-label="TikTok">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:tiktok" aria-hidden="true" />
-                    </a>
-                    <a href="https://youtube.com/@tudestinomexico" target="_blank" aria-label="YouTube">
-                        <Icon size={30} class="text-white hover:scale-110 hover:text-orange-100 transition-all cursor-pointer" name="bxl:youtube" aria-hidden="true" />
-                    </a>
-                </div>
+                <a href="/tu-destino-mexico-es-confiable" class={`${linkClass} w-fit text-sm`}>
+                    Cómo verificar a Tu Destino México
+                </a>
+            </section>
 
+            <hr class="border-white/15" />
+
+            {/* 2. BLOQUES: contacto, horarios, empresa y redes */}
+            <div class="grid gap-10 sm:grid-cols-2 xl:grid-cols-4 text-sm">
+
+                <section aria-labelledby="footer-contacto" class="flex flex-col gap-4">
+                    <h2 id="footer-contacto" class={sectionTitleClass}>Contacto</h2>
+                    <a href="tel:+529989806611" class="flex w-fit items-center gap-2 rounded font-bold text-white hover:text-orange-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                        <Icon name="lucide:phone" class="h-4 w-4 shrink-0" aria-hidden="true" />
+                        (998) 980 6611
+                    </a>
+                    <a
+                            href={whatsappHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex w-full sm:w-fit items-center justify-center gap-2 rounded-full bg-green-700 px-4 py-3 text-xs font-black uppercase tracking-wide text-white shadow-md transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                        <Icon name="simple-icons:whatsapp" class="h-4 w-4" aria-hidden="true" />
+                        Escribir por WhatsApp
+                    </a>
+                </section>
+
+                <section aria-labelledby="footer-horarios" class="flex flex-col gap-4">
+                    <h2 id="footer-horarios" class={sectionTitleClass}>Horarios</h2>
+                    <dl class="flex flex-col gap-3">
+                        {horarios.map(({ label, hours }) => (
+                            <div class="flex flex-col">
+                                <dt class="text-white/80">{label}</dt>
+                                <dd class="font-bold text-white">{hours}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                    <p class="text-xs text-white/60">Hora de Cancún (UTC-5)</p>
+                </section>
+
+                {/* En móvil se pliega; en escritorio siempre está abierto (ver script al final). */}
+                <details data-collapsible class="group mb-3 md:mb-0">
+                    <summary class="flex min-h-12 list-none cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/20 bg-white/5 px-4 py-3 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:pointer-events-none md:min-h-0 md:rounded-none md:border-0 md:bg-transparent md:p-0 [&::-webkit-details-marker]:hidden">
+                        <h2 id="footer-empresa" class={sectionTitleClass}>Empresa</h2>
+                        <span class="flex items-center gap-2 md:hidden">
+                            <span class="text-xs font-bold text-white group-open:hidden">Ver más</span>
+                            <span class="hidden text-xs font-bold text-white group-open:inline">Ocultar</span>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-transform group-open:rotate-180">
+                                <Icon name="lucide:chevron-down" class="h-4 w-4" aria-hidden="true" />
+                            </span>
+                        </span>
+                    </summary>
+                    <nav aria-labelledby="footer-empresa" class="mt-4 flex flex-col gap-4">
+                    <ul class="flex flex-col gap-3">
+                        <li><a href="/nosotros" class={linkClass}>Quiénes somos</a></li>
+                        <li><a href="/convenios" class={linkClass}>Convenios</a></li>
+                        <li><a href="/recomendaciones" class={linkClass}>Reseñas</a></li>
+                        <li><a href="/terminos-condiciones" class={linkClass}>Términos y condiciones</a></li>
+                        <li><a href="/privacidad" class={linkClass}>Aviso de privacidad</a></li>
+                    </ul>
+                    </nav>
+                </details>
+
+                {/* En móvil se pliega; en escritorio siempre está abierto (ver script al final). */}
+                <details data-collapsible class="group mb-3 md:mb-0">
+                    <summary class="flex min-h-12 list-none cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/20 bg-white/5 px-4 py-3 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:pointer-events-none md:min-h-0 md:rounded-none md:border-0 md:bg-transparent md:p-0 [&::-webkit-details-marker]:hidden">
+                        <h2 id="footer-redes" class={sectionTitleClass}>Síguenos</h2>
+                        <span class="flex items-center gap-2 md:hidden">
+                            <span class="text-xs font-bold text-white group-open:hidden">Ver más</span>
+                            <span class="hidden text-xs font-bold text-white group-open:inline">Ocultar</span>
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-transform group-open:rotate-180">
+                                <Icon name="lucide:chevron-down" class="h-4 w-4" aria-hidden="true" />
+                            </span>
+                        </span>
+                    </summary>
+                    <section aria-labelledby="footer-redes" class="mt-4 flex flex-col gap-4">
+                    <ul class="flex flex-col gap-3">
+                        <li>
+                            <a href="https://fb.com/tudestinomexicoo" target="_blank" rel="noopener noreferrer" class={socialClass}>
+                                <Icon size={22} name="bxl:facebook" aria-hidden="true" />
+                                Facebook
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://instagram.com/tudestinomexico" target="_blank" rel="noopener noreferrer" class={socialClass}>
+                                <Icon size={22} name="bxl:instagram" aria-hidden="true" />
+                                Instagram
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://tiktok.com/@tudestinomexico" target="_blank" rel="noopener noreferrer" class={socialClass}>
+                                <Icon size={22} name="bxl:tiktok" aria-hidden="true" />
+                                TikTok
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://youtube.com/@tudestinomexico" target="_blank" rel="noopener noreferrer" class={socialClass}>
+                                <Icon size={22} name="bxl:youtube" aria-hidden="true" />
+                                YouTube
+                            </a>
+                        </li>
+                    </ul>
+                    </section>
+                </details>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-between items-center md:items-end gap-8 text-xs sm:text-sm">
+            <hr class="border-white/15" />
 
-                <div class="text-center md:text-left leading-relaxed space-y-1.5">
-                    <p class="font-bold text-white text-sm sm:text-base">© TU DESTINO MX ROLANDO X MEXICO S.A. de C.V.</p>
-                    <p>Todos los derechos reservados.</p>
-                    <p>No nos hacemos responsables por fotografías no actualizadas por la cadena o proveedor distinguido.</p>
-                    <p class="mt-2 flex items-center justify-center md:justify-start gap-1.5">
-                        <span class="font-bold text-white">Teléfono:</span>
-                        <a href="tel:+529989806611" class="hover:text-white hover:underline transition-colors">(998) 980 6611</a>
-                    </p>
-                </div>
-
-                <div class="flex flex-col sm:flex-row gap-6 md:gap-10">
-                    <a
-                            href="/tu-destino-mexico-es-confiable"
-                            class="font-semibold text-white underline underline-offset-4 hover:text-orange-100 transition-all italic text-center whitespace-nowrap"
-                    >
-                        Información y verificación
-                    </a>
-                    <a
-                            href="/terminos-condiciones"
-                            class="font-semibold text-white underline underline-offset-4 hover:text-orange-100 transition-all italic text-center whitespace-nowrap"
-                    >
-                        Nuestros términos y condiciones.
-                    </a>
-                    <a
-                            href="/privacidad"
-                            class="font-semibold text-white underline underline-offset-4 hover:text-orange-100 transition-all italic text-center whitespace-nowrap"
-                    >
-                        Aviso de privacidad
-                    </a>
-                </div>
-
+            {/* 3. LEGAL: texto de menor intensidad al final */}
+            <div class="flex flex-col gap-2 text-xs leading-relaxed text-white/70">
+                <p class="font-bold text-white">© TU DESTINO MX ROLANDO X MEXICO S.A. de C.V. Todos los derechos reservados.</p>
+                <p>No nos hacemos responsables por fotografías no actualizadas por la cadena o proveedor distinguido.</p>
             </div>
 
         </div>
@@ -123,6 +198,18 @@ const showDevelopmentBadge =
         </div>
     )}
 </footer>
+
+<script>
+    // En escritorio las secciones plegables siempre van abiertas; en móvil empiezan cerradas.
+    const desktopQuery = window.matchMedia('(min-width: 768px)');
+    const syncCollapsibles = () => {
+        document.querySelectorAll<HTMLDetailsElement>('details[data-collapsible]').forEach((details) => {
+            details.open = desktopQuery.matches;
+        });
+    };
+    syncCollapsibles();
+    desktopQuery.addEventListener('change', syncCollapsibles);
+</script>
 
 <script>
     // Lógica para copiar folio y redirigir

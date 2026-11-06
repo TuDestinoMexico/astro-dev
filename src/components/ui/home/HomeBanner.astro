@@ -1,0 +1,54 @@
+---
+import HomeSearch from './HomeSearch';
+
+interface Props {
+    banner: {
+        titulo: string;
+        ctaLabel: string;
+        ctaUrl: string;
+        alt: string;
+        imageDesktop: string;
+        imageMobile: string;
+    } | null;
+}
+
+const { banner } = Astro.props;
+const hasImage = Boolean(banner?.imageDesktop);
+// El texto visible va dentro de la imagen; este título solo sirve como encabezado para lectores de pantalla.
+const titulo = banner?.titulo || 'Encuentra tu próximo viaje';
+const enlaceLabel = banner?.ctaLabel || titulo;
+---
+
+<section class="relative z-20" aria-labelledby="home-banner-heading">
+    <h1 id="home-banner-heading" class="sr-only">{titulo}</h1>
+
+    {/* La imagen tiene su propia altura. El buscador va debajo y solo cruza el borde inferior,
+        así en móvil la imagen se ve completa y el formulario no la tapa. */}
+    <div class="relative h-[68vh] min-h-[440px] overflow-hidden bg-brand-ink md:h-[600px]">
+        {hasImage && (
+            <picture class="absolute inset-0" aria-hidden="true">
+                <source media="(min-width: 768px)" srcset={banner?.imageDesktop} />
+                <img
+                    src={banner?.imageMobile || banner?.imageDesktop}
+                    alt=""
+                    width="1440"
+                    height="640"
+                    loading="eager"
+                    fetchpriority="high"
+                    decoding="async"
+                    class="h-full w-full object-cover object-top"
+                />
+            </picture>
+        )}
+
+        {banner?.ctaUrl && (
+            <a href={banner.ctaUrl} class="absolute inset-0 z-0" aria-label={enlaceLabel}>
+                <span class="sr-only">{enlaceLabel}</span>
+            </a>
+        )}
+    </div>
+
+    <div id="buscador" class="relative z-10 mx-auto -mt-16 w-full max-w-6xl px-4 pb-12 md:-mt-28 md:px-8 md:pb-16">
+        <HomeSearch client:load />
+    </div>
+</section>

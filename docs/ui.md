@@ -14,8 +14,8 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Ruta | Propósito |
 |---|---|---|
-| `Header.astro` | `components/layout/Header.astro` | Nav principal con logo de dimensiones reservadas, contacto, menú sticky, submenú horizontal y panel móvil responsive de una columna hasta 399px |
-| `Footer.astro` | `components/layout/Footer.astro` | Footer con SECTUR, SAT, redes sociales y términos |
+| `Header.astro` | `components/layout/Header.astro` | Escritorio (≥1280 px): barra de 80 px con logo, navegación principal con ícono (Hoteles, Tours, Destinos) y a la derecha "Pagar en línea", "Cotizar" por WhatsApp, menú hamburguesa (Convenios, Quiénes somos, Reseñas y Llamar a ventas) y botón de cuenta redondo. Móvil y tablet: barra superior con Pagar, WhatsApp y menú (Destinos, Convenios, Quiénes somos, Reseñas y teléfono), más una barra inferior fija con Inicio, Hoteles, Cotizar (WhatsApp), Tours y Cuenta. Sin header pegajoso. Los menús se animan con opacidad y desplazamiento de 200 ms; con movimiento reducido no animan. Los paneles cerrados son `inert` y no reciben foco. El botón de cuenta tiene contenedor de tamaño fijo para evitar saltos al hidratar. `body` recibe padding inferior en pantallas menores de 1280 px para no tapar contenido |
+| `Footer.astro` | `components/layout/Footer.astro` | Footer en cuatro bloques: verificación (SECTUR y SAT) arriba, contacto con teléfono y WhatsApp, horarios en hora de Cancún, empresa y redes; texto legal al final. En móvil, Empresa y Síguenos se pliegan con `details` y un script los abre en escritorio. Encabezados reales en cada bloque, foco visible en todos los controles y aviso de copiado para lectores de pantalla (`role="status"`). Insignia de desarrollo sin cambios |
 | `tu-destino-mexico-es-confiable.astro` | `pages/tu-destino-mexico-es-confiable.astro` | Página pública de identidad empresarial y orientación para verificar datos antes de reservar; usa la imagen cuadrada de la marca como vista previa social |
 | `Content.astro` | `components/layout/Content.astro` | Wrapper simple con `<slot/>` |
 | `Banner.astro` | `components/ui/Banner.astro` | Banner promocional con imagen y enlace |
@@ -24,7 +24,6 @@ Renderizados en servidor. Sin estado cliente.
 | `IconSocial.astro` | `components/ui/IconSocial.astro` | Icono de red social |
 | `MenuBar.astro` | `components/ui/MenuBar.astro` | Barra de contacto adaptable al ancho disponible con icono, título y subtítulo |
 | `SubMenu.astro` | `components/ui/SubMenu.astro` | Item de navegación con icono Material |
-| `FooterBanner.astro` | `components/ui/FooterBanner.astro` | Banner promocional pre-footer |
 | `HeroBanner.astro` | `components/ui/single/HeroBanner.astro` | Banner de cabecera para páginas de listing |
 | `HeroBannerOutBounds.astro` | `components/ui/single/HeroBannerOutBounds.astro` | Hero banner extendido |
 | `Card.astro` | `components/ui/single/Card.astro` | Tarjeta reutilizable para hoteles/tours (incluye botón favorito `FavoriteButton.jsx` en zona de imagen) |
@@ -45,9 +44,16 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `EventsHero.astro` | — | Shell SSR del hero editorial principal: composición asimétrica de panel de marca + imagen de destino, primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
-| `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP tipo cambio de página; autoplay de 7 segundos con pausa/reanudación, respeta `prefers-reduced-motion` y actualiza imagen, metadata, contenido y CTAs después de la hidratación |
-| `HeroView.jsx` | — | Módulo admin para CRUD de slides del hero, orden, publicación individual, generación WebP responsive, CTAs, preview de imagen y configuración del autoplay |
+| `HomeBanner.astro` | — | Banner a ancho completo con imagen de escritorio y de móvil (`<picture>`). El texto va dentro de la imagen; el banner completo es un enlace si hay URL. El buscador se monta encima de su borde inferior. Sin banner activo muestra solo el buscador |
+| `HomeSearch.tsx` | `client:load` | Buscador de hoteles o tours: pestañas Hotel/Tour, destino, fechas (entrada y salida para hotel, una para tour) con `SearchDatePicker` y viajeros. Viajeros abre un `<dialog>` modal con contadores de adultos y menores, y selector de edad por menor. Envía a `/hoteles` o `/tours` con parámetros en la URL, sin datos personales. El campo destino muestra sugerencias del catálogo mientras se escribe (combobox con teclado, desde 2 caracteres, con espera de 250 ms); al elegir una, guarda su nombre en el campo sin navegar; la búsqueda se envía con el botón |
+| `/api/catalogo-buscar` | — | Endpoint GET de solo lectura para las sugerencias (`tipo=hotel|tour`, `q`). Devuelve hasta 8 coincidencias y guarda la lista del catálogo 60 s en memoria por instancia |
+| `SearchSummary.astro` | — | Resumen de la búsqueda en `/hoteles` y `/tours` (destino, fechas, viajeros y conteo de resultados) Se muestra solo cuando hay filtros |
+| `SearchEditor.tsx` | `client:load` | Botón "Cambiar búsqueda" de `/hoteles` y `/tours`. Despliega en el mismo lugar el buscador de la portada (`HomeSearch` con `initial`), ya con la búsqueda actual. La animación es una transición de `grid-template-rows` de 300 ms; con movimiento reducido no anima. El panel cerrado queda `inert` |
+| `SearchResultsSkeleton.astro` | `<script>` | Skeleton de tarjetas con íconos de Lucide/Iconify mientras se muestran los resultados de `/hoteles` y `/tours`. Mantiene el skeleton ~1.4 s (0.3 s con movimiento reducido) y luego revela los resultados ya renderizados. Sin JavaScript se muestran directo |
+| `SearchLoader` (en `HomeSearch.tsx`) | — | Pantalla de espera al enviar la búsqueda: íconos que cambian cada 1.1 s, con un retardo de 600 ms antes de navegar. Se reinicia al volver con el historial (`pageshow`) |
+| `src/lib/searchParams.ts` | — | Valida los parámetros del buscador (`destino`, `entrada`, `salida`, `fecha`, `adultos`, `menores`, `edades`) y filtra por destino sin importar acentos ni mayúsculas. Las fechas de disponibilidad no filtran el catálogo: no hay inventario en Firestore |
+| `BookingCalendar.tsx` (`initialSearch`) | `client:only` | Precarga fechas y viajeros desde el buscador en la ficha del hotel, con un aviso para revisarlos antes de enviar la solicitud |
+| `EventsHero.astro`, `EventsHeroControls.jsx` | — | Hero de diapositivas anterior. Ya no se importa en la portada; se conservan en el repo |
 | `HotSalePromoRibbon.jsx` | (no determinada) | Cinta promocional Hot Sale |
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |
@@ -102,7 +108,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + diálogo accesible de inicio con Google y Facebook |
+| `ClientLoginButton.jsx` | `client:only` | Botón redondo con ícono de usuario ("Área de clientes") en Header.astro + diálogo accesible de inicio con Google y Facebook |
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico con dimensiones reservadas (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |
@@ -123,6 +129,7 @@ Renderizados en servidor. Sin estado cliente.
 | `LeadsView.jsx` | — | Últimas cotizaciones (Firestore, limit 5) |
 | `TeamView.jsx` | — | CRUD equipo con drag & drop, paginación, búsqueda, selector de fotos |
 | `OfertasView.jsx` | — | CRUD de ofertas (Firestore `ofertas` con `onSnapshot`, tiempo real): formulario (título, descripción, descuento, código, color, vigencia opcional, activo), tabla con drag & drop + búsqueda + paginación, toggle visible/oculta y badge "Vencida" |
+| `HomeBannerView.jsx` | — | Pestaña "Banner inicio" del admin: textos, enlace, vigencia y dos imágenes (escritorio y móvil) subidas a Storage en `home-banner/`. Guarda en `config/homeBanner` |
 | `MediaManager.jsx` | — | Explorador Firebase Storage con CRUD de archivos/carpetas |
 | `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, mantenimiento general y pausa de consultas CRM para reservas/grupos), comunicado oficial, conversión WebP adaptable y eliminación sincronizada de imágenes |
 
@@ -130,6 +137,9 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Propósito |
 |---|---|
+| `FeaturedTours.astro` | Sección "Tours para complementar tu viaje" de la home. Carga hasta 6 tours activos de Firestore (`fetchTourList`) en `MobileRail`, con estado de catálogo no disponible |
+| `MobileRail.astro` | Fila de tarjetas que en móvil se desliza en horizontal con ajuste a cada tarjeta (78 % del ancho) y desde md se vuelve cuadrícula. Se usa en Hoteles destacados, `/hoteles` y `/tours`. En `/hoteles`, "Ver más" solo aparece en escritorio, porque en móvil el carrusel muestra todas las tarjetas |
+| `BuenFinTopbar.tsx` (`client:only`) | Barra promocional del Buen Fin encima del header, montada en `Layout.astro`. Cuenta regresiva en hora de Cancún: "EMPIEZA EN" hasta el 13 de noviembre de 2026 a las 00:00 y "TERMINA EN" hasta el 17 a las 23:59:59; después no se muestra. Vigencia en `src/lib/buenFin.ts`. Muestra una insignia roja "BUEN FIN :)". En la fase activa, si `ctaEnabled` es `true`, muestra "Cotiza ahora" hacia el WhatsApp de la empresa con un mensaje de la promoción, y una segunda línea con el cupón simbólico `BUENFIN-TDMX` y botón de copiar. Mientras `ctaEnabled` sea `false`, muestra "Próximamente" |
 | `MinorAges.tsx` | Inputs de edades para menores (usado por BookingCalendar) |
 
 ---
