@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { MapPin, Bed, Map, ArrowUpRight } from 'lucide-react';
+import { MapPin, Bed, Map, ArrowUpRight, ImageOff, X } from 'lucide-react';
 
 export default function RecentlyViewed() {
     const [recentItems, setRecentItems] = useState([]);
@@ -21,37 +21,18 @@ export default function RecentlyViewed() {
         }
     }, []);
 
-    // ANIMACIONES GSAP SUTILES
+    // ANIMACIÓN SUTIL: solo entran las tarjetas, sin desplazar el encabezado
     useGSAP(() => {
         if (recentItems.length > 0) {
-            const tl = gsap.timeline();
-
-            gsap.set(".reveal-el", { y: 20, opacity: 0 });
-            gsap.set(".reveal-card", { y: 30, opacity: 0 });
-
-            tl.to(".reveal-el", {
-                y: 0,
-                opacity: 1,
-                stagger: 0.1,
-                duration: 0.6,
-                ease: "power2.out"
-            });
-
-            tl.to(".reveal-card", {
-                y: 0,
-                opacity: 1,
-                stagger: 0.1,
-                duration: 0.6,
-                ease: "power2.out"
-            }, "-=0.3");
+            gsap.fromTo(".reveal-card",
+                { y: 14, opacity: 0 },
+                { y: 0, opacity: 1, stagger: 0.06, duration: 0.45, ease: "power2.out" }
+            );
         }
     }, { dependencies: [recentItems], scope: containerRef });
 
-    // NUEVA FUNCIÓN: Limpiar el historial
     const handleClearHistory = () => {
-        // 1. Lo borramos de la memoria del navegador
         localStorage.removeItem('tdmx_recently_viewed');
-        // 2. Vaciamos el estado actual
         setRecentItems([]);
     };
 
@@ -60,88 +41,77 @@ export default function RecentlyViewed() {
     }
 
     return (
-        <section ref={containerRef} className="w-full py-12 font-sans border-t border-slate-200">
+        <section ref={containerRef} className="w-full border-t border-slate-200 py-6 font-sans md:py-8" aria-labelledby="recently-viewed-heading">
             <div className="container mx-auto px-4 md:px-6">
 
-                {/* ENCABEZADO COMPACTO */}
-                <div className="mb-8">
-                    <div className="overflow-hidden mb-1">
-                        <span className="reveal-el block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            Tu Historial
-                        </span>
-                    </div>
-                    <div className="overflow-hidden flex items-end justify-between gap-4">
-                        <h2 className="reveal-el text-2xl md:text-3xl font-black text-slate-800 tracking-tight">
+                {/* ENCABEZADO EN UNA SOLA LÍNEA */}
+                <div className="mb-4 flex items-center justify-between gap-4">
+                    <div className="flex min-w-0 items-baseline gap-3">
+                        <h2 id="recently-viewed-heading" className="truncate text-base font-black tracking-tight text-slate-800 md:text-lg">
                             Vistos recientemente
                         </h2>
-
-                        {/* BOTÓN FUNCIONAL DE LIMPIAR HISTORIAL */}
-                        <button
-                            onClick={handleClearHistory}
-                            className="reveal-el hidden sm:block text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors active:scale-95"
-                        >
-                            Limpiar historial
-                        </button>
+                        <span className="hidden text-[10px] font-bold uppercase tracking-widest text-slate-400 sm:inline">
+                            {recentItems.length} {recentItems.length === 1 ? 'opción' : 'opciones'}
+                        </span>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={handleClearHistory}
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                    >
+                        <X size={12} aria-hidden="true" />
+                        Limpiar
+                    </button>
                 </div>
 
-                {/* GRID DE TARJETAS ESTILO BOOKING */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                {/* FILA COMPACTA: deslizable en móvil, cuadrícula en escritorio */}
+                <ul className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 lg:grid-cols-4">
                     {recentItems.map((item, index) => (
-                        <a
-                            key={index}
-                            href={item.url}
-                            className="reveal-card group flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 hover:-translate-y-1 h-full"
-                        >
-                            {/* IMAGEN SUPERIOR */}
-                            <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-100">
-                                <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
-
-                                {/* Insignia del tipo flotante */}
-                                <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                                    {item.type === 'hotel' ? (
-                                        <Bed size={12} className="text-indigo-600" />
+                        <li key={`${item.url}-${index}`} className="reveal-card min-w-[15.5rem] snap-start md:min-w-0">
+                            <a
+                                href={item.url}
+                                className="group flex h-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-2.5 pr-3 transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                            >
+                                <span className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                                    {item.image ? (
+                                        <img
+                                            src={item.image}
+                                            alt=""
+                                            loading="lazy"
+                                            decoding="async"
+                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
                                     ) : (
-                                        <Map size={12} className="text-emerald-600" />
+                                        <span className="flex h-full w-full items-center justify-center text-slate-300">
+                                            <ImageOff size={18} aria-hidden="true" />
+                                        </span>
                                     )}
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-700">
+                                </span>
+
+                                <span className="min-w-0 flex-1">
+                                    <span className="mb-0.5 flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        {item.type === 'hotel'
+                                            ? <Bed size={10} className="text-indigo-500" aria-hidden="true" />
+                                            : <Map size={10} className="text-emerald-500" aria-hidden="true" />}
                                         {item.type}
                                     </span>
-                                </div>
-                            </div>
-
-                            {/* CONTENIDO INFERIOR */}
-                            <div className="flex flex-col flex-1 p-4 md:p-5">
-
-                                {/* Ubicación */}
-                                <div className="flex items-center gap-1 mb-1.5 text-slate-400">
-                                    <MapPin size={12} className="shrink-0" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest truncate">
-                                        {item.location}
+                                    <span className="block truncate text-sm font-bold leading-tight text-slate-900 group-hover:text-indigo-600">
+                                        {item.title}
                                     </span>
-                                </div>
+                                    {item.location && (
+                                        <span className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-slate-500">
+                                            <MapPin size={10} className="shrink-0" aria-hidden="true" />
+                                            <span className="truncate">{item.location}</span>
+                                        </span>
+                                    )}
+                                </span>
 
-                                {/* Título */}
-                                <h3 className="text-sm md:text-base font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors mb-4">
-                                    {item.title}
-                                </h3>
-
-                                {/* Pie interactivo */}
-                                <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">
-                                        Ver detalles
-                                    </span>
-                                    <ArrowUpRight size={16} className="text-slate-300 group-hover:text-indigo-600 transition-colors" />
-                                </div>
-
-                            </div>
-                        </a>
+                                <ArrowUpRight size={14} className="shrink-0 text-slate-300 transition group-hover:text-indigo-600" aria-hidden="true" />
+                            </a>
+                        </li>
                     ))}
-                </div>
+                </ul>
 
             </div>
         </section>

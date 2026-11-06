@@ -12,8 +12,18 @@ import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import { fetchTourDetail } from '../../lib/catalog';
 import { sanitizeCatalogHtml, stripCatalogHtml } from '../../lib/sanitizeHtml';
+import { parseSearchQuery } from '../../lib/searchParams';
 
 const { slug } = Astro.params;
+
+// Fecha y viajeros que llegan desde el buscador o la lista de tours.
+const searchQuery = parseSearchQuery(Astro.url.searchParams);
+const bookingInitialSearch = {
+    fecha: searchQuery.fecha,
+    adultos: searchQuery.adultos,
+    menores: searchQuery.menores,
+    edades: searchQuery.edades,
+};
 
 if (!slug) {
     return Astro.redirect('/404');
@@ -203,6 +213,7 @@ const tourSchema = {
                             client:only="react"
                             hotelName={tour.name}
                             isSingleDate={true}
+                            initialSearch={bookingInitialSearch}
                     />
 
                     <div class="mt-6 pt-6 border-t border-slate-100">

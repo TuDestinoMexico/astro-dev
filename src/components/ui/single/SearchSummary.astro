@@ -1,0 +1,50 @@
+---
+import type { SearchQuery } from '../../../lib/searchParams';
+
+interface Props {
+    query: SearchQuery;
+    tipo: 'hotel' | 'tour';
+    total: number;
+    filtrado: boolean;
+}
+
+const { query, tipo, total, filtrado } = Astro.props;
+
+const formatDay = (day: string) => new Date(`${day}T12:00:00-05:00`).toLocaleDateString('es-MX', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'America/Cancun',
+});
+
+const fechas = tipo === 'hotel'
+    ? (query.entrada && query.salida ? `${formatDay(query.entrada)} → ${formatDay(query.salida)}` : '')
+    : (query.fecha ? formatDay(query.fecha) : '');
+
+const viajeros = `${query.adultos} ${query.adultos === 1 ? 'adulto' : 'adultos'}`
+    + (query.menores > 0 ? ` · ${query.menores} ${query.menores === 1 ? 'menor' : 'menores'}` : '');
+
+const edades = query.edades.length ? `Edades: ${query.edades.join(', ')}` : '';
+
+const chipClass = 'inline-flex items-center gap-2 rounded-pill border border-brand-border bg-white px-4 py-2 text-xs font-bold text-brand-ink';
+---
+
+<section class="mb-10 rounded-panel border border-brand-border bg-brand-surface p-5 md:p-6" aria-label="Resumen de tu búsqueda">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="flex flex-wrap gap-2">
+            {query.destino && (
+                <span class={chipClass}><span class="text-brand-muted">Destino:</span> {query.destino}</span>
+            )}
+            {fechas && (
+                <span class={chipClass}><span class="text-brand-muted">{tipo === 'hotel' ? 'Estancia:' : 'Fecha:'}</span> {fechas}</span>
+            )}
+            <span class={chipClass}><span class="text-brand-muted">Viajeros:</span> {viajeros}</span>
+            {edades && (
+                <span class={chipClass}>{edades}</span>
+            )}
+        </div>
+
+        <p class="text-sm font-bold text-brand-ink" aria-live="polite">
+            {filtrado ? `${total} ${total === 1 ? 'resultado' : 'resultados'}` : `${total} ${total === 1 ? 'opción' : 'opciones'}`}
+        </p>
+    </div>
+</section>

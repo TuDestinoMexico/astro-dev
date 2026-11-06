@@ -1,15 +1,18 @@
 ---
 import TikTokCTA from "./ui/home/TikTokCTA.astro";
+import HomeBanner from "./ui/home/HomeBanner.astro";
+import { fetchHomeBanner } from "../lib/homeBanner";
 import Content from "./layout/Content.astro";
 import WelcomeModal from "./modal/WelcomeModal";
 import OfficialAnnouncementModal from "./ui/OfficialAnnouncementModal.jsx";
 import RecentlyViewed from "./ui/RecentlyViewed";
-import EventsHero from "./ui/home/EventsHero.astro";
 import FeaturedHotels from "./ui/home/FeaturedHotels.astro";
 import { destinations } from "../data/destinations";
+
+const homeBanner = await fetchHomeBanner();
 ---
 
-<EventsHero />
+<HomeBanner banner={homeBanner} />
 <Content>
     <WelcomeModal client:only="react" />
     <OfficialAnnouncementModal client:only="react" />
