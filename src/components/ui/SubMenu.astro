@@ -22,7 +22,7 @@ const isActive = pathname === url || pathname.replace(/\/$/, "") === url.replace
         href={url}
         class:list={[
             // Clases base
-        "flex-col items-center gap-1 transition-colors",
+        "flex-col items-center gap-1 transition-colors rounded-lg px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60",
 
             // LÓGICA RESPONSIVA:
         // Si mobileOnly es true, se oculta en escritorio ('md:hidden') y se ve en móvil ('flex').
