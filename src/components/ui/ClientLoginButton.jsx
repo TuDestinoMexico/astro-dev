@@ -63,20 +63,15 @@ export default function ClientLoginButton() {
   return (
     <>
       <button
+        type="button"
         onClick={handleOpen}
-        class="bg-purple-800 text-white p-3.5 flex flex-col space-y-1.5 flex-1 min-w-35 xl:min-w-40 shrink-0 transition-all duration-300 hover:brightness-105 text-left cursor-pointer"
+        aria-label={user ? 'Mi cuenta' : 'Área de clientes'}
+        title={user ? 'Mi cuenta' : 'Área de clientes'}
+        class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-purple-800 hover:text-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-800/60"
       >
-        <svg class="w-[18px] h-[18px] shrink-0 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
-        <p class="flex flex-col leading-tight tracking-tight mt-1">
-          <span class="text-xs xl:text-sm font-black uppercase tracking-wide whitespace-nowrap">
-            {user ? 'Mi Cuenta' : 'Área de Clientes'}
-          </span>
-          <span class="text-[11px] xl:text-xs font-medium text-white/90 whitespace-nowrap mt-0.5">
-            {user ? user.displayName || 'Ver panel' : 'Accede a tu cuenta'}
-          </span>
-        </p>
       </button>
 
       {isOpen && (

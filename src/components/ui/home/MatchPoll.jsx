@@ -54,7 +54,7 @@ export default function MatchPoll() {
         return (
             <button
                 onClick={() => setIsMinimized(false)}
-                className="fixed bottom-4 right-4 z-50 flex items-center gap-2.5 bg-slate-950 border border-slate-800 text-white px-4 py-3 rounded-full shadow-2xl hover:bg-slate-900 transition-all duration-300 animate-fade-in font-sans group border-emerald-500/20"
+                className="fixed bottom-24 right-4 z-40 xl:bottom-4 flex items-center gap-2.5 bg-slate-950 border border-slate-800 text-white px-4 py-3 rounded-full shadow-2xl hover:bg-slate-900 transition-all duration-300 animate-fade-in font-sans group border-emerald-500/20"
                 title="Abrir encuesta de Octavos"
             >
                 <BarChart2 size={16} className="text-emerald-400 animate-pulse" />
@@ -66,7 +66,7 @@ export default function MatchPoll() {
     }
 
     return (
-        <div className="fixed bottom-4 right-4 z-50 w-80 bg-slate-950 border border-slate-800 text-white p-5 rounded-[2rem] shadow-2xl animate-fade-in font-sans">
+        <div className="fixed bottom-24 right-4 z-40 xl:bottom-4 w-80 bg-slate-950 border border-slate-800 text-white p-5 rounded-[2rem] shadow-2xl animate-fade-in font-sans">
             {/* CABECERA */}
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-900">
                 <div className="flex items-center gap-2">
