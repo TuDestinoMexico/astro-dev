@@ -14,7 +14,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Ruta | Propósito |
 |---|---|---|
-| `Header.astro` | `components/layout/Header.astro` | Nav principal con logo de dimensiones reservadas, contacto, menú sticky, submenú horizontal y panel móvil responsive de una columna hasta 399px |
+| `Header.astro` | `components/layout/Header.astro` | Escritorio (≥1280 px): barra de 80 px con logo, navegación principal con ícono (Hoteles, Tours, Destinos) y a la derecha "Pagar en línea", "Cotizar" por WhatsApp, menú hamburguesa (Convenios, Quiénes somos, Reseñas y Llamar a ventas) y botón de cuenta redondo. Móvil y tablet: barra superior con Pagar, WhatsApp y menú (Destinos, Convenios, Quiénes somos, Reseñas y teléfono), más una barra inferior fija con Inicio, Hoteles, Cotizar (WhatsApp), Tours y Cuenta. Sin header pegajoso. `body` recibe padding inferior en pantallas menores de 1280 px para no tapar contenido |
 | `Footer.astro` | `components/layout/Footer.astro` | Footer con SECTUR, SAT, redes sociales y términos |
 | `tu-destino-mexico-es-confiable.astro` | `pages/tu-destino-mexico-es-confiable.astro` | Página pública de identidad empresarial y orientación para verificar datos antes de reservar; usa la imagen cuadrada de la marca como vista previa social |
 | `Content.astro` | `components/layout/Content.astro` | Wrapper simple con `<slot/>` |
@@ -109,7 +109,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `ClientLoginButton.jsx` | `client:only` | Botón "Área de Clientes" en Header.astro + diálogo accesible de inicio con Google y Facebook |
+| `ClientLoginButton.jsx` | `client:only` | Botón redondo con ícono de usuario ("Área de clientes") en Header.astro + diálogo accesible de inicio con Google y Facebook |
 | `ClientPanel.jsx` | `client:only` | Layout dashboard cliente (auth guard + topbar + contenido) |
 | `ClientTopbar.jsx` | — | Topbar estilo sitio: logo dinámico con dimensiones reservadas (Firestore `config/general.logoUrl`) + "Mis Reservas" (indigo) + "Mis Ofertas" (emerald) + "Mis Pagos" (amber) + "Mis Favoritos" (rose) + "Mi Cuenta" (purple) con dropdown |
 | `ClientOfertas.jsx` | — | Tarjetas de promociones en tiempo real (Firestore `ofertas` vía `onSnapshot`, orden por `posicion`): filtra ocultas y vencidas, botón "Reclamar" abre WhatsApp con mensaje prellenado (número de `config/general.whatsappGlobal` con fallback) |
