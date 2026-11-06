@@ -138,6 +138,7 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Propósito |
 |---|---|
+| `BuenFinTopbar.tsx` (`client:only`) | Barra promocional del Buen Fin encima del header, montada en `Layout.astro`. Cuenta regresiva en hora de Cancún: "EMPIEZA EN" hasta el 13 de noviembre de 2026 a las 00:00 y "TERMINA EN" hasta el 17 a las 23:59:59; después no se muestra. Vigencia en `src/lib/buenFin.ts`. Muestra una insignia roja "BUEN FIN :)". En la fase activa, si `ctaEnabled` es `true`, muestra "Cotiza ahora" hacia el WhatsApp de la empresa con un mensaje de la promoción, y una segunda línea con el cupón simbólico `BUENFIN-TDMX` y botón de copiar. Mientras `ctaEnabled` sea `false`, muestra "Próximamente" |
 | `MinorAges.tsx` | Inputs de edades para menores (usado por BookingCalendar) |
 
 ---
