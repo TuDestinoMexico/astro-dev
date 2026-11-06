@@ -45,9 +45,16 @@ Renderizados en servidor. Sin estado cliente.
 
 | Componente | Directiva | Propósito |
 |---|---|---|
-| `EventsHero.astro` | — | Shell SSR del hero editorial principal: composición asimétrica de panel de marca + imagen de destino, primera diapositiva, imagen LCP y CTA funcional sin JavaScript |
-| `EventsHeroControls.jsx` | `client:load` | Controles del hero y transiciones GSAP tipo cambio de página; autoplay de 7 segundos con pausa/reanudación, respeta `prefers-reduced-motion` y actualiza imagen, metadata, contenido y CTAs después de la hidratación |
-| `HeroView.jsx` | — | Módulo admin para CRUD de slides del hero, orden, publicación individual, generación WebP responsive, CTAs, preview de imagen y configuración del autoplay |
+| `HomeBanner.astro` | — | Banner a ancho completo con imagen de escritorio y de móvil (`<picture>`). El texto va dentro de la imagen; el banner completo es un enlace si hay URL. El buscador se monta encima de su borde inferior. Sin banner activo muestra solo el buscador |
+| `HomeSearch.tsx` | `client:load` | Buscador de hoteles o tours: pestañas Hotel/Tour, destino, fechas (entrada y salida para hotel, una para tour) y viajeros. Viajeros abre un `<dialog>` modal con contadores de adultos y menores, y selector de edad por menor. Envía a `/hoteles` o `/tours` con parámetros en la URL, sin datos personales. El campo destino muestra sugerencias del catálogo mientras se escribe (combobox con teclado, desde 2 caracteres, con espera de 250 ms); al elegir una, guarda su nombre en el campo sin navegar; la búsqueda se envía con el botón |
+| `/api/catalogo-buscar` | — | Endpoint GET de solo lectura para las sugerencias (`tipo=hotel|tour`, `q`). Devuelve hasta 8 coincidencias y guarda la lista del catálogo 60 s en memoria por instancia |
+| `SearchSummary.astro` | — | Resumen de la búsqueda en `/hoteles` y `/tours` (destino, fechas, viajeros y conteo de resultados) Se muestra solo cuando hay filtros |
+| `SearchEditor.tsx` | `client:load` | Botón "Cambiar búsqueda" de `/hoteles` y `/tours`. Despliega en el mismo lugar el buscador de la portada (`HomeSearch` con `initial`), ya con la búsqueda actual. La animación es una transición de `grid-template-rows` de 300 ms; con movimiento reducido no anima. El panel cerrado queda `inert` |
+| `SearchResultsSkeleton.astro` | `<script>` | Skeleton de tarjetas con íconos de Lucide/Iconify mientras se muestran los resultados de `/hoteles` y `/tours`. Mantiene el skeleton ~1.4 s (0.3 s con movimiento reducido) y luego revela los resultados ya renderizados. Sin JavaScript se muestran directo |
+| `SearchLoader` (en `HomeSearch.tsx`) | — | Pantalla de espera al enviar la búsqueda: íconos que cambian cada 1.1 s, con un retardo de 600 ms antes de navegar. Se reinicia al volver con el historial (`pageshow`) |
+| `src/lib/searchParams.ts` | — | Valida los parámetros del buscador (`destino`, `entrada`, `salida`, `fecha`, `adultos`, `menores`, `edades`) y filtra por destino sin importar acentos ni mayúsculas. Las fechas de disponibilidad no filtran el catálogo: no hay inventario en Firestore |
+| `BookingCalendar.tsx` (`initialSearch`) | `client:only` | Precarga fechas y viajeros desde el buscador en la ficha del hotel, con un aviso para revisarlos antes de enviar la solicitud |
+| `EventsHero.astro`, `EventsHeroControls.jsx` | — | Hero de diapositivas anterior. Ya no se importa en la portada; se conservan en el repo |
 | `HotSalePromoRibbon.jsx` | (no determinada) | Cinta promocional Hot Sale |
 | `WorldCupPromoRibbon.jsx` | (no determinada) | Cinta promocional Mundial 2026 |
 | `WorldCupCelebration.jsx` | (no determinada) | Sección celebración mundial |
@@ -123,6 +130,7 @@ Renderizados en servidor. Sin estado cliente.
 | `LeadsView.jsx` | — | Últimas cotizaciones (Firestore, limit 5) |
 | `TeamView.jsx` | — | CRUD equipo con drag & drop, paginación, búsqueda, selector de fotos |
 | `OfertasView.jsx` | — | CRUD de ofertas (Firestore `ofertas` con `onSnapshot`, tiempo real): formulario (título, descripción, descuento, código, color, vigencia opcional, activo), tabla con drag & drop + búsqueda + paginación, toggle visible/oculta y badge "Vencida" |
+| `HomeBannerView.jsx` | — | Pestaña "Banner inicio" del admin: textos, enlace, vigencia y dos imágenes (escritorio y móvil) subidas a Storage en `home-banner/`. Guarda en `config/homeBanner` |
 | `MediaManager.jsx` | — | Explorador Firebase Storage con CRUD de archivos/carpetas |
 | `ConfigView.jsx` | — | Configuración global (nombre, logo, WhatsApp, mantenimiento general y pausa de consultas CRM para reservas/grupos), comunicado oficial, conversión WebP adaptable y eliminación sincronizada de imágenes |
 

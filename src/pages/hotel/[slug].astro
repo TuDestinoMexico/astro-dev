@@ -11,8 +11,19 @@ import FavoriteButton from '../../components/ui/FavoriteButton.jsx';
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
 import { fetchHotelDetail } from '../../lib/catalog';
 import { sanitizeCatalogHtml, stripCatalogHtml } from '../../lib/sanitizeHtml';
+import { parseSearchQuery } from '../../lib/searchParams';
 
 const { slug } = Astro.params;
+
+// Fechas y viajeros que llegan desde el buscador o la lista de hoteles.
+const searchQuery = parseSearchQuery(Astro.url.searchParams);
+const bookingInitialSearch = {
+    entrada: searchQuery.entrada,
+    salida: searchQuery.salida,
+    adultos: searchQuery.adultos,
+    menores: searchQuery.menores,
+    edades: searchQuery.edades,
+};
 
 if (!slug) {
     return Astro.redirect('/404');
@@ -193,7 +204,7 @@ const hotelSchema = {
                         <Icon name="fa7-solid:calendar-check" size="24" class="text-emerald-600"/>
                         <h2 class="text-xl font-bold text-slate-800">Reserva tu estadía</h2>
                     </div>
-                    <BookingCalendar client:only="react" hotelName={hotel.name} />
+                    <BookingCalendar client:only="react" hotelName={hotel.name} initialSearch={bookingInitialSearch} />
                 </div>
             </div>
 

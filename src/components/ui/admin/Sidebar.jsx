@@ -88,6 +88,13 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout, i
                             <Tag size={16} /> Ofertas
                         </button>
 
+                        <button
+                            onClick={() => handleNavClick('banner')}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all ${activeTab === 'banner' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+                        >
+                            <Image size={16} /> Banner inicio
+                        </button>
+
                         {/* NUEVO - PESTAÑA: CONFIGURACIÓN */}
                         <button
                             onClick={() => handleNavClick('config')}
