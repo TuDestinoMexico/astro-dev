@@ -1,0 +1,53 @@
+---
+// Fila de tarjetas: en móvil se desliza en horizontal con ajuste a cada tarjeta;
+// desde md se convierte en cuadrícula normal. Las columnas de escritorio se pasan con `class`.
+interface Props {
+    class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class:list={['mobile-rail', className]}>
+    <slot />
+</div>
+
+<style is:global>
+    .mobile-rail {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 1rem;
+        padding: 0.5rem 1rem 1.5rem;
+        margin-inline: -1rem;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mobile-rail::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-rail > * {
+        flex: 0 0 78%;
+        min-width: 0;
+        scroll-snap-align: start;
+    }
+
+    @media (min-width: 768px) {
+        .mobile-rail {
+            display: grid;
+            overflow: visible;
+            scroll-snap-type: none;
+            padding: 0;
+            margin-inline: 0;
+        }
+
+        .mobile-rail > * {
+            flex: initial;
+            scroll-snap-align: none;
+        }
+    }
+</style>

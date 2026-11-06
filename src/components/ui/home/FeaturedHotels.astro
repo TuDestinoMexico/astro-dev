@@ -1,5 +1,5 @@
 ---
-import Grid from '../Grid.astro';
+import MobileRail from '../single/MobileRail.astro';
 import Card from '../single/Card.astro';
 import { fetchHotelList } from '../../../lib/catalog';
 
@@ -23,7 +23,7 @@ const hoteles = catalogResult.status === 'ok' ? catalogResult.data : [];
             <p class="mt-2 text-gray-500">Puedes continuar explorando el sitio o contactarnos para recibir asesoría.</p>
         </div>
     ) : hoteles.length > 0 ? (
-        <Grid grid={5}>
+        <MobileRail class="md:grid-cols-2 lg:grid-cols-5 md:gap-8">
             {hoteles.slice(0, 5).map(
                 (hotel: { name: string | undefined; slug: string | undefined; images: any; destino: string | undefined }) => (
                     <Card
@@ -35,7 +35,7 @@ const hoteles = catalogResult.status === 'ok' ? catalogResult.data : [];
                     />
                 )
             )}
-        </Grid>
+        </MobileRail>
     ) : (
         <div class="px-4 py-12 text-center">
             <p class="italic text-gray-500">No se encontraron hoteles disponibles en este momento.</p>

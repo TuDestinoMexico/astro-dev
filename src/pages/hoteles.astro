@@ -9,6 +9,7 @@ import HeroBannerOutBounds from "../components/ui/single/HeroBannerOutBounds.ast
 import SearchSummary from "../components/ui/single/SearchSummary.astro";
 import SearchResultsSkeleton from "../components/ui/single/SearchResultsSkeleton.astro";
 import SearchEditor from "../components/ui/single/SearchEditor";
+import MobileRail from "../components/ui/single/MobileRail.astro";
 import { fetchHotelList } from "../lib/catalog";
 import { hasSearchFilters, matchesDestino, parseSearchQuery, toSearchString } from "../lib/searchParams";
 
@@ -116,9 +117,9 @@ const hotelListSchema = {
                     </div>
             ) : hoteles.length > 0 ? (
                     <div class="flex flex-col items-center">
-                        <div id="hotel-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
+                        <MobileRail class="md:grid-cols-2 lg:grid-cols-4 md:gap-8 w-full">
                             {hoteles.map((hotel: any, index: number) => (
-                                    <div class={`hotel-card ${index >= INITIAL_VISIBLE ? 'hidden' : ''}`}>
+                                    <div class={`hotel-card ${index >= INITIAL_VISIBLE ? 'md:hidden' : ''}`} data-extra={index >= INITIAL_VISIBLE ? '' : undefined}>
                                         <Card
                                                 title={hotel.name || hotel.title}
                                                 slug={hotel.slug}
@@ -129,12 +130,12 @@ const hotelListSchema = {
                                         />
                                     </div>
                             ))}
-                        </div>
+                        </MobileRail>
 
                         {hoteles.length > INITIAL_VISIBLE && (
                                 <button
                                         id="load-more-btn"
-                                        class="mt-12 px-8 py-3 bg-purple-800 text-white font-bold rounded-full hover:bg-purple-900 transition-colors shadow-lg"
+                                        class="hidden md:block mt-12 px-8 py-3 bg-purple-800 text-white font-bold rounded-full hover:bg-purple-900 transition-colors shadow-lg"
                                 >
                                     Ver más hoteles
                                 </button>
@@ -168,25 +169,26 @@ const hotelListSchema = {
 </Layout>
 
 <script>
+    // En móvil todas las tarjetas están en el carrusel; el botón solo existe en escritorio.
+    // En escritorio, "Ver más" muestra el siguiente bloque de 8 quitando md:hidden.
     const btn = document.getElementById('load-more-btn');
-    const cards = document.querySelectorAll('.hotel-card.hidden');
-    let currentVisible = 8;
     const increment = 8;
 
+    const hiddenCards = () =>
+        Array.from(document.querySelectorAll<HTMLElement>('.hotel-card[data-extra]')).filter((card) =>
+            card.classList.contains('md:hidden')
+        );
+
     btn?.addEventListener('click', () => {
-        const hiddenCards = document.querySelectorAll('.hotel-card.hidden');
+        hiddenCards()
+            .slice(0, increment)
+            .forEach((card) => {
+                card.classList.remove('md:hidden');
+                card.classList.add('animate-fade-in');
+            });
 
-        // Mostramos el siguiente bloque de 8
-        for (let i = 0; i < increment; i++) {
-            if (hiddenCards[i]) {
-                hiddenCards[i].classList.remove('hidden');
-                // Añadimos una pequeña animación de entrada opcional
-                hiddenCards[i].classList.add('animate-fade-in');
-            }
-        }
-
-        // Si ya no hay más cartas ocultas, quitamos el botón
-        if (document.querySelectorAll('.hotel-card.hidden').length === 0) {
+        // Si ya no hay más tarjetas ocultas, quitamos el botón
+        if (hiddenCards().length === 0 && btn) {
             btn.style.display = 'none';
         }
     });
