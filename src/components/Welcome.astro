@@ -1,7 +1,9 @@
 ---
 import TikTokCTA from "./ui/home/TikTokCTA.astro";
+import NewsTicker from "./ui/home/NewsTicker.astro";
 import HomeBanner from "./ui/home/HomeBanner.astro";
 import { fetchHomeBanner } from "../lib/homeBanner";
+import { TICKER_MESSAGES } from "../lib/newsTicker";
 import Content from "./layout/Content.astro";
 import WelcomeModal from "./modal/WelcomeModal";
 import OfficialAnnouncementModal from "./ui/OfficialAnnouncementModal.jsx";
@@ -19,6 +21,8 @@ const homeBanner = await fetchHomeBanner();
     <OfficialAnnouncementModal client:only="react" />
 
     <RecentlyViewed client:only="react" />
+
+    <NewsTicker messages={TICKER_MESSAGES} />
 
     <TikTokCTA />
 
