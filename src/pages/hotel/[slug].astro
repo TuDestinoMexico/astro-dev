@@ -64,12 +64,11 @@ const principalImage = rawImages.principal && rawImages.principal.length > 0
     ? rawImages.principal[0].url
     : (allImages.length > 0 && allImages[0].url ? allImages[0].url : '');
 
+// Solo se guarda lo estable (tipo, título y ruta). La imagen se pide al servidor en /api/recientes,
+// porque las URLs firmadas de Storage caducan.
 const recentlyViewedData = {
-    id: slug,
     type: "hotel",
     title: hotel.name,
-    location: hotel.address,
-    image: principalImage,
     url: `/hotel/${slug}`
 };
 
@@ -216,12 +215,12 @@ const hotelSchema = {
 </Layout>
 
 {!catalogUnavailable && <script define:vars={{ recentlyViewedData }}>
-    if (typeof window !== 'undefined' && recentlyViewedData && recentlyViewedData.id) {
+    if (typeof window !== 'undefined' && recentlyViewedData && recentlyViewedData.url) {
         try {
             const currentStorage = localStorage.getItem('tdmx_recently_viewed');
             let items = currentStorage ? JSON.parse(currentStorage) : [];
 
-            items = items.filter(item => item.id !== recentlyViewedData.id);
+            items = items.filter(item => item.url !== recentlyViewedData.url);
 
             items.unshift(recentlyViewedData);
 
