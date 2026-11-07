@@ -33,7 +33,7 @@ Aunque `@react-google-maps/api` está en dependencias, el componente `HotelTabs.
 Se usa GSAP para animaciones que requieren control fino (hero slider, payment methods stagger). Para animaciones simples se usan CSS transitions y `@keyframes`.
 
 ### localStorage para "vistos recientemente"
-En lugar de backend o cookies, se usa `localStorage` con key `tdmx_recently_viewed` (máximo 4 items). Esto evita llamadas server-side pero pierde persistencia entre dispositivos.
+En lugar de backend o cookies, se usa `localStorage` con key `tdmx_recently_viewed` (máximo 4 items). Solo se guardan `type`, `url` y `title`: las URLs firmadas de Storage caducan a la hora, así que las imágenes y datos vigentes se piden a `/api/recientes` en cada visita. Esto pierde persistencia entre dispositivos.
 
 ---
 
