@@ -60,7 +60,7 @@ Renderizados en servidor. Sin estado cliente.
 | `MatchPoll.jsx` | (no determinada) | Encuesta en tiempo real (Firestore onSnapshot) |
 | `WelcomeModal.tsx` | `client:only` | Modal accesible de estado de pago (check vía query param `id`), con estados de carga, confirmado, pendiente y error; presenta el comprobante con lenguaje visual de pase de abordar |
 | `OfficialAnnouncementModal.jsx` | `client:only` desde `Welcome.astro` | Comunicado oficial público del home, mostrado en cada carga o actualización mientras esté activo |
-| `RecentlyViewed.jsx` | `client:only` | Tarjetas de últimos visitados (localStorage) |
+| `RecentlyViewed.jsx` | `client:only` | Vistos recientemente: guarda solo `{type, url, title}` en localStorage (`tdmx_recently_viewed`, máx. 4), pide título, ubicación e imagen vigentes a `/api/recientes`, quita los que ya no existen (`not-found`), conserva los guardados si el catálogo falla y muestra un icono si la imagen no carga |
 | `PromoLocker.jsx` | `client:only` | Locker promocional (actualmente comentado) |
 
 ### Favoritos
