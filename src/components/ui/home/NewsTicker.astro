@@ -1,0 +1,87 @@
+---
+interface Props {
+    messages: string[];
+}
+
+const { messages } = Astro.props;
+
+// Repite el grupo para que una sola frase cubra todo el ancho de cualquier pantalla.
+const REPEATS = 6;
+const group = Array.from({ length: REPEATS }, () => messages).flat();
+---
+
+{messages.length > 0 && (
+    <section class="news-ticker relative left-1/2 w-screen -translate-x-1/2 bg-slate-900 text-white" aria-label="Novedades de Tu Destino México">
+        <div class="news-ticker__viewport">
+            <ul class="news-ticker__track">
+                {group.map((message) => (
+                    <li class="news-ticker__item">{message}</li>
+                ))}
+                {group.map((message) => (
+                    <li class="news-ticker__item" aria-hidden="true">{message}</li>
+                ))}
+            </ul>
+        </div>
+    </section>
+)}
+
+<style>
+    .news-ticker__viewport {
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .news-ticker__track {
+        display: inline-flex;
+        margin: 0;
+        padding: clamp(0.6rem, 1.2vw, 1.1rem) 0;
+        list-style: none;
+    }
+
+    .news-ticker__item {
+        display: inline-flex;
+        align-items: center;
+        padding: 0 clamp(1.25rem, 3vw, 3rem);
+        font-size: clamp(0.95rem, 0.6rem + 1.6vw, 2.25rem);
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        line-height: 1.2;
+        text-transform: uppercase;
+    }
+
+    .news-ticker__item::after {
+        content: "";
+        display: inline-block;
+        width: 0.4em;
+        height: 0.4em;
+        margin-left: clamp(1.25rem, 3vw, 3rem);
+        border-radius: 9999px;
+        background: #25f4ee;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .news-ticker__track {
+            animation: news-ticker-scroll 40s linear infinite;
+        }
+
+        .news-ticker:hover .news-ticker__track,
+        .news-ticker:focus-within .news-ticker__track {
+            animation-play-state: paused;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .news-ticker__viewport {
+            overflow-x: auto;
+        }
+
+        .news-ticker__item[aria-hidden="true"] {
+            display: none;
+        }
+    }
+
+    @keyframes news-ticker-scroll {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
+</style>
