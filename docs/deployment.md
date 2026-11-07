@@ -178,7 +178,9 @@ git merge --no-ff experimental/ALCANCE -m "merge: integrar ALCANCE en dev"
 git push origin dev
 ```
 
-5. Eliminar la rama experimental local después de confirmar que la integración y el push a `dev` fueron correctos:
+Al aprobar el usuario los cambios, la integración en `dev` y el push a `dev` se hacen sin pedir confirmación adicional. Tras el push, el usuario revisa el sitio de `dev`.
+
+5. Eliminar la rama experimental local después de confirmar que la integración y el push a `dev` fueron correctos. Debe hacerse después del merge: `git branch -d` no borra ramas sin fusionar.
 
 ```bash
 git branch -d experimental/ALCANCE
@@ -199,7 +201,7 @@ git branch -D experimental/ALCANCE
 - Firestore y Storage conservan los permisos esperados.
 - No hay errores relevantes en los logs del deployment o del navegador.
 
-7. Promover a producción únicamente después de aprobar el Preview:
+7. Promover a producción únicamente cuando el usuario, tras revisar `dev` en el sitio, pida explícitamente la promoción:
 
 ```bash
 git switch master
