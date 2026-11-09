@@ -1,0 +1,124 @@
+<!-- Modal de espera al pulsar "Cotiza ahora" en los resultados de una búsqueda (/hoteles y /tours).
+     Se monta una sola vez por página; Card.astro marca sus enlaces con data-cotizar-busqueda. -->
+<dialog
+    data-cotizar-modal
+    class="cotizar-modal m-auto w-[min(92vw,24rem)] rounded-panel bg-white p-0 shadow-card-hover"
+    aria-labelledby="cotizar-modal-titulo"
+>
+    <div role="status" aria-live="polite" class="px-8 py-10 text-center">
+        <div class="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center">
+            <span class="absolute inset-0 animate-ping rounded-full bg-emerald-400/25" aria-hidden="true"></span>
+            <span class="relative flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 text-white">
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+                </svg>
+            </span>
+        </div>
+        <p id="cotizar-modal-titulo" class="text-base font-black text-slate-900" data-cotizar-texto>Preparando tu cotización</p>
+        <p class="mt-2 text-xs text-slate-500">Llevamos tus fechas y viajeros a la ficha.</p>
+        <div class="mt-6 flex items-center justify-center" aria-hidden="true">
+            <span class="h-1.5 w-40 overflow-hidden rounded-full bg-slate-100">
+                <span class="block h-full w-1/2 animate-[pulse_1.2s_ease-in-out_infinite] rounded-full bg-emerald-500"></span>
+            </span>
+        </div>
+    </div>
+</dialog>
+
+<style>
+    .cotizar-modal {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+        transition:
+            opacity 240ms ease,
+            transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+            overlay 240ms allow-discrete,
+            display 240ms allow-discrete;
+    }
+
+    .cotizar-modal[open] {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    @starting-style {
+        .cotizar-modal[open] {
+            opacity: 0;
+            transform: translateY(12px) scale(0.97);
+        }
+    }
+
+    .cotizar-modal::backdrop {
+        background: rgb(15 23 42 / 0.7);
+        backdrop-filter: blur(4px);
+        transition: opacity 240ms ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cotizar-modal,
+        .cotizar-modal::backdrop {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    const MENSAJES = [
+        'Preparando tu cotización',
+        'Cargando la ficha con tus fechas',
+        'Llevándote a la ficha',
+    ];
+    const INTERVALO_MS = 1100;
+    const ESPERA_ANTES_DE_IR_MS = 1800;
+
+    const modal = document.querySelector<HTMLDialogElement>('[data-cotizar-modal]');
+    const texto = modal?.querySelector<HTMLElement>('[data-cotizar-texto]');
+
+    let intervalo: number | undefined;
+    let temporizador: number | undefined;
+    let destino: string | null = null;
+
+    const detener = () => {
+        window.clearInterval(intervalo);
+        window.clearTimeout(temporizador);
+        intervalo = undefined;
+        temporizador = undefined;
+    };
+
+    if (modal && texto) {
+        document.addEventListener('click', (evento) => {
+            if (evento.defaultPrevented || evento.button !== 0) return;
+            if (evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
+
+            const enlace = (evento.target as Element | null)?.closest<HTMLAnchorElement>('a[data-cotizar-busqueda]');
+            if (!enlace || modal.open) return;
+
+            evento.preventDefault();
+            destino = enlace.href;
+
+            let indice = 0;
+            texto.textContent = MENSAJES[indice];
+            modal.showModal();
+
+            intervalo = window.setInterval(() => {
+                indice = (indice + 1) % MENSAJES.length;
+                texto.textContent = MENSAJES[indice];
+            }, INTERVALO_MS);
+
+            temporizador = window.setTimeout(() => {
+                detener();
+                if (destino) window.location.href = destino;
+            }, ESPERA_ANTES_DE_IR_MS);
+        });
+
+        // Si el usuario cierra el modal (Esc) antes de que cargue, cancelamos la navegación.
+        modal.addEventListener('close', detener);
+
+        // Al volver con el historial, la página puede restaurarse desde caché con el modal abierto.
+        window.addEventListener('pageshow', (evento) => {
+            if (evento.persisted && modal.open) {
+                detener();
+                modal.close();
+            }
+        });
+    }
+</script>
