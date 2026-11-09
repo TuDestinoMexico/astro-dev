@@ -2,25 +2,40 @@
 import { Icon } from "astro-icon/components";
 
 const { member } = Astro.props;
+const nombre = member.nombre || "Vacation Planner";
+// Sin foto, se muestran las iniciales en lugar de una imagen genérica.
+const iniciales = nombre
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((parte: string) => parte.charAt(0).toUpperCase())
+    .join("");
 ---
 
-<article class="group flex flex-col overflow-hidden rounded-card border border-brand-line bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-primary/40 hover:shadow-xl">
+<article class="group flex h-full flex-col overflow-hidden rounded-card border border-brand-line bg-white shadow-sm transition-all duration-300 motion-safe:hover:-translate-y-1 hover:border-brand-primary/40 hover:shadow-xl">
     <div class="relative aspect-[4/5] w-full overflow-hidden bg-brand-surface">
-        <img
-            src={member.foto || "https://placehold.co/400x500?text=Perfil"}
-            alt={member.nombre || "Vacation Planner"}
-            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            width="400"
-            height="500"
-            loading="lazy"
-        />
+        {member.foto ? (
+            <img
+                src={member.foto}
+                alt={nombre}
+                class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                width="400"
+                height="500"
+                loading="lazy"
+                decoding="async"
+            />
+        ) : (
+            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-primary/25 via-brand-surface to-brand-primary/10" aria-hidden="true">
+                <span class="text-6xl font-black tracking-tight text-brand-primary/80">{iniciales}</span>
+            </div>
+        )}
         <div class="absolute inset-0 bg-gradient-to-t from-brand-ink/70 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-60"></div>
-        <span class="absolute left-4 top-4 max-w-[85%] truncate rounded-pill border border-white/25 bg-brand-ink/25 px-3 py-1.5 text-center text-[9px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">{member.puesto || "Vacation Planner"}</span>
+        <span class="absolute left-3 top-3 max-w-[85%] truncate rounded-pill border border-white/25 bg-brand-ink/25 px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-md">{member.puesto || "Vacation Planner"}</span>
     </div>
-    <div class="relative flex min-h-28 flex-col justify-center gap-2 overflow-hidden px-4 py-5">
+    <div class="relative flex flex-1 flex-col justify-center gap-2 overflow-hidden px-5 py-5">
         <Icon name="lucide:plane" size="68" class="pointer-events-none absolute -bottom-4 -right-3 text-brand-primary/10 transition-transform duration-700 group-hover:-translate-x-2 group-hover:scale-110" aria-hidden="true" />
-        <h3 class="relative z-10 truncate text-base font-black uppercase tracking-tight text-brand-ink">{member.nombre || "Vacation Planner"}</h3>
-        <div class="relative z-10 mt-1 flex items-center gap-2 text-[10px] font-medium text-brand-muted">
+        <h3 class="relative z-10 text-lg font-black uppercase leading-tight tracking-tight text-brand-ink md:text-xl">{nombre}</h3>
+        <div class="relative z-10 mt-1 flex items-center gap-2 text-xs font-medium text-brand-muted">
             <span class="h-px w-5 bg-brand-primary/60"></span>
             <span>Diseñamos tu escapada</span>
         </div>

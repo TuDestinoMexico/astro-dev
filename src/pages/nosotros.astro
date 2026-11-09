@@ -7,6 +7,7 @@ import { Icon } from "astro-icon/components";
 import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import MemberCard from "../components/ui/team/MemberCard.astro";
+import MobileRail from "../components/ui/single/MobileRail.astro";
 
 interface TeamMember {
     id: string;
@@ -41,6 +42,12 @@ try {
 const whatsappHref = whatsappNumber
     ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hola, quiero planear mis próximas vacaciones con Tu Destino México.")}`
     : "";
+
+const pasos = [
+    { numero: "01", titulo: "Te escuchamos", texto: "Entendemos qué buscas antes de recomendarte dónde vivirlo." },
+    { numero: "02", titulo: "Diseñamos contigo", texto: "Combinamos destinos, hoteles y experiencias según tu manera de viajar." },
+    { numero: "03", titulo: "Te acompañamos", texto: "Seguimos cerca para que disfrutes el camino con más tranquilidad." },
+];
 ---
 
 <Layout
@@ -51,52 +58,39 @@ const whatsappHref = whatsappNumber
     <Content>
         <Header />
 
-        <main class="space-y-20 pb-16 pt-6 md:space-y-28 md:pt-10">
-            <section class="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:items-start md:gap-20">
+        <main class="space-y-16 pb-16 pt-6 md:space-y-24 md:pt-10">
+            {/* Intro compacta: lo esencial arriba, para llegar pronto al equipo */}
+            <section class="grid gap-6 md:grid-cols-[0.8fr_1.2fr] md:items-start md:gap-16">
                 <div>
                     <p class="text-[10px] font-black uppercase tracking-[0.24em] text-brand-primary">Nuestra manera de viajar</p>
                     <h1 class="mt-4 max-w-md text-3xl font-black uppercase leading-tight tracking-[-0.04em] text-brand-ink md:text-5xl">
                         Agencia de viajes en Cancún para diseñar momentos.
                     </h1>
                 </div>
-                <div class="max-w-2xl space-y-5 text-base leading-7 text-brand-muted md:text-lg">
+                <div class="max-w-2xl space-y-4 text-base leading-7 text-brand-muted md:justify-self-end md:text-lg">
                     <p>Creemos que cada viajero tiene una forma distinta de desconectarse, celebrar y descubrir. Por eso empezamos con una conversación, no con un catálogo.</p>
                     <p>Tu Vacation Planner está para ayudarte a elegir con claridad, anticipar los detalles y acompañarte hasta que el viaje deje de ser una idea y se convierta en una historia que quieras contar.</p>
-                    <p>¿Estás verificando nuestra información antes de reservar? Consulta <a href="/tu-destino-mexico-es-confiable" class="font-bold text-brand-primary underline underline-offset-4">los datos oficiales y recomendaciones para viajeros</a>.</p>
+                    <p class="flex items-start gap-3 rounded-card bg-brand-surface px-4 py-3 text-sm leading-6">
+                        <Icon name="lucide:shield-check" size="18" class="mt-1 shrink-0 text-brand-primary" aria-hidden="true" />
+                        <span>¿Estás verificando nuestra información antes de reservar? Consulta <a href="/tu-destino-mexico-es-confiable" class="font-bold text-brand-primary underline underline-offset-4">los datos oficiales y recomendaciones para viajeros</a>.</span>
+                    </p>
                 </div>
             </section>
 
-            <section class="grid gap-4 md:grid-cols-3">
-                <article class="rounded-card border border-brand-line bg-brand-surface p-6 md:p-8">
-                    <span class="text-3xl font-black text-brand-primary">01</span>
-                    <h2 class="mt-8 text-lg font-black uppercase tracking-tight text-brand-ink">Te escuchamos</h2>
-                    <p class="mt-3 text-sm leading-6 text-brand-muted">Entendemos qué buscas antes de recomendarte dónde vivirlo.</p>
-                </article>
-                <article class="rounded-card border border-brand-line bg-brand-surface p-6 md:p-8">
-                    <span class="text-3xl font-black text-brand-primary">02</span>
-                    <h2 class="mt-8 text-lg font-black uppercase tracking-tight text-brand-ink">Diseñamos contigo</h2>
-                    <p class="mt-3 text-sm leading-6 text-brand-muted">Combinamos destinos, hoteles y experiencias según tu manera de viajar.</p>
-                </article>
-                <article class="rounded-card border border-brand-line bg-brand-surface p-6 md:p-8">
-                    <span class="text-3xl font-black text-brand-primary">03</span>
-                    <h2 class="mt-8 text-lg font-black uppercase tracking-tight text-brand-ink">Te acompañamos</h2>
-                    <p class="mt-3 text-sm leading-6 text-brand-muted">Seguimos cerca para que disfrutes el camino con más tranquilidad.</p>
-                </article>
-            </section>
-
+            {/* Equipo: sección principal de la página */}
             <section id="equipo" class="scroll-mt-24">
-                <div class="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                <div class="mb-8 flex flex-col justify-between gap-4 md:mb-10 md:flex-row md:items-end">
                     <div>
                         <p class="text-[10px] font-black uppercase tracking-[0.24em] text-brand-primary">Las personas detrás del viaje</p>
-                        <h2 class="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-brand-ink md:text-5xl">Conoce a tus planners</h2>
+                        <h2 class="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-brand-ink md:text-6xl">Conoce a tus planners</h2>
                     </div>
                     <p class="max-w-sm text-sm leading-6 text-brand-muted md:text-right">Personas reales, recomendaciones honestas y una obsesión saludable por los detalles.</p>
                 </div>
 
                 {team.length > 0 ? (
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <MobileRail class="md:grid-cols-2 md:gap-6 lg:grid-cols-4">
                         {team.map((member) => <MemberCard member={member} />)}
-                    </div>
+                    </MobileRail>
                 ) : (
                     <div class="rounded-card border border-dashed border-brand-line bg-brand-surface px-6 py-12 text-center">
                         <Icon name="lucide:users-round" size="32" class="mx-auto text-brand-primary" aria-hidden="true" />
@@ -104,6 +98,22 @@ const whatsappHref = whatsappNumber
                         <p class="mt-2 text-xs text-brand-muted">Mientras tanto, podemos ayudarte a imaginar tu próximo destino.</p>
                     </div>
                 )}
+            </section>
+
+            {/* Cómo trabajamos: franja compacta debajo del equipo */}
+            <section aria-labelledby="como-trabajamos" class="space-y-5">
+                <p id="como-trabajamos" class="text-[10px] font-black uppercase tracking-[0.24em] text-brand-muted">Cómo trabajamos</p>
+                <div class="grid gap-3 md:grid-cols-3">
+                    {pasos.map((paso) => (
+                        <article class="flex items-start gap-4 rounded-card border border-brand-line bg-brand-surface p-5">
+                            <span class="text-2xl font-black leading-none text-brand-primary">{paso.numero}</span>
+                            <div>
+                                <h3 class="text-sm font-black uppercase tracking-tight text-brand-ink">{paso.titulo}</h3>
+                                <p class="mt-1 text-sm leading-6 text-brand-muted">{paso.texto}</p>
+                            </div>
+                        </article>
+                    ))}
+                </div>
             </section>
 
             <section class="relative overflow-hidden rounded-[2rem] bg-brand-primary px-6 py-12 text-white md:rounded-[3rem] md:px-14 md:py-16">
