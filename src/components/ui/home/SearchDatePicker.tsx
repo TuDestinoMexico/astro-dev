@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/style.css';
-import { addMonths, format, isAfter, isBefore, startOfMonth, startOfToday } from 'date-fns';
+import { addMonths, differenceInDays, format, isAfter, isBefore, isSameDay, startOfMonth, startOfToday } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import { calendarClassNames } from '../calendarClassNames';
 
 interface Props {
@@ -39,6 +39,27 @@ export default function SearchDatePicker({ mode, from, to, onChange }: Props) {
     const [draftDate, setDraftDate] = useState<Date | undefined>(undefined);
     const [currentMonth, setCurrentMonth] = useState(firstMonth);
     const [isDesktop, setIsDesktop] = useState(false);
+    // Día bajo el cursor mientras se elige la salida (solo escritorio, rangos).
+    const [hoverDate, setHoverDate] = useState<Date | undefined>(undefined);
+
+    const draftFrom = draftRange?.from;
+    const isChoosingCheckOut = mode === 'range' && Boolean(draftFrom && !draftRange?.to);
+    const previewEnd = isChoosingCheckOut && hoverDate && draftFrom && isAfter(hoverDate, draftFrom) ? hoverDate : undefined;
+    const selectedNights = draftFrom && draftRange?.to ? differenceInDays(draftRange.to, draftFrom) : 0;
+    const previewNights = previewEnd && draftFrom ? differenceInDays(previewEnd, draftFrom) : 0;
+    const previewModifiers = {
+        previewRange: (day: Date) => Boolean(previewEnd && draftFrom && isAfter(day, draftFrom) && isBefore(day, previewEnd)),
+        previewEnd: (day: Date) => Boolean(previewEnd && isSameDay(day, previewEnd)),
+    };
+    const previewClassNames = {
+        previewRange: '[&>button]:!bg-indigo-50 [&>button]:!text-indigo-700 [&>button]:rounded-none',
+        previewEnd: '[&>button]:!bg-indigo-100 [&>button]:!text-indigo-800 [&>button]:ring-2 [&>button]:ring-indigo-400',
+    };
+    const formatNoches = (noches: number) => `${noches} ${noches === 1 ? 'noche' : 'noches'} · ${noches + 1} ${noches + 1 === 1 ? 'día' : 'días'}`;
+    const handleDayHover = (day: Date) => {
+        if (isChoosingCheckOut) setHoverDate(day);
+    };
+    const clearHover = () => setHoverDate(undefined);
 
     // Dos meses en escritorio para rangos, uno en móvil.
     useEffect(() => {
@@ -124,7 +145,10 @@ export default function SearchDatePicker({ mode, from, to, onChange }: Props) {
                 ref={dialogRef}
                 aria-label={mode === 'range' ? 'Elige tus fechas de estancia' : 'Elige la fecha del tour'}
                 onClick={handleBackdropClick}
-                onClose={() => setDraftRange(undefined)}
+                onClose={() => {
+                    setDraftRange(undefined);
+                    setHoverDate(undefined);
+                }}
                 className="m-auto w-[calc(100%-2rem)] max-w-3xl rounded-panel border border-brand-border bg-white p-0 text-brand-ink shadow-card-hover backdrop:bg-brand-ink/60"
             >
                 <div className="flex items-center justify-between gap-3 px-5 pb-2 pt-5 sm:px-8">
@@ -136,13 +160,44 @@ export default function SearchDatePicker({ mode, from, to, onChange }: Props) {
                             {mode === 'range' ? 'Elige tus fechas' : 'Elige el día'}
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={closeCalendar}
-                        className="rounded-full px-3 py-1.5 text-xs font-bold text-brand-muted transition hover:bg-brand-surface hover:text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
-                    >
-                        Cerrar
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {mode === 'range' && (draftFrom || previewEnd) && (
+                            <span
+                                aria-live="polite"
+                                className={`shrink-0 rounded-xl px-3 py-2 text-xs font-black tabular-nums ${previewEnd ? 'border border-dashed border-indigo-400 bg-white text-indigo-500' : 'bg-indigo-50 text-indigo-700'}`}
+                            >
+                                {previewEnd ? formatNoches(previewNights) : draftRange?.to ? formatNoches(selectedNights) : 'Elige tu salida'}
+                            </span>
+                        )}
+                        <button
+                            type="button"
+                            onClick={closeCalendar}
+                            className="rounded-full px-3 py-1.5 text-xs font-bold text-brand-muted transition hover:bg-brand-surface hover:text-brand-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+
+                {/* Instrucciones compactas: cómo elegir fechas según el tipo de búsqueda */}
+                <div className="mx-5 mb-4 flex flex-col gap-3 rounded-2xl bg-brand-surface px-4 py-3 sm:mx-8 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="flex items-start gap-2 text-xs font-semibold leading-5 text-brand-muted">
+                        <Info size={14} aria-hidden="true" className="mt-0.5 shrink-0 text-indigo-500" />
+                        {mode === 'single' ? (
+                            <span>Toca el día de tu tour. Solo necesitas una fecha.</span>
+                        ) : (
+                            <span>
+                                <span className="sm:hidden">Toca entrada y salida. Verás las noches al elegir.</span>
+                                <span className="hidden sm:inline">Toca tu día de entrada y luego el de salida. Al pasar el cursor verás las noches.</span>
+                            </span>
+                        )}
+                    </p>
+                    {mode === 'range' && (
+                        <ol className="flex shrink-0 items-center gap-2 text-[10px] font-black uppercase tracking-widest" aria-label="Pasos para elegir fechas">
+                            <li className={`rounded-full px-2.5 py-1 ${!draftFrom ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 ring-1 ring-indigo-200'}`}>1 Entrada</li>
+                            <li className={`rounded-full px-2.5 py-1 ${isChoosingCheckOut ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400 ring-1 ring-slate-200'}`}>2 Salida</li>
+                        </ol>
+                    )}
                 </div>
 
                 <div className="space-y-4 px-5 pb-4 sm:px-8">
@@ -180,6 +235,10 @@ export default function SearchDatePicker({ mode, from, to, onChange }: Props) {
                                 onMonthChange={setCurrentMonth}
                                 selected={draftRange}
                                 onSelect={setDraftRange}
+                                onDayMouseEnter={handleDayHover}
+                                onDayMouseLeave={clearHover}
+                                modifiers={previewModifiers}
+                                modifiersClassNames={previewClassNames}
                                 min={1}
                                 disabled={{ before: today }}
                                 startMonth={firstMonth}

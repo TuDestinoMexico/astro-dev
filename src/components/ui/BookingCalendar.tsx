@@ -2,11 +2,11 @@ import React, { useId, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { format, addMonths, differenceInDays, isAfter, isBefore, startOfMonth, startOfToday, subMonths } from 'date-fns';
+import { format, addMonths, differenceInDays, isAfter, isBefore, isSameDay, startOfMonth, startOfToday, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/style.css';
-import { CalendarDays, User, Send, X } from 'lucide-react';
+import { CalendarDays, Info, User, Send, X } from 'lucide-react';
 import { MinorAges } from './MinorAges';
 import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
@@ -66,6 +66,27 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
         edadesMenores: (initialSearch?.edades ?? []).slice(0, prefillMenores),
     });
     const [validationMessage, setValidationMessage] = useState('');
+    // Día sobre el que está el cursor mientras se elige la salida (solo escritorio).
+    const [hoverDate, setHoverDate] = useState<Date | null>(null);
+
+    // Vista previa: solo cuando ya hay entrada y falta la salida, y el cursor está después de la entrada.
+    const isChoosingCheckOut = !isSingleDate && Boolean(checkIn && !checkOut);
+    const previewEnd = isChoosingCheckOut && hoverDate && checkIn && isAfter(hoverDate, checkIn) ? hoverDate : null;
+    const selectedNights = !isSingleDate && checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
+    const previewNights = previewEnd && checkIn ? differenceInDays(previewEnd, checkIn) : 0;
+    const previewModifiers = {
+        previewRange: (day: Date) => Boolean(previewEnd && checkIn && isAfter(day, checkIn) && isBefore(day, previewEnd)),
+        previewEnd: (day: Date) => Boolean(previewEnd && isSameDay(day, previewEnd)),
+    };
+    const previewClassNames = {
+        previewRange: '[&>button]:!bg-indigo-50 [&>button]:!text-indigo-700 [&>button]:rounded-none',
+        previewEnd: '[&>button]:!bg-indigo-100 [&>button]:!text-indigo-800 [&>button]:ring-2 [&>button]:ring-indigo-400',
+    };
+    const formatNoches = (noches: number) => `${noches} ${noches === 1 ? 'noche' : 'noches'} · ${noches + 1} ${noches + 1 === 1 ? 'día' : 'días'}`;
+    const handleDayHover = (day: Date) => {
+        if (isChoosingCheckOut) setHoverDate(day);
+    };
+    const clearHover = () => setHoverDate(null);
 
     const titleId = useId();
     const fieldPrefix = useId();
@@ -340,20 +361,46 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                         </div>
 
                         <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-4 sm:px-8 sm:py-6">
+                            {/* Instrucciones compactas: cómo elegir fechas según el tipo de reserva */}
+                            <div className="mb-4 flex flex-col gap-3 rounded-2xl bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="flex items-start gap-2 text-xs font-semibold leading-5 text-slate-600">
+                                    <Info size={14} className="mt-0.5 shrink-0 text-indigo-500" aria-hidden="true" />
+                                    {isSingleDate ? (
+                                        <span>Toca el día de tu tour. Solo necesitas una fecha.</span>
+                                    ) : (
+                                        <span>
+                                            <span className="sm:hidden">Toca entrada y salida. Verás las noches al elegir.</span>
+                                            <span className="hidden sm:inline">Toca tu día de entrada y luego el de salida. Al pasar el cursor verás las noches.</span>
+                                        </span>
+                                    )}
+                                </p>
+                                {!isSingleDate && (
+                                    <ol className="flex shrink-0 items-center gap-2 text-[10px] font-black uppercase tracking-widest" aria-label="Pasos para reservar">
+                                        <li className={`rounded-full px-2.5 py-1 ${!checkIn ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 ring-1 ring-indigo-200'}`}>1 Entrada</li>
+                                        <li className={`rounded-full px-2.5 py-1 ${checkIn && !checkOut ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400 ring-1 ring-slate-200'}`}>2 Salida</li>
+                                    </ol>
+                                )}
+                            </div>
+
                             <div ref={summaryRef} className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 px-4 py-3 sm:px-5">
                                 <div className="min-w-0">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{isSingleDate ? 'Fecha seleccionada' : 'Fechas seleccionadas'}</p>
                                     <p className="mt-1 truncate text-sm font-black text-indigo-950 sm:text-base">
                                         {isSingleDate && checkIn
                                             ? format(checkIn, 'dd MMMM yyyy', { locale: es })
-                                            : !isSingleDate && checkIn && checkOut
-                                                ? `${format(checkIn, 'dd MMM', { locale: es })} → ${format(checkOut, 'dd MMM yyyy', { locale: es })}`
-                                                : 'Aún no has seleccionado fechas'}
+                                            : !isSingleDate && checkIn && (checkOut || previewEnd)
+                                                ? `${format(checkIn, 'dd MMM', { locale: es })} → ${format((checkOut || previewEnd)!, 'dd MMM yyyy', { locale: es })}`
+                                                : !isSingleDate && checkIn
+                                                    ? `${format(checkIn, 'dd MMM yyyy', { locale: es })} → Elige tu salida`
+                                                    : 'Aún no has seleccionado fechas'}
                                     </p>
                                 </div>
-                                {!isSingleDate && checkIn && checkOut && (
-                                    <span className="shrink-0 rounded-xl bg-white px-3 py-2 text-xs font-black text-indigo-700 shadow-sm">
-                                        {differenceInDays(checkOut, checkIn)} {differenceInDays(checkOut, checkIn) === 1 ? 'noche' : 'noches'}
+                                {!isSingleDate && (checkOut || previewEnd) && (
+                                    <span
+                                        className={`shrink-0 rounded-xl px-3 py-2 text-xs font-black tabular-nums shadow-sm ${previewEnd ? 'border border-dashed border-indigo-400 bg-white text-indigo-500' : 'bg-white text-indigo-700'}`}
+                                        aria-live="polite"
+                                    >
+                                        {formatNoches(previewEnd ? previewNights : selectedNights)}
                                     </span>
                                 )}
                             </div>
@@ -373,10 +420,10 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                             ) : (
                                 <>
                                     <div className="hidden md:block">
-                                        <DayPicker mode="range" locale={es} numberOfMonths={2} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
+                                        <DayPicker mode="range" locale={es} numberOfMonths={2} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} onDayMouseEnter={handleDayHover} onDayMouseLeave={clearHover} modifiers={previewModifiers} modifiersClassNames={previewClassNames} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
                                     </div>
                                     <div className="md:hidden">
-                                        <DayPicker mode="range" locale={es} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
+                                        <DayPicker mode="range" locale={es} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} onDayMouseEnter={handleDayHover} onDayMouseLeave={clearHover} modifiers={previewModifiers} modifiersClassNames={previewClassNames} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
                                     </div>
                                 </>
                             )}
