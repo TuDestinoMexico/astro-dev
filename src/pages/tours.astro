@@ -8,6 +8,7 @@ import Card from "../components/ui/single/Card.astro";
 import SearchSummary from "../components/ui/single/SearchSummary.astro";
 import SearchResultsSkeleton from "../components/ui/single/SearchResultsSkeleton.astro";
 import MobileRail from "../components/ui/single/MobileRail.astro";
+import CotizarLoader from "../components/ui/single/CotizarLoader.astro";
 import SearchEditor from "../components/ui/single/SearchEditor";
 import { fetchTourList } from "../lib/catalog";
 import { hasSearchFilters, matchesDestino, parseSearchQuery, toSearchString } from "../lib/searchParams";
@@ -126,6 +127,7 @@ const tourListSchema = {
                                         destino={tour.destino}
                                         photo={tour.images || tour.imagenes}
                                         query={searchQueryString}
+                                        busqueda={searchFiltered}
                                 />
                         ))}
                     </MobileRail>
@@ -154,4 +156,5 @@ const tourListSchema = {
     </Content>
 
     <Footer/>
+    <CotizarLoader />
 </Layout>
