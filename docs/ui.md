@@ -151,7 +151,7 @@ Los modales críticos reutilizan `src/hooks/useAccessibleDialog.ts`. El patrón 
 
 El hook no controla la animación ni el portal: cada componente conserva su comportamiento visual y solo entrega la referencia del contenedor. `BookingCalendar.tsx` usa el mismo patrón junto con GSAP y `createPortal`.
 
-Los formularios deben asociar cada `label` con su control mediante `htmlFor` e `id`. El `placeholder` se utiliza únicamente como ejemplo o ayuda contextual; nunca reemplaza el nombre visible o accesible del campo. Los controles dinámicos, como las edades de `MinorAges.tsx`, deben generar IDs únicos por instancia.
+Los formularios deben asociar cada `label` con su control mediante `htmlFor` e `id`. El `placeholder` se utiliza únicamente como ejemplo o ayuda contextual; nunca reemplaza el nombre visible o accesible del campo. Los controles dinámicos, como las edades de `MinorAges.tsx`, deben generar IDs únicos por instancia. Los inputs deben usar `text-base` (16 px) en móvil y `md:text-sm` desde escritorio: iOS hace zoom al enfocar un campo con menos de 16 px.
 
 La descripción del catálogo se sanea server-side mediante `src/lib/sanitizeHtml.ts` antes de llegar a `HotelTabs` o a cualquier `set:html`. La política usa una allowlist estricta y las metadata/JSON-LD usan texto plano.
 
