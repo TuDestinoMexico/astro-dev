@@ -10,9 +10,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^5.0.6",
+    "@astrojs/react": "^7.1.5",
     "@astrojs/sitemap": "^3.7.3",
-    "@astrojs/vercel": "^10.0.8",
+    "@astrojs/vercel": "^11.0.20",
     "@gsap/react": "^2.1.2",
     "@iconify-json/material-symbols": "^1.2.73",
     "@iconify-json/simple-icons": "^1.2.68",
@@ -24,7 +24,7 @@
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.39.0",
     "@vercel/analytics": "^2.0.1",
-    "astro": "^6.4.2",
+    "astro": "^7.4.8",
     "astro-lightgallery": "^2.3.0",
     "astro-seo": "^1.1.0",
     "date-fns": "^4.1.0",
@@ -35,7 +35,7 @@
     "react": "^19.2.4",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.4",
-    "sanitize-html": "2.16.0",
+    "sanitize-html": "2.18.0",
     "tailwindcss": "^4.1.18",
     "vue": "^3.5.27"
   },
