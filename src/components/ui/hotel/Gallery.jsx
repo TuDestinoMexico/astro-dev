@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BadgeCheck, Images, X } from 'lucide-react';
 
 const CATEGORY_LABELS = {
@@ -50,6 +50,34 @@ function categoryCountClass(selected, inDialog) {
   return selected ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-500';
 }
 
+// Imagen con skeleton: un bloque animado mientras la foto carga, y luego un fundido de entrada.
+function GalleryImage({ src, alt = '', className = '', loaded, onLoaded, ...imgProps }) {
+  const imgRef = useRef(null);
+
+  // Cubre imágenes que ya estaban en caché y cargaron antes de que React escuchara el evento.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!loaded && img?.complete && img.naturalWidth > 0) onLoaded(src);
+  }, [src, loaded, onLoaded]);
+
+  return (
+    <>
+      {!loaded && (
+        <span aria-hidden="true" className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200 motion-reduce:animate-none" />
+      )}
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        decoding="async"
+        onLoad={() => onLoaded(src)}
+        className={`${className} transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        {...imgProps}
+      />
+    </>
+  );
+}
+
 export default function Gallery({ images = [], hotelName, type = 'hotels' }) {
   const dialogRef = useRef(null);
   const touchStartX = useRef(null);
@@ -57,6 +85,10 @@ export default function Gallery({ images = [], hotelName, type = 'hotels' }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState(() => new Set());
+  const [loadedUrls, setLoadedUrls] = useState(() => new Set());
+  const markLoaded = useCallback((url) => {
+    setLoadedUrls((current) => (current.has(url) ? current : new Set(current).add(url)));
+  }, []);
   const categoryLabels = CATEGORY_LABELS[type] || CATEGORY_LABELS.hotels;
 
   const usableImages = useMemo(
@@ -118,6 +150,22 @@ export default function Gallery({ images = [], hotelName, type = 'hotels' }) {
     if (!lightboxOpen || !dialogRef.current || dialogRef.current.open) return;
     dialogRef.current.showModal();
   }, [lightboxOpen]);
+
+  // Precarga solo la foto anterior y la siguiente, para que al navegar se vea ligero sin bajar todo el lote de golpe.
+  useEffect(() => {
+    if (!lightboxOpen || visibleImages.length < 2) return;
+
+    const neighbors = [activeIndex + 1, activeIndex - 1]
+      .map((index) => visibleImages[(index + visibleImages.length) % visibleImages.length])
+      .filter(Boolean);
+
+    // Las descargas quedan en la caché del navegador; no se cancelan al cambiar de foto.
+    neighbors.forEach((image) => {
+      const preload = new Image();
+      preload.decoding = 'async';
+      preload.src = image.url;
+    });
+  }, [lightboxOpen, activeIndex, visibleImages]);
 
   const move = (direction) => {
     if (visibleImages.length < 2) return;
@@ -207,7 +255,7 @@ export default function Gallery({ images = [], hotelName, type = 'hotels' }) {
           aria-label={`Abrir todas las fotos, ${usableImages.length} en total`}
           className={`group relative col-span-2 aspect-[2/1] overflow-hidden rounded-2xl bg-slate-200 text-left ${coverTileClass}`}
         >
-          <img src={coverImage.url} alt={hotelName} fetchPriority="high" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" onError={() => reportImageError(coverImage.url)} />
+          <GalleryImage src={coverImage.url} alt={hotelName} fetchPriority="high" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" loaded={loadedUrls.has(coverImage.url)} onLoaded={markLoaded} onError={() => reportImageError(coverImage.url)} />
           <span className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/5 to-transparent" />
           {coverImage.is_exclusive && <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-700/95 px-2.5 py-1 text-[10px] font-bold text-white sm:right-4 sm:top-4 sm:text-xs"><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />Exclusiva TDMX</span>}
           <span className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2 text-white sm:inset-x-5 sm:bottom-5">
@@ -231,7 +279,7 @@ export default function Gallery({ images = [], hotelName, type = 'hotels' }) {
               aria-label={`Abrir categoría ${category.label}, ${category.count} fotos`}
               className={`group relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-200 text-left ${categories.length === 1 ? 'lg:aspect-[4/3]' : 'lg:aspect-auto'}`}
             >
-              <img src={previewImage.url} alt="" loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" onError={() => reportImageError(previewImage.url)} />
+              <GalleryImage src={previewImage.url} alt="" loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" loaded={loadedUrls.has(previewImage.url)} onLoaded={markLoaded} onError={() => reportImageError(previewImage.url)} />
               <span className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
               {previewImage.is_exclusive && <span className="absolute right-2 top-2 rounded-full bg-emerald-700/95 px-2 py-1 text-[9px] font-bold text-white sm:text-[10px]">Exclusiva</span>}
               <span className="absolute inset-x-2 bottom-2 flex flex-wrap items-end justify-between gap-1 text-white sm:inset-x-3 sm:bottom-3">
@@ -276,7 +324,9 @@ export default function Gallery({ images = [], hotelName, type = 'hotels' }) {
                   if (Math.abs(delta) >= 48) move(delta < 0 ? 1 : -1);
                 }}
               >
-                {currentImage && <img src={currentImage.url} alt={currentImage.alt || hotelName} className="max-h-full max-w-full rounded-xl object-contain" onError={() => reportImageError(currentImage.url)} />}
+                {currentImage && (
+                  <GalleryImage src={currentImage.url} alt={currentImage.alt || hotelName} className="max-h-full max-w-full rounded-xl object-contain" loaded={loadedUrls.has(currentImage.url)} onLoaded={markLoaded} onError={() => reportImageError(currentImage.url)} />
+                )}
                 {visibleImages.length > 1 && (
                   <>
                     <button type="button" onClick={() => move(-1)} aria-label="Foto anterior" className="absolute left-2 grid h-11 w-11 place-items-center rounded-full bg-white/90 text-slate-900 shadow-lg hover:bg-white sm:left-5"><ArrowLeft className="h-5 w-5" /></button>
@@ -290,8 +340,8 @@ export default function Gallery({ images = [], hotelName, type = 'hotels' }) {
               </div>
               <div className="tdmx-gallery-dialog__thumbnails tdmx-gallery-scroll flex snap-x gap-2 overflow-x-auto pb-1" aria-label="Seleccionar foto">
                 {visibleImages.map((image, index) => (
-                  <button key={`${image.url}-dialog-${index}`} type="button" onClick={() => setActiveIndex(index)} aria-label={`Ver foto ${index + 1}`} aria-pressed={index === activeIndex} className={`h-14 w-20 shrink-0 snap-start overflow-hidden rounded-lg ring-2 ring-offset-2 ring-offset-slate-950 ${index === activeIndex ? 'ring-indigo-400' : 'ring-transparent opacity-60 hover:opacity-100'}`}>
-                    <img src={image.url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <button key={`${image.url}-dialog-${index}`} type="button" onClick={() => setActiveIndex(index)} aria-label={`Ver foto ${index + 1}`} aria-pressed={index === activeIndex} className={`relative h-14 w-20 shrink-0 snap-start overflow-hidden rounded-lg ring-2 ring-offset-2 ring-offset-slate-950 ${index === activeIndex ? 'ring-indigo-400' : 'ring-transparent opacity-60 hover:opacity-100'}`}>
+                    <GalleryImage src={image.url} alt="" loading="lazy" className="h-full w-full object-cover" loaded={loadedUrls.has(image.url)} onLoaded={markLoaded} />
                   </button>
                 ))}
               </div>

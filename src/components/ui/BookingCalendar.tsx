@@ -1,12 +1,12 @@
-import React, { useId, useState, useRef } from 'react';
+import React, { useEffect, useId, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { format, addMonths, differenceInDays, isAfter, isBefore, startOfMonth, startOfToday, subMonths } from 'date-fns';
+import { format, addMonths, differenceInDays, isAfter, isBefore, isSameDay, startOfMonth, startOfToday, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/style.css';
-import { CalendarDays, User, Send, X } from 'lucide-react';
+import { ArrowRight, Check, CalendarDays, Info, User, X } from 'lucide-react';
 import { MinorAges } from './MinorAges';
 import { useAccessibleDialog } from '../../hooks/useAccessibleDialog';
 
@@ -43,6 +43,19 @@ type BookingFormData = {
 
 import { calendarClassNames } from './calendarClassNames';
 
+// Pasos del modal de espera. Describen lo que hace el sitio; no consultan disponibilidad.
+const WHATSAPP_STEPS = ['Verificando tus fechas', 'Preparando tu solicitud', 'Abriendo WhatsApp con tu cotización'] as const;
+const WHATSAPP_STEP_MS = 900;
+
+// Logo de WhatsApp (Simple Icons). Lucide no lo incluye.
+function WhatsAppMark({ className = '' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 24 24" className={className} fill="currentColor" focusable="false" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967c-.273-.099-.471-.148-.67.15c-.197.297-.767.966-.94 1.164c-.173.199-.347.223-.644.075c-.297-.15-1.255-.463-2.39-1.475c-.883-.788-1.48-1.761-1.653-2.059c-.173-.297-.018-.458.13-.606c.134-.133.298-.347.446-.52s.198-.298.298-.497c.099-.198.05-.371-.025-.52s-.669-1.612-.916-2.207c-.242-.579-.487-.5-.669-.51a13 13 0 0 0-.57-.01c-.198 0-.52.074-.792.372c-.272.297-1.04 1.016-1.04 2.479c0 1.462 1.065 2.875 1.213 3.074s2.096 3.2 5.077 4.487c.709.306 1.262.489 1.694.625c.712.227 1.36.195 1.871.118c.571-.085 1.758-.719 2.006-1.413s.248-1.289.173-1.413c-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214l-3.741.982l.998-3.648l-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884c2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.82 11.82 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.9 11.9 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 0 0-3.48-8.413" />
+        </svg>
+    );
+}
+
 
 export default function BookingCalendar({ hotelName, isSingleDate = false, initialSearch }: Props) {
     // PRECARGA DESDE EL BUSCADOR (solo se usa en el primer render)
@@ -66,6 +79,67 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
         edadesMenores: (initialSearch?.edades ?? []).slice(0, prefillMenores),
     });
     const [validationMessage, setValidationMessage] = useState('');
+
+    // Modal de espera antes de abrir WhatsApp.
+    const [waitOpen, setWaitOpen] = useState(false);
+    const [waitStep, setWaitStep] = useState(0);
+    const [waitUrl, setWaitUrl] = useState('');
+    const waitDialogRef = useRef<HTMLDialogElement>(null);
+
+    useEffect(() => {
+        const dialog = waitDialogRef.current;
+        if (!dialog) return;
+
+        if (!waitOpen) {
+            if (dialog.open) dialog.close();
+            return;
+        }
+
+        setWaitStep(0);
+        if (!dialog.open) dialog.showModal();
+
+        const timers = [
+            window.setTimeout(() => setWaitStep(1), WHATSAPP_STEP_MS),
+            window.setTimeout(() => setWaitStep(2), WHATSAPP_STEP_MS * 2),
+            window.setTimeout(() => setWaitStep(3), WHATSAPP_STEP_MS * 3),
+            // Si el navegador bloquea la ventana, el botón "Abrir WhatsApp" queda disponible.
+            window.setTimeout(() => window.open(waitUrl, '_blank', 'noopener,noreferrer'), WHATSAPP_STEP_MS * 3 + 150),
+        ];
+
+        return () => timers.forEach((timer) => window.clearTimeout(timer));
+    }, [waitOpen, waitUrl]);
+
+    const closeWait = () => setWaitOpen(false);
+
+    // Resumen de fechas para el modal de espera.
+    const waitSummary = checkIn
+        ? isSingleDate
+            ? format(checkIn, 'dd MMM yyyy', { locale: es })
+            : checkOut
+                ? `${format(checkIn, 'dd MMM', { locale: es })} → ${format(checkOut, 'dd MMM', { locale: es })} · ${differenceInDays(checkOut, checkIn)} noches`
+                : ''
+        : '';
+    // Día sobre el que está el cursor mientras se elige la salida (solo escritorio).
+    const [hoverDate, setHoverDate] = useState<Date | null>(null);
+
+    // Vista previa: solo cuando ya hay entrada y falta la salida, y el cursor está después de la entrada.
+    const isChoosingCheckOut = !isSingleDate && Boolean(checkIn && !checkOut);
+    const previewEnd = isChoosingCheckOut && hoverDate && checkIn && isAfter(hoverDate, checkIn) ? hoverDate : null;
+    const selectedNights = !isSingleDate && checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
+    const previewNights = previewEnd && checkIn ? differenceInDays(previewEnd, checkIn) : 0;
+    const previewModifiers = {
+        previewRange: (day: Date) => Boolean(previewEnd && checkIn && isAfter(day, checkIn) && isBefore(day, previewEnd)),
+        previewEnd: (day: Date) => Boolean(previewEnd && isSameDay(day, previewEnd)),
+    };
+    const previewClassNames = {
+        previewRange: '[&>button]:!bg-indigo-50 [&>button]:!text-indigo-700 [&>button]:rounded-none',
+        previewEnd: '[&>button]:!bg-indigo-100 [&>button]:!text-indigo-800 [&>button]:ring-2 [&>button]:ring-indigo-400',
+    };
+    const formatNoches = (noches: number) => `${noches} ${noches === 1 ? 'noche' : 'noches'} · ${noches + 1} ${noches + 1 === 1 ? 'día' : 'días'}`;
+    const handleDayHover = (day: Date) => {
+        if (isChoosingCheckOut) setHoverDate(day);
+    };
+    const clearHover = () => setHoverDate(null);
 
     const titleId = useId();
     const fieldPrefix = useId();
@@ -261,7 +335,11 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
         }
 
         setValidationMessage('');
+        setWaitUrl(buildWhatsAppUrl());
+        setWaitOpen(true);
+    };
 
+    const buildWhatsAppUrl = () => {
         const noches = checkOut ? differenceInDays(checkOut, checkIn!) : 0;
 
         // Mensaje dinámico según el tipo
@@ -279,7 +357,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
             (formData.menores > 0 ? `\n👶 *Edades:* ${formData.edadesMenores.join(', ')}` : '')
         );
 
-        window.open(`https://wa.me/529987141365?text=${mensaje}`, '_blank');
+        return `https://wa.me/529987141365?text=${mensaje}`;
     };
 
     return (
@@ -340,20 +418,46 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                         </div>
 
                         <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-4 sm:px-8 sm:py-6">
+                            {/* Instrucciones compactas: cómo elegir fechas según el tipo de reserva */}
+                            <div className="mb-4 flex flex-col gap-3 rounded-2xl bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="flex items-start gap-2 text-xs font-semibold leading-5 text-slate-600">
+                                    <Info size={14} className="mt-0.5 shrink-0 text-indigo-500" aria-hidden="true" />
+                                    {isSingleDate ? (
+                                        <span>Toca el día de tu tour. Solo necesitas una fecha.</span>
+                                    ) : (
+                                        <span>
+                                            <span className="sm:hidden">Toca entrada y salida. Verás las noches al elegir.</span>
+                                            <span className="hidden sm:inline">Toca tu día de entrada y luego el de salida. Al pasar el cursor verás las noches.</span>
+                                        </span>
+                                    )}
+                                </p>
+                                {!isSingleDate && (
+                                    <ol className="flex shrink-0 items-center gap-2 text-[10px] font-black uppercase tracking-widest" aria-label="Pasos para reservar">
+                                        <li className={`rounded-full px-2.5 py-1 ${!checkIn ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 ring-1 ring-indigo-200'}`}>1 Entrada</li>
+                                        <li className={`rounded-full px-2.5 py-1 ${checkIn && !checkOut ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400 ring-1 ring-slate-200'}`}>2 Salida</li>
+                                    </ol>
+                                )}
+                            </div>
+
                             <div ref={summaryRef} className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 px-4 py-3 sm:px-5">
                                 <div className="min-w-0">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{isSingleDate ? 'Fecha seleccionada' : 'Fechas seleccionadas'}</p>
                                     <p className="mt-1 truncate text-sm font-black text-indigo-950 sm:text-base">
                                         {isSingleDate && checkIn
                                             ? format(checkIn, 'dd MMMM yyyy', { locale: es })
-                                            : !isSingleDate && checkIn && checkOut
-                                                ? `${format(checkIn, 'dd MMM', { locale: es })} → ${format(checkOut, 'dd MMM yyyy', { locale: es })}`
-                                                : 'Aún no has seleccionado fechas'}
+                                            : !isSingleDate && checkIn && (checkOut || previewEnd)
+                                                ? `${format(checkIn, 'dd MMM', { locale: es })} → ${format((checkOut || previewEnd)!, 'dd MMM yyyy', { locale: es })}`
+                                                : !isSingleDate && checkIn
+                                                    ? `${format(checkIn, 'dd MMM yyyy', { locale: es })} → Elige tu salida`
+                                                    : 'Aún no has seleccionado fechas'}
                                     </p>
                                 </div>
-                                {!isSingleDate && checkIn && checkOut && (
-                                    <span className="shrink-0 rounded-xl bg-white px-3 py-2 text-xs font-black text-indigo-700 shadow-sm">
-                                        {differenceInDays(checkOut, checkIn)} {differenceInDays(checkOut, checkIn) === 1 ? 'noche' : 'noches'}
+                                {!isSingleDate && (checkOut || previewEnd) && (
+                                    <span
+                                        className={`shrink-0 rounded-xl px-3 py-2 text-xs font-black tabular-nums shadow-sm ${previewEnd ? 'border border-dashed border-indigo-400 bg-white text-indigo-500' : 'bg-white text-indigo-700'}`}
+                                        aria-live="polite"
+                                    >
+                                        {formatNoches(previewEnd ? previewNights : selectedNights)}
                                     </span>
                                 )}
                             </div>
@@ -373,10 +477,10 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                             ) : (
                                 <>
                                     <div className="hidden md:block">
-                                        <DayPicker mode="range" locale={es} numberOfMonths={2} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
+                                        <DayPicker mode="range" locale={es} numberOfMonths={2} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} onDayMouseEnter={handleDayHover} onDayMouseLeave={clearHover} modifiers={previewModifiers} modifiersClassNames={previewClassNames} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
                                     </div>
                                     <div className="md:hidden">
-                                        <DayPicker mode="range" locale={es} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
+                                        <DayPicker mode="range" locale={es} month={currentMonth} onMonthChange={setCurrentMonth} selected={range} onSelect={handleRangeSelect} onDayMouseEnter={handleDayHover} onDayMouseLeave={clearHover} modifiers={previewModifiers} modifiersClassNames={previewClassNames} min={1} disabled={{ before: today }} startMonth={firstMonth} endMonth={addMonths(today, 24)} fixedWeeks showOutsideDays={false} classNames={calendarClassNames} />
                                     </div>
                                 </>
                             )}
@@ -391,6 +495,69 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                 </div>,
                 document.body
             )}
+
+            {/* Espera antes de abrir WhatsApp: muestra los pasos y deja un botón de respaldo */}
+            <dialog
+                ref={waitDialogRef}
+                aria-labelledby={`${fieldPrefix}-wait-title`}
+                aria-describedby={`${fieldPrefix}-wait-status`}
+                onClose={() => setWaitOpen(false)}
+                className="m-auto w-[calc(100%-2rem)] max-w-md rounded-[2rem] border border-white/70 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/55 backdrop:backdrop-blur-sm"
+            >
+                <div className="p-6 md:p-8">
+                    <div className="flex items-start gap-4">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-lg shadow-green-200" aria-hidden="true">
+                            <WhatsAppMark className="h-6 w-6" />
+                        </span>
+                        <div className="min-w-0">
+                            <h2 id={`${fieldPrefix}-wait-title`} className="text-lg font-black leading-tight">Preparando tu cotización</h2>
+                            <p className="mt-1 truncate text-xs font-semibold text-slate-500">
+                                {hotelName}{waitSummary ? ` · ${waitSummary}` : ''}
+                            </p>
+                        </div>
+                    </div>
+
+                    <ol className="mt-6 space-y-3" id={`${fieldPrefix}-wait-status`} aria-live="polite">
+                        {WHATSAPP_STEPS.map((paso, index) => {
+                            const isDone = waitStep > index;
+                            const isActive = waitStep === index;
+                            return (
+                                <li key={paso} className="flex items-center gap-3 text-sm font-bold">
+                                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs ${isDone ? 'bg-emerald-500 text-white' : isActive ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'}`} aria-hidden="true">
+                                        {isDone ? <Check size={14} /> : isActive ? <span className="h-2 w-2 animate-pulse rounded-full bg-indigo-600 motion-reduce:animate-none" /> : index + 1}
+                                    </span>
+                                    <span className={isDone || isActive ? 'text-slate-900' : 'text-slate-400'}>
+                                        {paso}{isDone ? ' ✓' : ''}
+                                    </span>
+                                </li>
+                            );
+                        })}
+                    </ol>
+
+                    <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+                        <div className="h-full rounded-full bg-emerald-500 transition-[width] duration-700 ease-out" style={{ width: `${(Math.min(waitStep, 3) / 3) * 100}%` }} />
+                    </div>
+
+                    <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                        <button type="button" onClick={closeWait} className="min-h-12 rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+                            Cancelar
+                        </button>
+                        <a
+                            href={waitUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={closeWait}
+                            aria-disabled={waitStep < 3}
+                            className={`inline-flex min-h-12 items-center justify-center rounded-xl bg-[#25D366] px-5 text-sm font-black text-white shadow-lg shadow-green-100 transition hover:bg-[#1ebd5b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 ${waitStep < 3 ? 'pointer-events-none opacity-40' : ''}`}
+                        >
+                            Abrir WhatsApp
+                        </a>
+                    </div>
+                    {waitStep >= 3 && (
+                        <p className="mt-3 text-center text-xs text-slate-500">Si WhatsApp no se abrió solo, toca el botón.</p>
+                    )}
+                </div>
+            </dialog>
 
             {/* 3. FORMULARIO PERMANENTE - Sigue debajo del contenedor anterior */}
             <div className="space-y-3">
@@ -448,10 +615,15 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                     onClick={sendWhatsApp}
                     disabled={!canSendWhatsApp}
                     aria-disabled={!canSendWhatsApp}
-                    className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-xl shadow-green-100 transition-all active:scale-95 group disabled:cursor-not-allowed disabled:opacity-40"
+                    className="group w-full rounded-2xl bg-[#25D366] px-6 py-4 text-white shadow-xl shadow-green-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1ebd5b] hover:shadow-2xl hover:shadow-green-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-xl"
                 >
-                    <Send size={18} className="group-hover:translate-x-1" />
-                    Reservar por WhatsApp
+                    <span className="flex items-center justify-center gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110" aria-hidden="true">
+                            <WhatsAppMark className="h-5 w-5" />
+                        </span>
+                        <span className="text-base font-black tracking-tight">Reservar por WhatsApp</span>
+                        <ArrowRight size={18} aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1" />
+                    </span>
                 </button>
             </div>
         </div>
