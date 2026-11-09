@@ -31,7 +31,6 @@ Renderizados en servidor. Sin estado cliente.
 | `MemberCard.astro` | `components/ui/team/MemberCard.astro` | Tarjeta editorial de miembro del equipo con foto, rol y tratamiento de Vacation Planner |
 | `MemberSkeleton.astro` | `components/ui/team/MemberSkeleton.astro` | Skeleton loading para miembros |
 | `AppDownload.astro` | `components/ui/home/AppDownload.astro` | Sección de descarga de app |
-| `NewsTicker.astro` | `components/ui/home/NewsTicker.astro` | Franja de novedades animada encima de `TikTokCTA` en la portada. Muestra `TICKER_MESSAGES` de `src/lib/newsTicker.ts` (hoy: "Xolo News Próximamente"), repetido para cubrir todo el ancho, con tamaño de texto responsive. Se pausa al pasar el cursor o enfocar, y sin animación con `prefers-reduced-motion`. `buildTickerMessages` y `fetchTickerCounts` (Buen Fin y conteos del catálogo) existen en el mismo archivo sin usar |
 | `TikTokCTA.astro` | `components/ui/home/TikTokCTA.astro` | CTA visual para promocionar `@tudestinomexico` en TikTok con tarjeta vertical tipo video corto |
 | `FeaturedHotels.astro` | `components/ui/home/FeaturedHotels.astro` | Server island del catálogo destacado; carga tras el HTML crítico con fallback SSR estable |
 | `RecomendacionesBanner.astro` | `components/ui/home/RecomendacionesBanner.astro` | Banner de recomendaciones |
