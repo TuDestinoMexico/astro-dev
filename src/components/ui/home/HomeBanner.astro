@@ -26,19 +26,24 @@ const enlaceLabel = banner?.ctaLabel || titulo;
         así en móvil la imagen se ve completa y el formulario no la tapa. */}
     <div class="relative h-[68vh] min-h-[440px] overflow-hidden bg-brand-ink md:h-[600px]">
         {hasImage && (
-            <picture class="absolute inset-0" aria-hidden="true">
-                <source media="(min-width: 768px)" srcset={banner?.imageDesktop} />
-                <img
-                    src={banner?.imageMobile || banner?.imageDesktop}
-                    alt=""
-                    width="1440"
-                    height="640"
-                    loading="eager"
-                    fetchpriority="high"
-                    decoding="async"
-                    class="h-full w-full object-cover object-top"
-                />
-            </picture>
+            <>
+                {/* Skeleton: se ve mientras carga la imagen y se quita si falla. */}
+                <div class="absolute inset-0 animate-pulse bg-slate-800 motion-reduce:animate-none" aria-hidden="true" data-banner-skeleton></div>
+                <picture class="absolute inset-0" aria-hidden="true">
+                    <source media="(min-width: 768px)" srcset={banner?.imageDesktop} />
+                    <img
+                        src={banner?.imageMobile || banner?.imageDesktop}
+                        alt=""
+                        width="1440"
+                        height="640"
+                        loading="eager"
+                        fetchpriority="high"
+                        decoding="async"
+                        class="banner-image h-full w-full object-cover object-top"
+                        data-banner-img
+                    />
+                </picture>
+            </>
         )}
 
         {banner?.ctaUrl && (
@@ -52,3 +57,44 @@ const enlaceLabel = banner?.ctaLabel || titulo;
         <HomeSearch client:load />
     </div>
 </section>
+
+<noscript>
+    <style>
+        .banner-image { opacity: 1 !important; }
+        [data-banner-skeleton] { display: none !important; }
+    </style>
+</noscript>
+
+<style>
+    .banner-image {
+        opacity: 0;
+        transition: opacity 500ms ease-out;
+    }
+
+    .banner-image.is-loaded {
+        opacity: 1;
+    }
+</style>
+
+<script>
+    // Revela la imagen del banner al cargar y quita el skeleton. Si la imagen falla, solo se quita el skeleton.
+    const img = document.querySelector<HTMLImageElement>('[data-banner-img]');
+    const skeleton = document.querySelector<HTMLElement>('[data-banner-skeleton]');
+
+    if (img) {
+        const reveal = () => {
+            img.classList.add('is-loaded');
+            skeleton?.remove();
+        };
+        const fail = () => skeleton?.remove();
+
+        if (img.complete && img.naturalWidth > 0) {
+            reveal();
+        } else if (img.complete) {
+            fail();
+        } else {
+            img.addEventListener('load', reveal, { once: true });
+            img.addEventListener('error', fail, { once: true });
+        }
+    }
+</script>
