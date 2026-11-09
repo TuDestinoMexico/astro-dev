@@ -13,7 +13,7 @@
 ## Herramientas
 
 - Package manager: Bun 1.4.0
-- Lockfile: `bun.lock` (se conserva `package-lock.json` durante la migración)
+- Lockfile: `bun.lock` (único lockfile; `package-lock.json` eliminado tras la migración a Bun)
 - Runtime local: Bun
 - Runtime SSR en Vercel: Node.js
 
