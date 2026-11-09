@@ -10,6 +10,7 @@ import SearchSummary from "../components/ui/single/SearchSummary.astro";
 import SearchResultsSkeleton from "../components/ui/single/SearchResultsSkeleton.astro";
 import SearchEditor from "../components/ui/single/SearchEditor";
 import MobileRail from "../components/ui/single/MobileRail.astro";
+import CotizarLoader from "../components/ui/single/CotizarLoader.astro";
 import { fetchHotelList } from "../lib/catalog";
 import { hasSearchFilters, matchesDestino, parseSearchQuery, toSearchString } from "../lib/searchParams";
 
@@ -42,6 +43,16 @@ const whatsappNoResultsUrl = `https://wa.me/529987141365?text=${encodeURICompone
 // Configuramos cuántos mostrar inicialmente
 const INITIAL_VISIBLE = 8;
 const hotelHeroImage = new URL('/images/banners/hoteles-desktop.jpg', Astro.site ?? 'https://tudestinomx.com').href;
+
+// Si la búsqueda abarca varios destinos, los hoteles se agrupan por destino en el orden en que llegan.
+const gruposMap = new Map<string, any[]>();
+for (const hotel of hoteles) {
+    const nombreDestino = (typeof hotel.destino === 'string' && hotel.destino.trim()) || 'Otros destinos';
+    if (!gruposMap.has(nombreDestino)) gruposMap.set(nombreDestino, []);
+    gruposMap.get(nombreDestino)!.push(hotel);
+}
+const gruposDestino = Array.from(gruposMap, ([nombre, hotelesDestino]) => ({ nombre, hoteles: hotelesDestino }));
+const porDestino = gruposDestino.length > 1;
 
 const hotelListSchema = {
     '@context': 'https://schema.org',
@@ -115,8 +126,36 @@ const hotelListSchema = {
                         <p class="text-gray-700 font-semibold">El catálogo de hoteles no está disponible temporalmente.</p>
                         <p class="text-gray-500 mt-2">Intenta nuevamente más tarde o contáctanos para ayudarte a encontrar hospedaje.</p>
                     </div>
+            ) : hoteles.length > 0 && porDestino ? (
+                    <div id="resultados-hoteles" class="scroll-mt-28 space-y-14">
+                        {gruposDestino.map((grupo, indice) => (
+                            <section aria-labelledby={`destino-${indice}`} class="scroll-mt-28">
+                                <div class="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-gray-200 pb-4">
+                                    <div>
+                                        <p class="text-xs font-black uppercase tracking-[0.18em] text-purple-800">Destino</p>
+                                        <h3 id={`destino-${indice}`} class="mt-1 text-2xl font-extrabold text-gray-800">{grupo.nombre}</h3>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-500">{grupo.hoteles.length} {grupo.hoteles.length === 1 ? 'hotel' : 'hoteles'}</span>
+                                </div>
+                                <MobileRail class="md:grid-cols-2 lg:grid-cols-4 md:gap-8 w-full">
+                                    {grupo.hoteles.map((hotel: any) => (
+                                        <div class="hotel-card">
+                                            <Card
+                                                    title={hotel.name || hotel.title}
+                                                    slug={hotel.slug}
+                                                    type="hotel"
+                                                    destino={hotel.destino}
+                                                    photo={hotel.images || hotel.imagenes}
+                                                    query={searchQueryString} busqueda={searchFiltered}
+                                            />
+                                        </div>
+                                    ))}
+                                </MobileRail>
+                            </section>
+                        ))}
+                    </div>
             ) : hoteles.length > 0 ? (
-                    <div class="flex flex-col items-center">
+                    <div id="resultados-hoteles" class="flex flex-col items-center scroll-mt-28">
                         <MobileRail class="md:grid-cols-2 lg:grid-cols-4 md:gap-8 w-full">
                             {hoteles.map((hotel: any, index: number) => (
                                     <div class={`hotel-card ${index >= INITIAL_VISIBLE ? 'md:hidden' : ''}`} data-extra={index >= INITIAL_VISIBLE ? '' : undefined}>
@@ -126,7 +165,7 @@ const hotelListSchema = {
                                                 type="hotel"
                                                 destino={hotel.destino}
                                                 photo={hotel.images || hotel.imagenes}
-                                                query={searchQueryString}
+                                                query={searchQueryString} busqueda={searchFiltered}
                                         />
                                     </div>
                             ))}
@@ -166,6 +205,7 @@ const hotelListSchema = {
     </Content>
 
     <Footer/>
+    <CotizarLoader />
 </Layout>
 
 <script>
@@ -192,6 +232,22 @@ const hotelListSchema = {
             btn.style.display = 'none';
         }
     });
+
+    // Tras la búsqueda (cuando el skeleton da paso a los resultados), llevamos la vista
+    // directo a los hoteles encontrados. Ocurre una sola vez por carga.
+    const resultadosWrapper = document.querySelector<HTMLElement>('[data-search-results]');
+    const listaHoteles = document.getElementById('resultados-hoteles');
+    const hayBusqueda = Boolean(document.querySelector('[data-search-skeleton]'));
+
+    if (resultadosWrapper && listaHoteles && hayBusqueda) {
+        const movimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const observador = new MutationObserver(() => {
+            if (resultadosWrapper.classList.contains('hidden')) return;
+            observador.disconnect();
+            listaHoteles.scrollIntoView({ behavior: movimientoReducido ? 'auto' : 'smooth', block: 'start' });
+        });
+        observador.observe(resultadosWrapper, { attributes: true, attributeFilter: ['class'] });
+    }
 </script>
 
 <style>
