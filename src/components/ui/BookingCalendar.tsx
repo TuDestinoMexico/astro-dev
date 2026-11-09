@@ -567,7 +567,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                     <input
                         id={`${fieldPrefix}-name`}
                         type="text" placeholder="Nombre completo"
-                        className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-50 rounded-2xl text-sm font-bold focus:border-indigo-500 outline-none transition-all shadow-sm"
+                        className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-50 rounded-2xl text-base md:text-sm font-bold focus:border-indigo-500 outline-none transition-all shadow-sm"
                         onChange={e => setFormData({...formData, nombre: e.target.value})}
                     />
                 </div>
@@ -579,7 +579,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                             id={`${fieldPrefix}-adults`}
                             type="number" min="1" step="1" inputMode="numeric" value={formData.adultos}
                             onChange={e => setFormData({...formData, adultos: normalizeAdultos(e.target.value)})}
-                            className="w-full text-sm font-bold outline-none bg-transparent"
+                            className="w-full text-base md:text-sm font-bold outline-none bg-transparent"
                         />
                     </div>
                     <div className="relative bg-white border-2 border-slate-50 rounded-2xl p-3 shadow-sm">
@@ -588,7 +588,7 @@ export default function BookingCalendar({ hotelName, isSingleDate = false, initi
                             id={`${fieldPrefix}-children`}
                             type="number" min="0" value={formData.menores}
                             onChange={e => handleMenoresChange(parseInt(e.target.value) || 0)}
-                            className="w-full text-sm font-bold outline-none bg-transparent"
+                            className="w-full text-base md:text-sm font-bold outline-none bg-transparent"
                         />
                     </div>
                     <MinorAges
