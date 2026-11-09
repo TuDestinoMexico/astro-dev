@@ -4,6 +4,17 @@ import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
 import Content from "../components/layout/Content.astro";
 
+// Fin de la vigencia de las alianzas (hora de Cancún, UTC-5).
+const VIGENCIA_FIN = new Date("2026-12-31T23:59:59-05:00");
+
+function formatoRestante(fin: Date, ahora: Date = new Date()): string {
+    const minutos = Math.max(0, Math.floor((fin.getTime() - ahora.getTime()) / 60000));
+    const dias = Math.floor(minutos / 1440);
+    const horas = Math.floor((minutos % 1440) / 60);
+    const mins = minutos % 60;
+    return `${dias} d ${String(horas).padStart(2, "0")} h ${String(mins).padStart(2, "0")} m`;
+}
+
 const alianzasExclusivas = [
     {
         empresa: "Sams Club Afiliados",
@@ -33,6 +44,7 @@ const alianzasExclusivas = [
 ].map((aliado) => ({
     ...aliado,
     inicial: aliado.empresa.charAt(0).toUpperCase(),
+    vence: formatoRestante(VIGENCIA_FIN),
     // Separa las cifras para resaltarlas sin cambiar el texto.
     beneficiosPartes: aliado.beneficios.map((beneficio) =>
         beneficio
@@ -144,6 +156,15 @@ const esqueletos = [0, 1];
                                     </ul>
                                 )}
 
+                                <p class="mb-6 inline-flex w-fit items-center gap-2 rounded-full bg-red-50 px-3 py-1.5 text-xs font-black tabular-nums text-red-700 ring-1 ring-red-200">
+                                    <span class="sr-only">Vence el 31 de diciembre de 2026. Tiempo restante:</span>
+                                    <span class="relative flex h-2 w-2" aria-hidden="true">
+                                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75 motion-reduce:animate-none"></span>
+                                        <span class="relative inline-flex h-2 w-2 rounded-full bg-red-600"></span>
+                                    </span>
+                                    <span aria-hidden="true">Vence en <span data-vence-restante data-vence-fin={VIGENCIA_FIN.toISOString()}>{aliado.vence}</span></span>
+                                </p>
+
                                 <div class="mt-auto flex flex-col gap-4 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
                                     <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
                                         <svg class="h-4 w-4 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -153,6 +174,8 @@ const esqueletos = [0, 1];
                                     </span>
                                     <a
                                         href={aliado.url}
+                                        data-convenio-link
+                                        data-empresa={aliado.empresa}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         aria-label={`Ver beneficio de ${aliado.empresa} (se abre en una pestaña nueva)`}
@@ -168,10 +191,130 @@ const esqueletos = [0, 1];
             </div>
 
         </section>
+
+        {/* Confirmación antes de salir del sitio. Sin JavaScript, el enlace abre el sitio directamente. */}
+        <dialog
+            data-convenio-modal
+            aria-labelledby="convenio-modal-titulo"
+            aria-describedby="convenio-modal-texto"
+            class="convenio-modal m-0 mt-auto w-full max-w-none rounded-t-3xl bg-white p-0 text-slate-900 shadow-2xl sm:m-auto sm:max-w-md sm:rounded-3xl"
+        >
+            <div class="p-6 md:p-8">
+                <div class="flex items-start justify-between gap-4">
+                    <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-700" aria-hidden="true">
+                        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </span>
+                    <button
+                        type="button"
+                        data-convenio-cerrar
+                        aria-label="Cerrar"
+                        class="-m-2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600"
+                    >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <h2 id="convenio-modal-titulo" class="mt-5 text-xl font-bold leading-tight text-slate-900">
+                    Te llevaremos al sitio de <span data-convenio-empresa></span>
+                </h2>
+                <p id="convenio-modal-texto" class="mt-3 text-sm leading-relaxed text-slate-600 md:text-base">
+                    El beneficio se consulta en su sitio oficial. Se abrirá en una pestaña nueva.
+                </p>
+
+                <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button
+                        type="button"
+                        data-convenio-cerrar
+                        class="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-2"
+                    >
+                        Cancelar
+                    </button>
+                    <a
+                        data-convenio-continuar
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-2"
+                    >
+                        Continuar al sitio
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14m-6-6l6 6-6 6"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </dialog>
     </Content>
 
     <Footer/>
 </Layout>
+
+<style is:global>
+    /* Apertura y cierre del modal. Los navegadores sin soporte abren y cierran sin animación. */
+    .convenio-modal {
+        opacity: 0;
+        translate: 0 1.5rem;
+        scale: 0.97;
+        transition:
+            opacity 220ms ease,
+            translate 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+            scale 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+            display 320ms allow-discrete,
+            overlay 320ms allow-discrete;
+    }
+
+    .convenio-modal[open] {
+        opacity: 1;
+        translate: 0 0;
+        scale: 1;
+    }
+
+    @starting-style {
+        .convenio-modal[open] {
+            opacity: 0;
+            translate: 0 1.5rem;
+            scale: 0.97;
+        }
+    }
+
+    @media (max-width: 639px) {
+        .convenio-modal { translate: 0 100%; }
+        .convenio-modal[open] { translate: 0 0; }
+        @starting-style {
+            .convenio-modal[open] { translate: 0 100%; }
+        }
+    }
+
+    .convenio-modal::backdrop {
+        background: rgb(15 23 42 / 0);
+        transition:
+            background-color 320ms ease,
+            display 320ms allow-discrete,
+            overlay 320ms allow-discrete;
+    }
+
+    .convenio-modal[open]::backdrop {
+        background: rgb(15 23 42 / 0.6);
+        backdrop-filter: blur(4px);
+    }
+
+    @starting-style {
+        .convenio-modal[open]::backdrop {
+            background: rgb(15 23 42 / 0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .convenio-modal,
+        .convenio-modal::backdrop {
+            transition: none !important;
+        }
+    }
+</style>
 
 <noscript>
     <style>
@@ -208,4 +351,53 @@ const esqueletos = [0, 1];
         // Respaldo: si la carga tarda demasiado, se muestra el contenido de todos modos.
         window.setTimeout(reveal, MAX_SKELETON_MS);
     }
+
+    // Confirmación antes de salir al sitio del aliado.
+    const modal = document.querySelector<HTMLDialogElement>('[data-convenio-modal]');
+    const modalEmpresa = modal?.querySelector<HTMLElement>('[data-convenio-empresa]');
+    const modalContinuar = modal?.querySelector<HTMLAnchorElement>('[data-convenio-continuar]');
+
+    if (modal && modalEmpresa && modalContinuar) {
+        document.querySelectorAll<HTMLAnchorElement>('[data-convenio-link]').forEach((link) => {
+            link.addEventListener('click', (event) => {
+                // Mantiene el comportamiento nativo para abrir en pestaña nueva con teclas o clic central.
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+                event.preventDefault();
+                modalEmpresa.textContent = link.dataset.empresa ?? '';
+                modalContinuar.href = link.href;
+                modal.showModal();
+            });
+        });
+
+        modal.querySelectorAll('[data-convenio-cerrar]').forEach((boton) => {
+            boton.addEventListener('click', () => modal.close());
+        });
+
+        // Clic fuera del contenido (sobre el fondo) cierra el modal.
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) modal.close();
+        });
+
+        modalContinuar.addEventListener('click', () => modal.close());
+    }
+
+    // Contador de vigencia: se actualiza cada minuto.
+    const formatearRestante = (fin: Date) => {
+        const minutos = Math.max(0, Math.floor((fin.getTime() - Date.now()) / 60000));
+        const dias = Math.floor(minutos / 1440);
+        const horas = Math.floor((minutos % 1440) / 60);
+        const mins = minutos % 60;
+        return `${dias} d ${String(horas).padStart(2, '0')} h ${String(mins).padStart(2, '0')} m`;
+    };
+
+    const actualizarVigencia = () => {
+        document.querySelectorAll<HTMLElement>('[data-vence-restante]').forEach((el) => {
+            const fin = new Date(el.dataset.venceFin ?? '');
+            if (!Number.isNaN(fin.getTime())) el.textContent = formatearRestante(fin);
+        });
+    };
+
+    actualizarVigencia();
+    window.setInterval(actualizarVigencia, 60_000);
 </script>
