@@ -7,7 +7,7 @@ export const BUEN_FIN_TOPBAR = {
     // Desde start hasta end dice "TERMINA EN". Después de end la barra no se muestra.
     end: new Date('2026-11-17T23:59:59-05:00'),
     // Activa el botón de WhatsApp y el cupón durante la fase activa. Mientras sea false, muestra "Próximamente".
-    ctaEnabled: false,
+    ctaEnabled: true,
 } as const;
 
 // Cupón simbólico de la temporada. No indica un monto de descuento.
